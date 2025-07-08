@@ -1,16 +1,17 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 func main() {
-	fmt.Println("test")
+	cleanInput("hello world")
 }
 
 func cleanInput(text string) []string {
-	// split user input into words on based whitespaces
-	// lowercase everything
-	// trim leading or trailing whitespaces
-	// hello WORLD -> ["hello", "world"]
-	var temp = []string{text}
-	return temp
+	var sanitizedText = strings.Trim(strings.ToLower(text), " ")
+	fmt.Printf("got: %s\n", text)
+	fmt.Printf("santized into: %s\n", sanitizedText)
+	return strings.Split(sanitizedText, " ")
 }
