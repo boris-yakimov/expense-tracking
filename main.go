@@ -36,26 +36,15 @@ func main() {
 		input := scanner.Text()
 		sanitizedInput := cleanInput(input)
 
+		// check if command is supported
 		command, validCommand := supportedCommands[sanitizedInput[0]]
 
 		if validCommand {
-
-			if command.name == "exit" {
-				exitErr := supportedCommands["exit"].callback()
-				if exitErr != nil {
-					fmt.Printf("exit error: %s\n", exitErr)
-				}
+			if err := command.callback(); err != nil {
+				fmt.Printf("%s error: %s\n", command.name, err)
 			}
-
-			if command.name == "help" {
-				helpErr := supportedCommands["help"].callback()
-				if helpErr != nil {
-					fmt.Printf("help error: %s\n", helpErr)
-				}
-			}
-
 		} else {
-			fmt.Println("Unkown command")
+			fmt.Println("Unkown command, please run the :help command to see valid options")
 		}
 	}
 }
@@ -66,7 +55,7 @@ func cleanInput(text string) []string {
 }
 
 func commandExit() error {
-	fmt.Println("Closing the LZ cli... goodbye!")
+	fmt.Println("Closing the ITGix AWS Landing Zone cli... goodbye!")
 	os.Exit(0)
 	return nil
 }
