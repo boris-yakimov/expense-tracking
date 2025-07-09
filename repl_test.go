@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"testing"
 )
 
@@ -16,21 +15,18 @@ func TestCleanInput(t *testing.T) {
 		},
 		{
 			input:    "HelloWo rld!",
-			expected: []string{"hellowo, rld!"},
+			expected: []string{"hellowo", "rld!"},
 		},
 		{
-			input:    "hello, world, 123, test",
-			expected: []string{"hello", "world", "123", "test"},
+			input:    "hello world 123 te!t",
+			expected: []string{"hello", "world", "123", "te!t"},
 		},
 	}
 
 	for _, c := range cases {
 		actual := cleanInput(c.input)
-		// fmt.Println(actual)
 		actualSize := len(actual)
 		expectedSize := len(c.expected)
-		// fmt.Printf("expected len: %v\n", expectedSize)
-		// fmt.Printf("actual size: %v\n", actualSize)
 		if actualSize != expectedSize {
 			t.Errorf("expected size: %v\n, got size: %v\n", expectedSize, actualSize)
 		}

@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"strings"
 )
 
@@ -11,7 +10,5 @@ func main() {
 
 func cleanInput(text string) []string {
 	var sanitizedText = strings.Trim(strings.ToLower(text), " ")
-	fmt.Printf("got: %s\n", text)
-	fmt.Printf("santized into: %s\n", sanitizedText)
 	return strings.Split(sanitizedText, " ")
 }
