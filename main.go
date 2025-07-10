@@ -17,7 +17,7 @@ func main() {
 	supportedCommands := map[string]cliCommand{
 		"exit": {
 			name:        "exit",
-			description: "Exit the LZ cli",
+			description: "Exit the expense-tracking cli",
 			callback:    commandExit,
 		},
 		"help": {
@@ -35,7 +35,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Printf("itgix-landing-zone > ")
+		fmt.Printf("expense-tracking > ")
 
 		scanner.Scan()
 		input := scanner.Text()
@@ -60,24 +60,33 @@ func cleanInput(text string) []string {
 }
 
 func commandExit() error {
-	fmt.Println("Closing the ITGix AWS Landing Zone cli... goodbye!")
+	fmt.Println("Closing the expnse-tracking cli... goodbye!")
 	os.Exit(0)
 	return nil
 }
 
 func commandHelp() error {
 	fmt.Printf(`
-ITGix AWS Landing Zone
+Expense Tracking Tool
 Usage:
 
 help: Display a help message
-exit: Exit the Landing Zone cli
+exit: Exit the expense-tracking cli
 
 `)
 	return nil
 }
 
-func commandExpense() error {
-	// TODO:
+func commandExpense(operation string) error {
+	validOperations := map[string]struct{}{
+		"add":    {},
+		"del":    {},
+		"update": {},
+	}
+
+	operation, validOperation := validOperations[operation]
+	if validOperation {
+	}
+
 	return nil
 }
