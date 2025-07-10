@@ -25,11 +25,11 @@ func main() {
 			description: "Display a help message",
 			callback:    commandHelp,
 		},
-		"expense": {
-			name:        "expense",
-			description: "Add an expense",
-			callback:    commandExpense,
-		},
+		// "expense": {
+		// 	name:        "expense",
+		// 	description: "Add an expense",
+		// 	callback:    commandExpense,
+		// },
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -67,6 +67,7 @@ func commandExit() error {
 
 func commandHelp() error {
 	fmt.Printf(`
+	func commandHelp() error {
 Expense Tracking Tool
 Usage:
 
@@ -77,16 +78,15 @@ exit: Exit the expense-tracking cli
 	return nil
 }
 
-func commandExpense(operation string) error {
-	validOperations := map[string]struct{}{
-		"add":    {},
-		"del":    {},
-		"update": {},
-	}
-
-	operation, validOperation := validOperations[operation]
-	if validOperation {
-	}
-
+func listExpenses() error {
+	// TODO:
+	return nil
+}
+func addExpense() error {
+	// TODO:
+	return nil
+}
+func showTotal() error {
+	// TODO:
 	return nil
 }
