@@ -25,6 +25,11 @@ func main() {
 			description: "Display a help message",
 			callback:    commandHelp,
 		},
+		"expense": {
+			name:        "expense",
+			description: "Add an expense",
+			callback:    commandExpense,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -69,5 +74,10 @@ help: Display a help message
 exit: Exit the Landing Zone cli
 
 `)
+	return nil
+}
+
+func commandExpense() error {
+	// TODO:
 	return nil
 }
