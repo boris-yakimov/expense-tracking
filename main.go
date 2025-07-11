@@ -52,7 +52,6 @@ func main() {
 		input := scanner.Text()
 		sanitizedInput := cleanInput(input)
 
-		// check if command is supported
 		command, validCommand := supportedCommands[sanitizedInput[0]]
 		args := sanitizedInput[1:]
 
@@ -72,11 +71,12 @@ func cleanInput(text string) []string {
 }
 
 func commandExit(args []string) error {
-	fmt.Println("Closing the expnse-tracking tool... goodbye!")
+	fmt.Println("Closing the expense-tracking tool... goodbye!")
 	os.Exit(0)
 	return nil
 }
 
+// TODO: extend with - add help, delete/del help, etc
 func commandHelp(args []string) error {
 	fmt.Printf(`
 Expense Tracking Tool
@@ -84,13 +84,16 @@ Usage:
 
 list:       List expenses
 show-total: Show total expenses
-add:        Add an expense
+add:        Add an expense - add <amount> <category><note>
+delete:     Delete an expense - TO BE IMPLEMENTED
 help:       Display a help message
 exit:       Exit the expense-tracking tool
 `)
 	return nil
 }
 
+// TODO: list of everything in the data json
+// TODO: visualized in a table
 func listExpenses(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
@@ -103,6 +106,7 @@ func listExpenses(args []string) error {
 	return nil
 }
 
+// TODO: maybe make this a common function for parsing arguments for all other funcs
 func addExpense(args []string) error {
 	if len(args) < 3 {
 		return fmt.Errorf("usage: add <amount> <category> <note>")
@@ -119,15 +123,23 @@ func addExpense(args []string) error {
 	return handleExpenseAdd(amount, category, note)
 }
 
+// TODO: show what was added
+// TODO: show summary after something is added
 func handleExpenseAdd(amount float64, category, note string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
 	expenses = append(expenses, Expense{Amount: amount, Category: category, Note: note})
+	if saveExpenseErr := saveExpenses(expenses); saveExpenseErr != nil {
+		return fmt.Errorf("Error saving expense: %s", saveExpenseErr)
+	}
+
 	return nil
 }
 
+// TODO: total amount
+// TODO: by category
 func showTotal(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
@@ -137,6 +149,6 @@ func showTotal(args []string) error {
 	for _, e := range expenses {
 		total += e.Amount
 	}
-	fmt.Printf("Total expenses: $%.2f\n")
+	fmt.Printf("Total expenses: $%.2f\n", total)
 	return nil
 }
