@@ -6,6 +6,7 @@ import (
 	"os"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type cliCommand struct {
@@ -123,7 +124,6 @@ func addExpense(args []string) error {
 	return handleExpenseAdd(amount, category, note)
 }
 
-// TODO: show what was added
 // TODO: show summary after something is added
 func handleExpenseAdd(amount float64, category, note string) error {
 	expenses, loadFileErr := loadExpenses()
@@ -136,6 +136,7 @@ func handleExpenseAdd(amount float64, category, note string) error {
 	}
 
 	fmt.Printf("added $%.2f | %s | %s\n", amount, category, note)
+	showSummaryCurrentMonth()
 
 	return nil
 }
@@ -146,16 +147,22 @@ func showSummaryCurrentMonth() error {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
 
+	fmt.Println("----------------------------------------------------------------------")
+
+	month := time.Now().Month()
+	year := time.Now().Year()
+	fmt.Printf("summary for %v %v\n", month, year)
+
 	for _, e := range expenses {
 		fmt.Printf("%s | $%.2f | %s\n", e.Category, e.Amount, e.Note)
 	}
 
+	fmt.Println("----------------------------------------------------------------------")
+
 	return nil
 }
 
-// TODO: total amount
-// TODO: by category
-// TODO: print all expenses for current month so far before the total, which should appear on the bottom
+// TODO: filter by category
 func showTotal(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {

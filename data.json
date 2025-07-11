@@ -13,5 +13,15 @@
     "amount": 3,
     "category": "food",
     "note": "eggs"
+  },
+  {
+    "amount": 123,
+    "category": "food",
+    "note": "groceries"
+  },
+  {
+    "amount": 1250,
+    "category": "rent",
+    "note": "apartment"
   }
 ]
