@@ -4,13 +4,14 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 )
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func() error
+	callback    func(args []string) error
 }
 
 func main() {
@@ -53,9 +54,10 @@ func main() {
 
 		// check if command is supported
 		command, validCommand := supportedCommands[sanitizedInput[0]]
+		args := sanitizedInput[1:]
 
 		if validCommand {
-			if err := command.callback(); err != nil {
+			if err := command.callback(args); err != nil {
 				fmt.Printf("%s error: %s\n", command.name, err)
 			}
 		} else {
@@ -69,15 +71,14 @@ func cleanInput(text string) []string {
 	return strings.Split(sanitizedText, " ")
 }
 
-func commandExit() error {
+func commandExit(args []string) error {
 	fmt.Println("Closing the expnse-tracking tool... goodbye!")
 	os.Exit(0)
 	return nil
 }
 
-func commandHelp() error {
+func commandHelp(args []string) error {
 	fmt.Printf(`
-	func commandHelp() error {
 Expense Tracking Tool
 Usage:
 
@@ -90,7 +91,7 @@ exit:       Exit the expense-tracking tool
 	return nil
 }
 
-func listExpenses() error {
+func listExpenses(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
@@ -102,7 +103,23 @@ func listExpenses() error {
 	return nil
 }
 
-func addExpense(amount float64, category, note string) error {
+func addExpense(args []string) error {
+	if len(args) < 3 {
+		return fmt.Errorf("usage: add <amount> <category> <note>")
+	}
+
+	amount, err := strconv.ParseFloat(args[0], 64)
+	if err != nil {
+		return fmt.Errorf("invalid amount: %v", err)
+	}
+
+	category := args[1]
+	note := strings.Join(args[2:], " ")
+
+	return handleExpenseAdd(amount, category, note)
+}
+
+func handleExpenseAdd(amount float64, category, note string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
@@ -111,7 +128,7 @@ func addExpense(amount float64, category, note string) error {
 	return nil
 }
 
-func showTotal() error {
+func showTotal(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
