@@ -2,6 +2,16 @@
   {
     "amount": 12.5,
     "category": "food",
-    "note": "duner"
+    "note": "meat"
+  },
+  {
+    "amount": 11,
+    "category": "food",
+    "note": "milk"
+  },
+  {
+    "amount": 3,
+    "category": "food",
+    "note": "eggs"
   }
 ]

@@ -92,7 +92,6 @@ exit:       Exit the expense-tracking tool
 	return nil
 }
 
-// TODO: list of everything in the data json
 // TODO: visualized in a table
 func listExpenses(args []string) error {
 	expenses, loadFileErr := loadExpenses()
@@ -111,6 +110,7 @@ func addExpense(args []string) error {
 	if len(args) < 3 {
 		return fmt.Errorf("usage: add <amount> <category> <note>")
 	}
+	// TODO: add validation to where someone cannot add stuff like add 11.00 | food | meat - this results int - $11.00 | | | food | (too many |s)
 
 	amount, err := strconv.ParseFloat(args[0], 64)
 	if err != nil {
@@ -135,11 +135,27 @@ func handleExpenseAdd(amount float64, category, note string) error {
 		return fmt.Errorf("Error saving expense: %s", saveExpenseErr)
 	}
 
+	fmt.Printf("added $%.2f | %s | %s\n", amount, category, note)
+
+	return nil
+}
+
+func showSummaryCurrentMonth() error {
+	expenses, loadFileErr := loadExpenses()
+	if loadFileErr != nil {
+		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+	}
+
+	for _, e := range expenses {
+		fmt.Printf("%s | $%.2f | %s\n", e.Category, e.Amount, e.Note)
+	}
+
 	return nil
 }
 
 // TODO: total amount
 // TODO: by category
+// TODO: print all expenses for current month so far before the total, which should appear on the bottom
 func showTotal(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
@@ -149,6 +165,7 @@ func showTotal(args []string) error {
 	for _, e := range expenses {
 		total += e.Amount
 	}
+	showSummaryCurrentMonth()
 	fmt.Printf("Total expenses: $%.2f\n", total)
 	return nil
 }

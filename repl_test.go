@@ -4,6 +4,8 @@ import (
 	"testing"
 )
 
+// TODO: write tests for add with a variety of inputs
+// TODO: write tests for del
 func TestCleanInput(t *testing.T) {
 	cases := []struct {
 		input    string
