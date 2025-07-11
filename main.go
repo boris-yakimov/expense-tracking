@@ -17,7 +17,7 @@ func main() {
 	supportedCommands := map[string]cliCommand{
 		"exit": {
 			name:        "exit",
-			description: "Exit the expense-tracking cli",
+			description: "Exit the expense-tracking tool",
 			callback:    commandExit,
 		},
 		"help": {
@@ -25,11 +25,21 @@ func main() {
 			description: "Display a help message",
 			callback:    commandHelp,
 		},
-		// "expense": {
-		// 	name:        "expense",
-		// 	description: "Add an expense",
-		// 	callback:    commandExpense,
-		// },
+		"list": {
+			name:        "list",
+			description: "List expenses",
+			callback:    listExpenses,
+		},
+		"show-total": {
+			name:        "show-total",
+			description: "Show total expenses",
+			callback:    showTotal,
+		},
+		"add": {
+			name:        "add",
+			description: "Add an expense",
+			callback:    addExpense,
+		},
 	}
 
 	scanner := bufio.NewScanner(os.Stdin)
@@ -60,7 +70,7 @@ func cleanInput(text string) []string {
 }
 
 func commandExit() error {
-	fmt.Println("Closing the expnse-tracking cli... goodbye!")
+	fmt.Println("Closing the expnse-tracking tool... goodbye!")
 	os.Exit(0)
 	return nil
 }
@@ -71,22 +81,45 @@ func commandHelp() error {
 Expense Tracking Tool
 Usage:
 
-help: Display a help message
-exit: Exit the expense-tracking cli
-
+list:       List expenses
+show-total: Show total expenses
+add:        Add an expense
+help:       Display a help message
+exit:       Exit the expense-tracking tool
 `)
 	return nil
 }
 
 func listExpenses() error {
-	// TODO:
+	expenses, loadFileErr := loadExpenses()
+	if loadFileErr != nil {
+		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+	}
+	for i, e := range expenses {
+		fmt.Printf("%d. $%.2f | %s | %s\n", i+1, e.Amount, e.Category, e.Note)
+	}
+
 	return nil
 }
-func addExpense() error {
-	// TODO:
+
+func addExpense(amount float64, category, note string) error {
+	expenses, loadFileErr := loadExpenses()
+	if loadFileErr != nil {
+		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+	}
+	expenses = append(expenses, Expense{Amount: amount, Category: category, Note: note})
 	return nil
 }
+
 func showTotal() error {
-	// TODO:
+	expenses, loadFileErr := loadExpenses()
+	if loadFileErr != nil {
+		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+	}
+	var total float64
+	for _, e := range expenses {
+		total += e.Amount
+	}
+	fmt.Printf("Total expenses: $%.2f\n")
 	return nil
 }

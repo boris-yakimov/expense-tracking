@@ -12,7 +12,7 @@ type Expense struct {
 }
 
 func loadExpenses() ([]Expense, error) {
-	file, err := os.Create("data.json")
+	file, err := os.Open("data.json")
 	if os.IsNotExist(err) {
 		return []Expense{}, nil
 	}
