@@ -77,8 +77,31 @@ func commandExit(args []string) error {
 	return nil
 }
 
-// TODO: extend with - add help, delete/del help, etc
 func commandHelp(args []string) error {
+	fmt.Println("len of args is: ", len(args))
+	fmt.Println("current args are: ", args)
+	if len(args) > 0 {
+
+		// help add
+		if args[0] == "add" {
+			fmt.Printf(`
+Expense Tracking Tool
+Usage: add <amount> <category> <note>
+
+example 
+        - add 12 food "meat from store"
+        output :
+        added $12.00 | food | "meat from store"
+    or
+        - add 25 food vegetables from store
+        output :
+        added $25.00 | food | vegetables from store
+`)
+			return nil
+		}
+	}
+
+	// default help menu
 	fmt.Printf(`
 Expense Tracking Tool
 Usage:
@@ -86,21 +109,25 @@ Usage:
 list:       List expenses
 show-total: Show total expenses
 add:        Add an expense - add <amount> <category><note>
-delete:     Delete an expense - TO BE IMPLEMENTED
+del/delete:     Delete an expense - TO BE IMPLEMENTED
 help:       Display a help message
 exit:       Exit the expense-tracking tool
+
+Detailed usage:
+help add:   Format of the add command 
+help del/delete : TO BE IMPLEMENTED
 `)
+
 	return nil
 }
 
-// TODO: visualized in a table
 func listExpenses(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
 	for i, e := range expenses {
-		fmt.Printf("%d. $%.2f | %s | %s\n", i+1, e.Amount, e.Category, e.Note)
+		fmt.Printf("%d. $%-8.2f | %-6s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
 	}
 
 	return nil
@@ -147,17 +174,22 @@ func showSummaryCurrentMonth() error {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
 
-	fmt.Println("----------------------------------------------------------------------")
+	// TODO: fit this to match the length of the table
+	// TODO: make it have a table look - https://gosamples.dev/string-padding/
+	fmt.Printf("+%s+\n", strings.Repeat("-", 50))
 
 	month := time.Now().Month()
 	year := time.Now().Year()
 	fmt.Printf("summary for %v %v\n", month, year)
 
+	// TODO: sort the output by category so that we see a list of food, than a list of apartment, than a list of something else, etc
 	for _, e := range expenses {
-		fmt.Printf("%s | $%.2f | %s\n", e.Category, e.Amount, e.Note)
+		fmt.Printf("%s | $%-8.2f | %-15s\n", e.Category, e.Amount, e.Note)
 	}
 
-	fmt.Println("----------------------------------------------------------------------")
+	// TODO: fit this to match the length of the table
+	// TODO: make it have a table look - https://gosamples.dev/string-padding/
+	fmt.Printf("+%s+\n", strings.Repeat("-", 50))
 
 	return nil
 }

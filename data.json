@@ -23,5 +23,15 @@
     "amount": 1250,
     "category": "rent",
     "note": "apartment"
+  },
+  {
+    "amount": 12,
+    "category": "food",
+    "note": "\"meat from store\""
+  },
+  {
+    "amount": 25,
+    "category": "food",
+    "note": "vegetables from store"
   }
 ]
