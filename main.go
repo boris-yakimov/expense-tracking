@@ -124,8 +124,14 @@ help del/delete : TO BE IMPLEMENTED
 func listExpenses(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+		return fmt.Errorf("Unable to load expenses file: %w", loadFileErr)
 	}
+
+	if len(expenses) == 0 {
+		fmt.Println("No expenses found")
+		return nil
+	}
+
 	for i, e := range expenses {
 		fmt.Printf("%d. $%-8.2f | %-6s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
 	}
@@ -151,22 +157,52 @@ func addExpense(args []string) error {
 	return handleExpenseAdd(amount, category, note)
 }
 
-// TODO: show summary after something is added
+// TODO: add year and month nested into it, than expenses nested under month
+// TODO: check what is the current month and only add under this category
 func handleExpenseAdd(amount float64, category, note string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
-	expenses = append(expenses, Expense{Amount: amount, Category: category, Note: note})
+
+	newExpense := Expense{
+		Amount:   amount,
+		Category: category,
+		Note:     note,
+	}
+
+	expenses = append(expenses, newExpense)
 	if saveExpenseErr := saveExpenses(expenses); saveExpenseErr != nil {
 		return fmt.Errorf("Error saving expense: %s", saveExpenseErr)
 	}
 
-	fmt.Printf("added $%.2f | %s | %s\n", amount, category, note)
+	fmt.Printf("\nadded $%.2f | %s | %s\n", amount, category, note)
 	showSummaryCurrentMonth()
 
 	return nil
 }
+
+// TODO: add an income section
+// TODO: add an investment section
+// TODO: should be year {
+//             month {
+//                investments {
+//                  amount: 123
+//                  category: ibkr
+//                  note: annual investmentu
+//                }
+//                income {
+//                  amount: 123
+//                  category: salary
+//                  note: work
+//                }
+//                expenses {
+//                  amount: 123
+//                  category: food
+//                  note: groceries
+//                }
+//             }
+//          }
 
 func showSummaryCurrentMonth() error {
 	expenses, loadFileErr := loadExpenses()
@@ -176,7 +212,7 @@ func showSummaryCurrentMonth() error {
 
 	// TODO: fit this to match the length of the table
 	// TODO: make it have a table look - https://gosamples.dev/string-padding/
-	fmt.Printf("+%s+\n", strings.Repeat("-", 50))
+	fmt.Printf("\n+%s+\n", strings.Repeat("-", 50))
 
 	month := time.Now().Month()
 	year := time.Now().Year()

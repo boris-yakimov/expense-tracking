@@ -33,5 +33,35 @@
     "amount": 25,
     "category": "food",
     "note": "vegetables from store"
+  },
+  {
+    "amount": 37,
+    "category": "food",
+    "note": "stuff"
+  },
+  {
+    "amount": 5432,
+    "category": "renovation",
+    "note": "fence"
+  },
+  {
+    "amount": 115,
+    "category": "steam",
+    "note": "games"
+  },
+  {
+    "amount": 127,
+    "category": "steam",
+    "note": "more games"
+  },
+  {
+    "amount": 53,
+    "category": "food",
+    "note": "groceries"
+  },
+  {
+    "amount": 54,
+    "category": "food",
+    "note": "groceries"
   }
 ]
