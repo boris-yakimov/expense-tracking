@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -157,6 +158,7 @@ func addExpense(args []string) error {
 	return handleExpenseAdd(amount, category, note)
 }
 
+// TODO: add predefined categories of common expenses and than anything uncommon will just be accepted as an entry
 // TODO: add year and month nested into it, than expenses nested under month
 // TODO: check what is the current month and only add under this category
 func handleExpenseAdd(amount float64, category, note string) error {
@@ -182,7 +184,13 @@ func handleExpenseAdd(amount float64, category, note string) error {
 	return nil
 }
 
-// TODO: add an income section
+// TODO: add an income section - add some predefined sections so that they cannot be mistaken
+//   - paycheck
+//   - transfers
+//   - apartment rental
+//   - dividends
+//   - business trip - ? maybe just compbine with paycheck as with on-call
+//   - capital gains
 // TODO: add an investment section
 // TODO: should be year {
 //             month {
@@ -218,7 +226,11 @@ func showSummaryCurrentMonth() error {
 	year := time.Now().Year()
 	fmt.Printf("summary for %v %v\n", month, year)
 
-	// TODO: sort the output by category so that we see a list of food, than a list of apartment, than a list of something else, etc
+	// sort expenses by category in alphabetical order
+	sort.Slice(expenses, func(i, j int) bool {
+		return expenses[i].Category < expenses[j].Category
+	})
+
 	for _, e := range expenses {
 		fmt.Printf("%s | $%-8.2f | %-15s\n", e.Category, e.Amount, e.Note)
 	}
@@ -231,6 +243,7 @@ func showSummaryCurrentMonth() error {
 }
 
 // TODO: filter by category
+// TODO: filter by year or month
 func showTotal(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
