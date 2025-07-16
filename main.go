@@ -133,8 +133,15 @@ func listExpenses(args []string) error {
 		return nil
 	}
 
-	for i, e := range expenses {
-		fmt.Printf("%d. $%-8.2f | %-6s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+	for year, months := range expenses {
+		for month, expenseList := range months {
+			for i, e := range expenseList {
+				// TODO: add counter 1. , 2. , 3.
+				fmt.Printf("year: %s", year)
+				fmt.Printf("month: %s", month)
+				fmt.Printf("%d $%-8.2f | %-6s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+			}
+		}
 	}
 
 	return nil
@@ -159,21 +166,31 @@ func addExpense(args []string) error {
 }
 
 // TODO: add predefined categories of common expenses and than anything uncommon will just be accepted as an entry
-// TODO: add year and month nested into it, than expenses nested under month
-// TODO: check what is the current month and only add under this category
 func handleExpenseAdd(amount float64, category, note string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
 
-	newExpense := Expense{
+	year := strconv.Itoa(time.Now().Year())
+	month := time.Now().Month().String()
+
+	//ensure nested structure exists
+	if _, ok := expenses[year]; !ok {
+		expenses[year] = make(map[string][]ExpenseDetails)
+	}
+
+	if _, ok := expenses[year][month]; !ok {
+		expenses[year][month] = []ExpenseDetails{}
+	}
+
+	newExpense := ExpenseDetails{
 		Amount:   amount,
 		Category: category,
 		Note:     note,
 	}
 
-	expenses = append(expenses, newExpense)
+	expenses[year][month] = append(expenses[year][month], newExpense)
 	if saveExpenseErr := saveExpenses(expenses); saveExpenseErr != nil {
 		return fmt.Errorf("Error saving expense: %s", saveExpenseErr)
 	}
@@ -222,16 +239,16 @@ func showSummaryCurrentMonth() error {
 	// TODO: make it have a table look - https://gosamples.dev/string-padding/
 	fmt.Printf("\n+%s+\n", strings.Repeat("-", 50))
 
-	month := time.Now().Month()
-	year := time.Now().Year()
+	year := strconv.Itoa(time.Now().Year())
+	month := time.Now().Month().String()
 	fmt.Printf("summary for %v %v\n", month, year)
 
 	// sort expenses by category in alphabetical order
-	sort.Slice(expenses, func(i, j int) bool {
-		return expenses[i].Category < expenses[j].Category
+	sort.Slice(expenses[year][month], func(i, j int) bool {
+		return expenses[year][month][i].Category < expenses[year][month][j].Category
 	})
 
-	for _, e := range expenses {
+	for _, e := range expenses[year][month] {
 		fmt.Printf("%s | $%-8.2f | %-15s\n", e.Category, e.Amount, e.Note)
 	}
 
@@ -249,8 +266,12 @@ func showTotal(args []string) error {
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
+
+	year := strconv.Itoa(time.Now().Year())
+	month := time.Now().Month().String()
+
 	var total float64
-	for _, e := range expenses {
+	for _, e := range expenses[year][month] {
 		total += e.Amount
 	}
 	showSummaryCurrentMonth()
