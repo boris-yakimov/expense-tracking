@@ -5,6 +5,11 @@
         "amount": 53.4,
         "category": "food",
         "note": "groceries"
+      },
+      {
+        "amount": 5432,
+        "category": "renovation",
+        "note": "fence"
       }
     ]
   }
