@@ -8,6 +8,13 @@ import (
 	"time"
 )
 
+// TODO: fix paddding
+const (
+	amountWidth   = 10
+	categoryWidth = 12
+	noteWidth     = 40
+)
+
 func listExpenses(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
@@ -20,11 +27,15 @@ func listExpenses(args []string) error {
 	}
 
 	for year, months := range expenses {
+		fmt.Printf("\nYear: %s\n", year)
 		for month, expenseList := range months {
+			fmt.Printf("  Month: %s\n", month)
+			if len(expenseList) == 0 {
+				fmt.Println("    No expenses recorded.")
+				continue
+			}
 			for i, e := range expenseList {
-				fmt.Printf("year: %s\n", year)
-				fmt.Printf("month: %s\n", month)
-				fmt.Printf("%d. $%-8.2f | %-6s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+				fmt.Printf("    %2d. $%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
 			}
 		}
 	}
@@ -38,26 +49,27 @@ func showSummaryCurrentMonth() error {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
 	}
 
-	// TODO: fit this to match the length of the table
-	// TODO: make it have a table look - https://gosamples.dev/string-padding/
-	fmt.Printf("\n+%s+\n", strings.Repeat("-", 50))
-
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
-	fmt.Printf("summary for %v %v\n", month, year)
 
-	// sort expenses by category in alphabetical order
-	sort.Slice(expenses[year][month], func(i, j int) bool {
-		return expenses[year][month][i].Category < expenses[year][month][j].Category
-	})
-
-	for _, e := range expenses[year][month] {
-		fmt.Printf("%s | $%-8.2f | %-15s\n", e.Category, e.Amount, e.Note)
+	monthExpenses, ok := expenses[year][month]
+	if !ok || len(monthExpenses) == 0 {
+		fmt.Printf("\nNo expenses found for %s %s.\n", month, year)
 	}
 
-	// TODO: fit this to match the length of the table
-	// TODO: make it have a table look - https://gosamples.dev/string-padding/
-	fmt.Printf("+%s+\n", strings.Repeat("-", 50))
+	fmt.Printf("\nSummary for %v %v", month, year)
+	fmt.Printf("\n+%s+\n", strings.Repeat("-", 58))
+
+	// sort expenses by category in alphabetical order
+	sort.Slice(monthExpenses, func(i, j int) bool {
+		return monthExpenses[i].Category < monthExpenses[j].Category
+	})
+
+	for i, e := range monthExpenses {
+		fmt.Printf("| %2d. $%-8.2f | %-10s | %-27s |\n", i+1, e.Amount, e.Category, e.Note)
+	}
+
+	fmt.Printf("+%s+\n", strings.Repeat("-", 58))
 
 	return nil
 }

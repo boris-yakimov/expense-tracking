@@ -38,7 +38,7 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	for {
-		fmt.Printf("expense-tracking > ")
+		fmt.Printf("\nexpense-tracking > ")
 
 		scanner.Scan()
 		input := scanner.Text()
