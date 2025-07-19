@@ -3,18 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 )
 
 type cliCommand struct {
 	name        string
 	description string
 	callback    func(args []string) error
-}
-
-func cleanInput(text string) []string {
-	var sanitizedText = strings.Trim(strings.ToLower(text), " ")
-	return strings.Split(sanitizedText, " ")
 }
 
 func commandExit(args []string) error {

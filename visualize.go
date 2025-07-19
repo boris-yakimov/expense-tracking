@@ -8,7 +8,6 @@ import (
 	"time"
 )
 
-// TODO: fix paddding
 const (
 	amountWidth   = 10
 	categoryWidth = 12
@@ -43,27 +42,7 @@ func listExpenses(args []string) error {
 	return nil
 }
 
-// TODO: filter by category
-// TODO: filter by year or month
 func showTotal(args []string) error {
-	expenses, loadFileErr := loadExpenses()
-	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
-	}
-
-	year := strconv.Itoa(time.Now().Year())
-	month := time.Now().Month().String()
-
-	var total float64
-	for _, e := range expenses[year][month] {
-		total += e.Amount
-	}
-	showSummaryCurrentMonth()
-	fmt.Printf("Total expenses: $%.2f\n", total)
-	return nil
-}
-
-func showSummaryCurrentMonth() error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
 		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
@@ -77,19 +56,27 @@ func showSummaryCurrentMonth() error {
 		fmt.Printf("\nNo expenses found for %s %s.\n", month, year)
 	}
 
-	fmt.Printf("\nSummary for %v %v", month, year)
-	fmt.Printf("\n+%s+\n", strings.Repeat("-", 58))
+	fmt.Printf("\nSummary for %v %v\n", month, year)
+
+	//table border width: + 2 (padding per field) * 3 columns + 4 (pipes) + field widths
+	border := "+" + strings.Repeat("-", amountWidth+categoryWidth+noteWidth+10) + "+"
+	fmt.Println(border)
 
 	// sort expenses by category in alphabetical order
 	sort.Slice(monthExpenses, func(i, j int) bool {
 		return monthExpenses[i].Category < monthExpenses[j].Category
 	})
 
+	var total float64
 	for i, e := range monthExpenses {
-		fmt.Printf("| %2d. $%-8.2f | %-10s | %-27s |\n", i+1, e.Amount, e.Category, e.Note)
+		category := padRight(e.Category, categoryWidth)
+		note := truncateOrPad(e.Note, noteWidth)
+		fmt.Printf("| %2d. $%-8.2f | %-*s | %-*s |\n", i+1, e.Amount, categoryWidth, category, noteWidth, note)
+		total += e.Amount
 	}
 
-	fmt.Printf("+%s+\n", strings.Repeat("-", 58))
+	fmt.Println(border)
+	fmt.Printf("Total expenses: $%.2f\n", total)
 
 	return nil
 }

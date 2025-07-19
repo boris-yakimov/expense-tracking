@@ -59,7 +59,10 @@ func handleExpenseAdd(amount float64, category, note string) error {
 	}
 
 	fmt.Printf("\nadded $%.2f | %s | %s\n", amount, category, note)
-	showSummaryCurrentMonth()
+
+	// TODO: figure out a better way to define cli callback funcs to avoid just passing aroungs args even in places where they are not mandatory
+	var args []string
+	showTotal(args)
 
 	return nil
 }
@@ -71,7 +74,9 @@ func handleExpenseAdd(amount float64, category, note string) error {
 //   - dividends
 //   - business trip - ? maybe just compbine with paycheck as with on-call
 //   - capital gains
+//
 // TODO: add an investment section
+//
 // TODO: should be
 //           year {
 //             month {

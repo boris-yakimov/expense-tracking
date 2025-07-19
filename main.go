@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -55,4 +56,9 @@ func main() {
 			fmt.Println("Unkown command, please run the :help command to see valid options")
 		}
 	}
+}
+
+func cleanInput(text string) []string {
+	var sanitizedText = strings.Trim(strings.ToLower(text), " ")
+	return strings.Split(sanitizedText, " ")
 }
