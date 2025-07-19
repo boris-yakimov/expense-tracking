@@ -43,6 +43,26 @@ func listExpenses(args []string) error {
 	return nil
 }
 
+// TODO: filter by category
+// TODO: filter by year or month
+func showTotal(args []string) error {
+	expenses, loadFileErr := loadExpenses()
+	if loadFileErr != nil {
+		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+	}
+
+	year := strconv.Itoa(time.Now().Year())
+	month := time.Now().Month().String()
+
+	var total float64
+	for _, e := range expenses[year][month] {
+		total += e.Amount
+	}
+	showSummaryCurrentMonth()
+	fmt.Printf("Total expenses: $%.2f\n", total)
+	return nil
+}
+
 func showSummaryCurrentMonth() error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
@@ -74,22 +94,19 @@ func showSummaryCurrentMonth() error {
 	return nil
 }
 
-// TODO: filter by category
-// TODO: filter by year or month
-func showTotal(args []string) error {
-	expenses, loadFileErr := loadExpenses()
-	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+// trim string to fit a preset width
+func padRight(str string, width int) string {
+	if len(str) > width {
+		return str[:width]
 	}
+	return str + strings.Repeat(" ", width-len(str))
+}
 
-	year := strconv.Itoa(time.Now().Year())
-	month := time.Now().Month().String()
-
-	var total float64
-	for _, e := range expenses[year][month] {
-		total += e.Amount
+// ensure note fits within a preset width
+func truncateOrPad(str string, width int) string {
+	runes := []rune(str)
+	if len(runes) > width {
+		return string(runes[:width])
 	}
-	showSummaryCurrentMonth()
-	fmt.Printf("Total expenses: $%.2f\n", total)
-	return nil
+	return str + strings.Repeat(" ", width-len(runes))
 }
