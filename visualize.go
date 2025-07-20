@@ -8,6 +8,11 @@ import (
 	"time"
 )
 
+// TODO: calculate % savings rate (should show minus percent of expenses exceed income)
+// TODO: montly totals with less details - income, expense, investement, % p&l
+// TODO: yearly totals with less details - income, expense, investment, %p&l
+// TODO: draw a terminal diagram/pie chart
+
 const (
 	amountWidth   = 10
 	categoryWidth = 12

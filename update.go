@@ -28,7 +28,7 @@ func addExpense(args []string) error {
 	return handleExpenseAdd(amount, category, note)
 }
 
-// TODO: add predefined categories of common expenses and than anything uncommon will just be accepted as an entry
+// TODO: only allow add if category is allowed
 func handleExpenseAdd(amount float64, category, note string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
