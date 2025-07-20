@@ -5,22 +5,14 @@ import (
 	"os"
 )
 
-type Expense struct {
-	Year     string  `json:"year"`
-	Month    string  `json:"month"`
-	Amount   float64 `json:"amount"`
-	Category string  `json:"category"`
-	Note     string  `json:"note"`
-}
-
 // minimal expense without year and date
-type ExpenseDetails struct {
+type Expense struct {
 	Amount   float64 `json:"amount"`
 	Category string  `json:"category"`
 	Note     string  `json:"note"`
 }
 
-type NestedExpenses map[string]map[string][]ExpenseDetails
+type NestedExpenses map[string]map[string][]Expense
 
 func loadExpenses() (NestedExpenses, error) {
 	file, err := os.Open("data.json")

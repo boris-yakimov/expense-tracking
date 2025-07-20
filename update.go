@@ -40,14 +40,14 @@ func handleExpenseAdd(amount float64, category, note string) error {
 
 	//ensure nested structure exists
 	if _, ok := expenses[year]; !ok {
-		expenses[year] = make(map[string][]ExpenseDetails)
+		expenses[year] = make(map[string][]Expense)
 	}
 
 	if _, ok := expenses[year][month]; !ok {
-		expenses[year][month] = []ExpenseDetails{}
+		expenses[year][month] = []Expense{}
 	}
 
-	newExpense := ExpenseDetails{
+	newExpense := Expense{
 		Amount:   amount,
 		Category: category,
 		Note:     note,
