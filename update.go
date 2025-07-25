@@ -25,13 +25,16 @@ func addExpense(args []string) error {
 	category := args[1]
 	if _, ok := allowedExpenseCategories[category]; !ok {
 		// TODO: create a function to print a list of allowed expense categories for the user
-		return fmt.Errorf("\nInvalid expense category: %s", category)
+		return fmt.Errorf("\ninvalid expense category: %s", category)
 	}
 
-	// TODO: note show contain only alphanumeric and comma, dash
 	note := strings.Join(args[2:], " ")
 	if len(note) > noteMaxLength {
-		return fmt.Errorf("\nNote should be a maximum of %v characters, provided %v", noteMaxLength, len(note))
+		return fmt.Errorf("\nnote should be a maximum of %v characters, provided %v", noteMaxLength, len(note))
+	}
+
+	if !validNoteInputFormat(note) {
+		return fmt.Errorf("\ninvalid character in note, notes should contain only letters, numbers, commas, and dashes")
 	}
 
 	return handleExpenseAdd(amount, category, note)
