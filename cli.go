@@ -18,8 +18,6 @@ func commandExit(args []string) error {
 }
 
 func commandHelp(args []string) error {
-	fmt.Println("len of args is: ", len(args))
-	fmt.Println("current args are: ", args)
 	if len(args) > 0 {
 
 		// help add
