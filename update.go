@@ -7,15 +7,15 @@ import (
 	"time"
 )
 
+const (
+	noteMaxLength = 42
+)
+
 // TODO: maybe make this a common function for parsing arguments for all other funcs
 func addExpense(args []string) error {
 	if len(args) < 3 {
 		return fmt.Errorf("usage: add <amount> <category> <note>")
 	}
-	// TODO: add validation to where someone cannot add stuff like add 11.00 | food | meat - this results int - $11.00 | | | food | (too many |s)
-	// TODO: <command> <amount> <category> <note>
-	//         add       5.43      food     shopping for this and that
-	// expecially for note have to figure out how to show that this part all goes into a single note
 
 	amount, err := strconv.ParseFloat(args[0], 64)
 	if err != nil {
@@ -23,7 +23,16 @@ func addExpense(args []string) error {
 	}
 
 	category := args[1]
+	if _, ok := allowedExpenseCategories[category]; !ok {
+		// TODO: create a function to print a list of allowed expense categories for the user
+		return fmt.Errorf("\nInvalid expense category: %s", category)
+	}
+
+	// TODO: note show contain only alphanumeric and comma, dash
 	note := strings.Join(args[2:], " ")
+	if len(note) > noteMaxLength {
+		return fmt.Errorf("\nNote should be a maximum of %v characters, provided %v", noteMaxLength, len(note))
+	}
 
 	return handleExpenseAdd(amount, category, note)
 }

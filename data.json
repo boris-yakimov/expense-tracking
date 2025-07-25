@@ -20,6 +20,11 @@
         "amount": 12.35,
         "category": "food",
         "note": "sandwitch"
+      },
+      {
+        "amount": 100,
+        "category": "travel",
+        "note": "rent a car gas"
       }
     ]
   }
