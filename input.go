@@ -19,5 +19,4 @@ func validNoteInputFormat(note string) bool {
 	}
 
 	return matched
-
 }

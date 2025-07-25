@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"os"
 	"sort"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 )
 
@@ -84,6 +86,41 @@ func showTotal(args []string) error {
 	fmt.Printf("Total expenses: $%.2f\n", total)
 
 	return nil
+}
+
+func showAllowedCategories(categoryType string) error {
+	fmt.Println("\nallowed categories are: ")
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "\nCategory\tDescription")
+	fmt.Fprintln(w, "--------\t-----------")
+
+	if categoryType == "expense" {
+		for key, val := range allowedExpenseCategories {
+			fmt.Fprintf(w, "%s\t%s\n", key, val)
+		}
+		w.Flush()
+		return nil
+	}
+
+	if categoryType == "income" {
+		for key, val := range allowedIncomeCategories {
+			fmt.Fprintf(w, "%s\t%s\n", key, val)
+		}
+		w.Flush()
+		return nil
+	}
+
+	if categoryType == "investement" {
+		for key, val := range allowedInvestmentCategories {
+			fmt.Fprintf(w, "%s\t%s\n", key, val)
+		}
+		w.Flush()
+		return nil
+	}
+
+	w.Flush()
+	return fmt.Errorf("\nallowed category types are expense, income, or investment - provided %s", categoryType)
 }
 
 // trim string to fit a preset width

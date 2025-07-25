@@ -11,7 +11,6 @@ const (
 	noteMaxLength = 42
 )
 
-// TODO: maybe make this a common function for parsing arguments for all other funcs
 func addExpense(args []string) error {
 	if len(args) < 3 {
 		return fmt.Errorf("usage: add <amount> <category> <note>")
@@ -24,8 +23,9 @@ func addExpense(args []string) error {
 
 	category := args[1]
 	if _, ok := allowedExpenseCategories[category]; !ok {
-		// TODO: create a function to print a list of allowed expense categories for the user
-		return fmt.Errorf("\ninvalid expense category: %s", category)
+		fmt.Printf("\ninvalid expense category: \"%s\"", category)
+		showAllowedCategories("expense") // expense, income, investment
+		return fmt.Errorf("\n\nPlease pick a valid category from the list above.")
 	}
 
 	note := strings.Join(args[2:], " ")
@@ -40,7 +40,6 @@ func addExpense(args []string) error {
 	return handleExpenseAdd(amount, category, note)
 }
 
-// TODO: only allow add if category is allowed
 func handleExpenseAdd(amount float64, category, note string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
@@ -57,8 +56,8 @@ func handleExpenseAdd(amount float64, category, note string) error {
 
 	if _, ok := expenses[year][month]; !ok {
 		expenses[year][month] = []Expense{}
-	}
 
+	}
 	newExpense := Expense{
 		Amount:   amount,
 		Category: category,

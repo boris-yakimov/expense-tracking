@@ -30,7 +30,7 @@ func main() {
 		},
 		"add": {
 			name:        "add",
-			description: "Add an expense",
+			description: "Add an expense, income or investment",
 			callback:    addExpense,
 		},
 	}
@@ -49,7 +49,8 @@ func main() {
 
 		if validCommand {
 			if err := command.callback(args); err != nil {
-				fmt.Printf("%s error: %s\n", command.name, err)
+				fmt.Printf("\n\ncommand: %s <amount> <category> <note>\n", command.name)
+				fmt.Printf("%s\n", err)
 			}
 		} else {
 			fmt.Println("Unkown command, please run the :help command to see valid options")
