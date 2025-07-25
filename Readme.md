@@ -2,8 +2,6 @@
 
 ### Some examples from the current version as of July 2025
 List (current month)
-
-```
 ```
 expense-tracking > list
 
@@ -13,12 +11,10 @@ Year: 2025
      2. $5432.00  | renovation | fence
      3. $45.00    | food       | burgers
      4. $12.35    | food       | sandwitch
-```
      5. $100.00   | travel     | rent a car gas
 ```
 
 Show total
-```
 ```
 expense-tracking > show-total
 
@@ -32,10 +28,8 @@ Summary for July 2025
 +------------------------------------------------------------------------+
 Total expenses: $5642.75
 ```
-```
 
 Help
-```
 ```
 expense-tracking > help                                                                                                                                                                                                                                                                 
 Expense Tracking Tool
@@ -52,15 +46,12 @@ Detailed usage:
 help add:   Format of the add command
 help del/delete : TO BE IMPLEMENTED
 ```
-```
-
 
 Exit
 ```
 expense-tracking > exit
 Closing the expense-tracking tool... goodbye!
 ```
-
 
 Add
 TODO:
