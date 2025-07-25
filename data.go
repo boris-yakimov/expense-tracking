@@ -29,7 +29,7 @@ var allowedExpenseCategories = map[string]string{
 	"services":       "cleaners, repairs, movers, consultants, etc",
 }
 
-var allowedIncomeCategorioes = map[string]string{
+var allowedIncomeCategories = map[string]string{
 	"salary":          "any income from employer - includes wages, on-call overtime, business trips",
 	"transfers":       "transfer in from other people - split bills, family support, etc",
 	"dividends":       "stocks, mutual funds, private equity",
@@ -41,7 +41,7 @@ var allowedIncomeCategorioes = map[string]string{
 	"refunds":         "tax refunds, product returns",
 }
 
-var allowedInvestmentCategorioes = map[string]string{
+var allowedInvestmentCategories = map[string]string{
 	"stocks":         "direct stock ownership in public comapnies",
 	"bonds":          "government, corporrate, etc",
 	"funds":          "ETFs or mutual funds",
