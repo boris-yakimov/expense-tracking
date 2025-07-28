@@ -11,24 +11,31 @@ const (
 	noteMaxLength = 42
 )
 
-func addExpense(args []string) error {
-	if len(args) < 3 {
-		return fmt.Errorf("usage: add <amount> <category> <note>")
+func addTransaction(args []string) error {
+	if len(args) < 4 {
+		return fmt.Errorf("usage: add <transcation typ> <amount> <category> <note>")
 	}
 
-	amount, err := strconv.ParseFloat(args[0], 64)
+	transactionType := args[0]
+	if _, ok := validTranscationTypes[transactionType]; !ok {
+		return fmt.Errorf("invalid transaction type %s, please use expense, income, or investment", transactionType)
+	}
+
+	amount, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
+		// TODO: simulate this and validate the output
 		return fmt.Errorf("invalid amount: %v", err)
 	}
 
-	category := args[1]
+	category := args[2]
+	// TODO: fix this so it works with other transaction types as well
 	if _, ok := allowedExpenseCategories[category]; !ok {
-		fmt.Printf("\ninvalid expense category: \"%s\"", category)
-		showAllowedCategories("expense") // expense, income, investment
-		return fmt.Errorf("\n\nPlease pick a valid expense category from the list above.")
+		fmt.Printf("\ninvalid transaction category: \"%s\"", category)
+		showAllowedCategories(transactionType) // expense, income, investment
+		return fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
 	}
 
-	note := strings.Join(args[2:], " ")
+	note := strings.Join(args[3:], " ")
 	if len(note) > noteMaxLength {
 		return fmt.Errorf("\nnote should be a maximum of %v characters, provided %v", noteMaxLength, len(note))
 	}
@@ -37,42 +44,52 @@ func addExpense(args []string) error {
 		return fmt.Errorf("\ninvalid character in note, notes should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
-	return handleExpenseAdd(amount, category, note)
+	return handleTransactionAdd(transactionType, amount, category, note)
 }
 
-func handleExpenseAdd(amount float64, category, note string) error {
-	expenses, loadFileErr := loadExpenses()
+func handleTransactionAdd(transactionType string, amount float64, category, note string) error {
+	transcations, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+		return fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+	}
+
+	if transactionType == "expense" || transactionType == "expenses" {
+		transactionType = "Expenses"
+	}
+
+	if transactionType == "investment" || transactionType == "investments" {
+		transactionType = "Expenses"
+	}
+
+	if transactionType == "income" {
+		transactionType = "Income"
 	}
 
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
 
-	transactionType := "Expenses"
-
 	// ensure nested structure exists
-	if _, ok := expenses[year]; !ok {
-		expenses[year] = make(map[string]map[string][]Transaction)
+	if _, ok := transcations[year]; !ok {
+		transcations[year] = make(map[string]map[string][]Transaction)
 	}
 
-	if _, ok := expenses[year][month]; !ok {
-		expenses[year][month] = make(map[string][]Transaction)
+	if _, ok := transcations[year][month]; !ok {
+		transcations[year][month] = make(map[string][]Transaction)
 	}
 
-	if _, ok := expenses[year][month][transactionType]; !ok {
-		expenses[year][month][transactionType] = []Transaction{}
+	if _, ok := transcations[year][month][transactionType]; !ok {
+		transcations[year][month][transactionType] = []Transaction{}
 	}
 
-	newExpense := Transaction{
+	newTransaction := Transaction{
 		Amount:   amount,
 		Category: category,
 		Note:     note,
 	}
 
-	expenses[year][month][transactionType] = append(expenses[year][month][transactionType], newExpense)
-	if saveExpenseErr := saveExpenses(expenses); saveExpenseErr != nil {
-		return fmt.Errorf("Error saving expense: %s", saveExpenseErr)
+	transcations[year][month][transactionType] = append(transcations[year][month][transactionType], newTransaction)
+	if saveTransactionErr := saveTransactions(transcations); saveTransactionErr != nil {
+		return fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
 	}
 
 	fmt.Printf("\nadded $%.2f | %s | %s\n", amount, category, note)

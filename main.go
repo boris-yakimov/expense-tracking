@@ -23,7 +23,7 @@ func main() {
 		"list": {
 			name:        "list",
 			description: "List expenses",
-			callback:    listExpenses,
+			callback:    listTransactions,
 		},
 		"show-total": {
 			name:        "show-total",
@@ -31,10 +31,9 @@ func main() {
 			callback:    showTotal,
 		},
 		"add": {
-			// TODO: add <transcation_type> <amount> <category> <note>
 			name:        "add",
-			description: "Add an expense, income or investment",
-			callback:    addExpense,
+			description: "Add a transaction (expense, income or investment)",
+			callback:    addTransaction,
 		},
 	}
 

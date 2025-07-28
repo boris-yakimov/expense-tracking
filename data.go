@@ -58,6 +58,14 @@ var allowedInvestmentCategories = map[string]string{
 	"commodities": "gold, silver, oil, etc",
 }
 
+var validTranscationTypes = map[string]struct{}{
+	"expenses":    {},
+	"expense":     {},
+	"investments": {},
+	"investment":  {},
+	"income":      {},
+}
+
 // minimal expense without year and date
 type Transaction struct {
 	Amount   float64 `json:"amount"`
@@ -69,7 +77,7 @@ type Transaction struct {
 // nestest structrure: year -> month -> transcation type (expense, income, investment) -> transaction
 type NestedExpenses map[string]map[string]map[string][]Transaction
 
-func loadExpenses() (NestedExpenses, error) {
+func loadTransactions() (NestedExpenses, error) {
 	file, err := os.Open("data.json")
 	if os.IsNotExist(err) {
 		return make(NestedExpenses), nil
@@ -86,7 +94,7 @@ func loadExpenses() (NestedExpenses, error) {
 	return nested, err
 }
 
-func saveExpenses(nested NestedExpenses) error {
+func saveTransactions(nested NestedExpenses) error {
 	file, err := os.Create("data.json")
 	if err != nil {
 		return err

@@ -21,19 +21,20 @@ const (
 	noteWidth     = 40
 )
 
-func listExpenses(args []string) error {
-	expenses, loadFileErr := loadExpenses()
+func listTransactions(args []string) error {
+	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load expenses file: %w", loadFileErr)
+		return fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
 	}
 
-	if len(expenses) == 0 {
-		fmt.Println("No expenses found")
+	if len(transactions) == 0 {
+		// TODO: simulate this to see how the output looks like
+		fmt.Println("No transactions found")
 		return nil
 	}
 
 	// years
-	for year, months := range expenses {
+	for year, months := range transactions {
 		fmt.Printf("\nYear: %s\n", year)
 
 		// months
@@ -44,7 +45,7 @@ func listExpenses(args []string) error {
 			for transcationType, transactionList := range transactionTypes {
 				fmt.Printf("    Transcation Type: %s\n\n", transcationType)
 				if len(transactionList) == 0 {
-					fmt.Println("\nNo expenses recorded.")
+					fmt.Println("\nNo transactions recorded.")
 					continue
 				}
 
@@ -59,20 +60,21 @@ func listExpenses(args []string) error {
 	return nil
 }
 
-// TODO: maybe just use listExpenses() function inside showTotal() and similar for the others or just convert listExpenses() to be able to work with each
+// TODO: maybe just use listTransactions() function inside showTotal() and similar for the others or just convert listTransactions() to be able to work with each
 // TODO: should print a nice summary with separate section for expenses, investments and income and a total p&l based on those
 func showTotal(args []string) error {
-	expenses, loadFileErr := loadExpenses()
+	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load expenses file: %s", loadFileErr)
+		return fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
 
-	monthExpenses, ok := expenses[year][month]["Expenses"]
-	if !ok || len(monthExpenses) == 0 {
-		fmt.Printf("\nNo expenses found for %s %s.\n", month, year)
+	// TODO: fix this so it shows all transaction types
+	monthTransactions, ok := transactions[year][month]["Expenses"]
+	if !ok || len(monthTransactions) == 0 {
+		fmt.Printf("\nNo transactions found for %s %s.\n", month, year)
 	}
 
 	fmt.Printf("\nSummary for %v %v\n", month, year)
@@ -82,12 +84,12 @@ func showTotal(args []string) error {
 	fmt.Println(border)
 
 	// sort expenses by category in alphabetical order
-	sort.Slice(monthExpenses, func(i, j int) bool {
-		return monthExpenses[i].Category < monthExpenses[j].Category
+	sort.Slice(monthTransactions, func(i, j int) bool {
+		return monthTransactions[i].Category < monthTransactions[j].Category
 	})
 
 	var total float64
-	for i, e := range monthExpenses {
+	for i, e := range monthTransactions {
 		category := padRight(e.Category, categoryWidth)
 		note := truncateOrPad(e.Note, noteWidth)
 		fmt.Printf("| %2d. $%-8.2f | %-*s | %-*s |\n", i+1, e.Amount, categoryWidth, category, noteWidth, note)
@@ -95,7 +97,7 @@ func showTotal(args []string) error {
 	}
 
 	fmt.Println(border)
-	fmt.Printf("Total expenses: $%.2f\n", total)
+	fmt.Printf("Summary of transactions: $%.2f\n", total)
 
 	return nil
 }
@@ -107,8 +109,16 @@ func showAllowedCategories(categoryType string) error {
 	fmt.Fprintln(w, "\nCategory\tDescription")
 	fmt.Fprintln(w, "--------\t-----------")
 
-	if categoryType == "expense" {
+	if categoryType == "expense" || categoryType == "expenses" {
 		for key, val := range allowedExpenseCategories {
+			fmt.Fprintf(w, "%s\t%s\n", key, val)
+		}
+		w.Flush()
+		return nil
+	}
+
+	if categoryType == "investement" || categoryType == "investments" {
+		for key, val := range allowedInvestmentCategories {
 			fmt.Fprintf(w, "%s\t%s\n", key, val)
 		}
 		w.Flush()
@@ -123,16 +133,8 @@ func showAllowedCategories(categoryType string) error {
 		return nil
 	}
 
-	if categoryType == "investement" {
-		for key, val := range allowedInvestmentCategories {
-			fmt.Fprintf(w, "%s\t%s\n", key, val)
-		}
-		w.Flush()
-		return nil
-	}
-
 	w.Flush()
-	return fmt.Errorf("\nallowed category types are expense, income, or investment - provided %s", categoryType)
+	return fmt.Errorf("\nallowed transaction types are expense, income, or investment - provided %s", categoryType)
 }
 
 // trim string to fit a preset width

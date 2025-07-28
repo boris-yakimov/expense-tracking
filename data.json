@@ -36,6 +36,16 @@
           "amount": 317,
           "category": "food",
           "note": "large amount of groceries"
+        },
+        {
+          "amount": 23.5,
+          "category": "food",
+          "note": "pizza"
+        },
+        {
+          "amount": 19.5,
+          "category": "insurance",
+          "note": "property insurance"
         }
       ]
     }
