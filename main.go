@@ -18,6 +18,8 @@ func main() {
 			description: "Display a help message",
 			callback:    commandHelp,
 		},
+		// TODO: list <transcation_type> <amount> <category> <note>
+		// TODO: add option list all
 		"list": {
 			name:        "list",
 			description: "List expenses",
@@ -29,6 +31,7 @@ func main() {
 			callback:    showTotal,
 		},
 		"add": {
+			// TODO: add <transcation_type> <amount> <category> <note>
 			name:        "add",
 			description: "Add an expense, income or investment",
 			callback:    addExpense,
@@ -37,9 +40,12 @@ func main() {
 
 	scanner := bufio.NewScanner(os.Stdin)
 
+	// print help menu on start
+	// TODO: fix this so that I don't have to constantly pass around args even where they are not really needed
+	commandHelp([]string{""})
+
 	for {
-		fmt.Printf("\nexpense-tracking > ")
-		// TODO: opening the tool immediately shows the help menu
+		fmt.Printf("\n$ expense-tracking > ")
 
 		scanner.Scan()
 		input := scanner.Text()
@@ -50,7 +56,7 @@ func main() {
 
 		if validCommand {
 			if err := command.callback(args); err != nil {
-				fmt.Printf("\n\ncommand: %s <amount> <category> <note>\n", command.name)
+				fmt.Printf("\n\nError with command: %s\n", command.name)
 				fmt.Printf("%s\n", err)
 			}
 		} else {

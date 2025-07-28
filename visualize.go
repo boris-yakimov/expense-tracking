@@ -42,9 +42,9 @@ func listExpenses(args []string) error {
 
 			// expenses, investments, or income
 			for transcationType, transactionList := range transactionTypes {
-				fmt.Printf(" Transcation Type: %s\n", transcationType)
+				fmt.Printf("    Transcation Type: %s\n\n", transcationType)
 				if len(transactionList) == 0 {
-					fmt.Println("    No expenses recorded.")
+					fmt.Println("\nNo expenses recorded.")
 					continue
 				}
 
@@ -59,7 +59,7 @@ func listExpenses(args []string) error {
 	return nil
 }
 
-// TODO: maybe just use listExpenses() function and similar for the others or just convert listExpenses() to be able to work with each
+// TODO: maybe just use listExpenses() function inside showTotal() and similar for the others or just convert listExpenses() to be able to work with each
 // TODO: should print a nice summary with separate section for expenses, investments and income and a total p&l based on those
 func showTotal(args []string) error {
 	expenses, loadFileErr := loadExpenses()

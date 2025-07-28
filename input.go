@@ -11,8 +11,8 @@ func cleanInput(cmdArgs string) []string {
 }
 
 func validNoteInputFormat(note string) bool {
-	// only letters, numbers, commas, and dashes
-	pattern := `^[a-zA-Z0-9,-]+$`
+	// only letters, numbers, commas, spaces or dashes
+	pattern := `^[a-zA-Z0-9,' '-]+$`
 	matched, err := regexp.MatchString(pattern, note)
 	if err != nil {
 		return false

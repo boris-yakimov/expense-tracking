@@ -22,6 +22,7 @@ func commandHelp(args []string) error {
 
 		// help add
 		if args[0] == "add" {
+			// TODO: add info what is the max char limit
 			fmt.Printf(`
 Expense Tracking Tool
 Usage: add <amount> <category> <note>

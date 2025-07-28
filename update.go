@@ -34,7 +34,7 @@ func addExpense(args []string) error {
 	}
 
 	if !validNoteInputFormat(note) {
-		return fmt.Errorf("\ninvalid character in note, notes should contain only letters, numbers, commas, and dashes")
+		return fmt.Errorf("\ninvalid character in note, notes should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
 	return handleExpenseAdd(amount, category, note)
@@ -49,7 +49,7 @@ func handleExpenseAdd(amount float64, category, note string) error {
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
 
-	transactionType := "Expeses"
+	transactionType := "Expenses"
 
 	// ensure nested structure exists
 	if _, ok := expenses[year]; !ok {
@@ -83,24 +83,3 @@ func handleExpenseAdd(amount float64, category, note string) error {
 
 	return nil
 }
-
-// TODO: should be
-//           year {
-//             month {
-//                investments {
-//                  amount: 123
-//                  category: ibkr
-//                  note: annual investmentu
-//                }
-//                income {
-//                  amount: 123
-//                  category: salary
-//                  note: work
-//                }
-//                expenses {
-//                  amount: 123
-//                  category: food
-//                  note: groceries
-//                }
-//             }
-//          }

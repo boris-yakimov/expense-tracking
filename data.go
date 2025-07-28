@@ -62,7 +62,8 @@ var allowedInvestmentCategories = map[string]string{
 type Transaction struct {
 	Amount   float64 `json:"amount"`
 	Category string  `json:"category"`
-	Note     string  `json:"note"`
+	// TODO: is description a better term for this ?
+	Note string `json:"note"`
 }
 
 // nestest structrure: year -> month -> transcation type (expense, income, investment) -> transaction
