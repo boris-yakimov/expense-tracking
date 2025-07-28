@@ -59,13 +59,14 @@ var allowedInvestmentCategories = map[string]string{
 }
 
 // minimal expense without year and date
-type Expense struct {
+type Transaction struct {
 	Amount   float64 `json:"amount"`
 	Category string  `json:"category"`
 	Note     string  `json:"note"`
 }
 
-type NestedExpenses map[string]map[string][]Expense
+// nestest structrure: year -> month -> transcation type (expense, income, investment) -> transaction
+type NestedExpenses map[string]map[string]map[string][]Transaction
 
 func loadExpenses() (NestedExpenses, error) {
 	file, err := os.Open("data.json")

@@ -32,16 +32,26 @@ func listExpenses(args []string) error {
 		return nil
 	}
 
+	// years
 	for year, months := range expenses {
 		fmt.Printf("\nYear: %s\n", year)
-		for month, expenseList := range months {
+
+		// months
+		for month, transactionTypes := range months {
 			fmt.Printf("  Month: %s\n", month)
-			if len(expenseList) == 0 {
-				fmt.Println("    No expenses recorded.")
-				continue
-			}
-			for i, e := range expenseList {
-				fmt.Printf("    %2d. $%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+
+			// expenses, investments, or income
+			for transcationType, transactionList := range transactionTypes {
+				fmt.Printf(" Transcation Type: %s\n", transcationType)
+				if len(transactionList) == 0 {
+					fmt.Println("    No expenses recorded.")
+					continue
+				}
+
+				// list of each transaction
+				for i, e := range transactionList {
+					fmt.Printf("    %2d. $%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+				}
 			}
 		}
 	}
@@ -49,6 +59,8 @@ func listExpenses(args []string) error {
 	return nil
 }
 
+// TODO: maybe just use listExpenses() function and similar for the others or just convert listExpenses() to be able to work with each
+// TODO: should print a nice summary with separate section for expenses, investments and income and a total p&l based on those
 func showTotal(args []string) error {
 	expenses, loadFileErr := loadExpenses()
 	if loadFileErr != nil {
@@ -58,7 +70,7 @@ func showTotal(args []string) error {
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
 
-	monthExpenses, ok := expenses[year][month]
+	monthExpenses, ok := expenses[year][month]["Expenses"]
 	if !ok || len(monthExpenses) == 0 {
 		fmt.Printf("\nNo expenses found for %s %s.\n", month, year)
 	}

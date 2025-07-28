@@ -39,6 +39,7 @@ func main() {
 
 	for {
 		fmt.Printf("\nexpense-tracking > ")
+		// TODO: opening the tool immediately shows the help menu
 
 		scanner.Scan()
 		input := scanner.Text()

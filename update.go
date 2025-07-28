@@ -25,7 +25,7 @@ func addExpense(args []string) error {
 	if _, ok := allowedExpenseCategories[category]; !ok {
 		fmt.Printf("\ninvalid expense category: \"%s\"", category)
 		showAllowedCategories("expense") // expense, income, investment
-		return fmt.Errorf("\n\nPlease pick a valid category from the list above.")
+		return fmt.Errorf("\n\nPlease pick a valid expense category from the list above.")
 	}
 
 	note := strings.Join(args[2:], " ")
@@ -49,22 +49,28 @@ func handleExpenseAdd(amount float64, category, note string) error {
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
 
-	//ensure nested structure exists
+	transactionType := "Expeses"
+
+	// ensure nested structure exists
 	if _, ok := expenses[year]; !ok {
-		expenses[year] = make(map[string][]Expense)
+		expenses[year] = make(map[string]map[string][]Transaction)
 	}
 
 	if _, ok := expenses[year][month]; !ok {
-		expenses[year][month] = []Expense{}
-
+		expenses[year][month] = make(map[string][]Transaction)
 	}
-	newExpense := Expense{
+
+	if _, ok := expenses[year][month][transactionType]; !ok {
+		expenses[year][month][transactionType] = []Transaction{}
+	}
+
+	newExpense := Transaction{
 		Amount:   amount,
 		Category: category,
 		Note:     note,
 	}
 
-	expenses[year][month] = append(expenses[year][month], newExpense)
+	expenses[year][month][transactionType] = append(expenses[year][month][transactionType], newExpense)
 	if saveExpenseErr := saveExpenses(expenses); saveExpenseErr != nil {
 		return fmt.Errorf("Error saving expense: %s", saveExpenseErr)
 	}
@@ -78,16 +84,6 @@ func handleExpenseAdd(amount float64, category, note string) error {
 	return nil
 }
 
-// TODO: add an income section - add some predefined sections so that they cannot be mistaken
-//   - paycheck
-//   - transfers
-//   - apartment rental
-//   - dividends
-//   - business trip - ? maybe just compbine with paycheck as with on-call
-//   - capital gains
-//
-// TODO: add an investment section
-//
 // TODO: should be
 //           year {
 //             month {

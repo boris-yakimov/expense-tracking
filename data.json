@@ -1,31 +1,38 @@
 {
   "2025": {
-    "July": [
-      {
-        "amount": 53.4,
-        "category": "food",
-        "note": "groceries"
-      },
-      {
-        "amount": 5432,
-        "category": "renovation",
-        "note": "fence"
-      },
-      {
-        "amount": 45,
-        "category": "food",
-        "note": "burgers"
-      },
-      {
-        "amount": 12.35,
-        "category": "food",
-        "note": "sandwitch"
-      },
-      {
-        "amount": 100,
-        "category": "travel",
-        "note": "rent a car gas"
-      }
-    ]
+    "July": {
+      "Expenses": [
+        {
+          "amount": 53.4,
+          "category": "food",
+          "note": "groceries"
+        },
+        {
+          "amount": 5432,
+          "category": "renovation",
+          "note": "fence"
+        },
+        {
+          "amount": 45,
+          "category": "food",
+          "note": "burgers"
+        },
+        {
+          "amount": 12.35,
+          "category": "food",
+          "note": "sandwitch"
+        },
+        {
+          "amount": 100,
+          "category": "travel",
+          "note": "rent a car gas"
+        },
+        {
+          "amount": 52,
+          "category": "food",
+          "note": "groceries"
+        }
+      ]
+    }
   }
 }
