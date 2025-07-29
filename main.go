@@ -22,12 +22,12 @@ func main() {
 		// TODO: add option list all
 		"list": {
 			name:        "list",
-			description: "List expenses",
+			description: "List transactions",
 			callback:    listTransactions,
 		},
 		"show-total": {
 			name:        "show-total",
-			description: "Show total expenses",
+			description: "Show totals of all transactions",
 			callback:    showTotal,
 		},
 		"add": {

@@ -75,12 +75,12 @@ type Transaction struct {
 }
 
 // nestest structrure: year -> month -> transcation type (expense, income, investment) -> transaction
-type NestedExpenses map[string]map[string]map[string][]Transaction
+type NestedTransactions map[string]map[string]map[string][]Transaction
 
-func loadTransactions() (NestedExpenses, error) {
+func loadTransactions() (NestedTransactions, error) {
 	file, err := os.Open("data.json")
 	if os.IsNotExist(err) {
-		return make(NestedExpenses), nil
+		return make(NestedTransactions), nil
 	}
 	if err != nil {
 		return nil, err
@@ -88,13 +88,13 @@ func loadTransactions() (NestedExpenses, error) {
 
 	defer file.Close()
 
-	var nested NestedExpenses
+	var nested NestedTransactions
 	decoder := json.NewDecoder(file)
 	err = decoder.Decode(&nested)
 	return nested, err
 }
 
-func saveTransactions(nested NestedExpenses) error {
+func saveTransactions(nested NestedTransactions) error {
 	file, err := os.Create("data.json")
 	if err != nil {
 		return err
