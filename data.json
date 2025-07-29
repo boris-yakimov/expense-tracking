@@ -43,6 +43,13 @@
           "note": "pizza"
         }
       ],
+      "Income": [
+        {
+          "amount": 500,
+          "category": "salary",
+          "note": "income from employment"
+        }
+      ],
       "Investments": [
         {
           "amount": 78,

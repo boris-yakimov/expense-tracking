@@ -39,11 +39,11 @@ func listTransactions(args []string) error {
 
 		// months
 		for month, transactionTypes := range months {
-			fmt.Printf("  Month: %s\n", month)
+			fmt.Printf("  Month: %s\n\n", month)
 
 			// expenses, investments, or income
 			for transcationType, transactionList := range transactionTypes {
-				fmt.Printf("    Transcation Type: %s\n\n", transcationType)
+				fmt.Printf("    %s\n", transcationType)
 				if len(transactionList) == 0 {
 					fmt.Println("\nNo transactions recorded.")
 					continue
@@ -51,8 +51,10 @@ func listTransactions(args []string) error {
 
 				// list of each transaction
 				for i, e := range transactionList {
-					fmt.Printf("    %2d. $%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+					fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
 				}
+
+				fmt.Println()
 			}
 		}
 	}
@@ -91,12 +93,12 @@ func showTotal(args []string) error {
 	for i, e := range monthTransactions {
 		category := padRight(e.Category, categoryWidth)
 		note := truncateOrPad(e.Note, noteWidth)
-		fmt.Printf("| %2d. $%-8.2f | %-*s | %-*s |\n", i+1, e.Amount, categoryWidth, category, noteWidth, note)
+		fmt.Printf("| %2d. €%-8.2f | %-*s | %-*s |\n", i+1, e.Amount, categoryWidth, category, noteWidth, note)
 		total += e.Amount
 	}
 
 	fmt.Println(border)
-	fmt.Printf("Total P&L: $%.2f\n", total)
+	fmt.Printf("Total P&L: €%.2f\n", total)
 	// TODO: calculate p&l %
 	// fmt.Printf("Total P&L %: $%.2f\n", totalPercentage)
 
@@ -111,7 +113,7 @@ func showAllowedCategories(categoryType string) error {
 	fmt.Fprintln(w, "--------\t-----------")
 
 	if categoryType == "expense" || categoryType == "expenses" {
-		for key, val := range allowedExpenseCategories {
+		for key, val := range allowedTranscationCategories["expense"] {
 			fmt.Fprintf(w, "%s\t%s\n", key, val)
 		}
 		w.Flush()
@@ -119,7 +121,7 @@ func showAllowedCategories(categoryType string) error {
 	}
 
 	if categoryType == "investement" || categoryType == "investments" {
-		for key, val := range allowedInvestmentCategories {
+		for key, val := range allowedTranscationCategories["investment"] {
 			fmt.Fprintf(w, "%s\t%s\n", key, val)
 		}
 		w.Flush()
@@ -127,7 +129,7 @@ func showAllowedCategories(categoryType string) error {
 	}
 
 	if categoryType == "income" {
-		for key, val := range allowedIncomeCategories {
+		for key, val := range allowedTranscationCategories["income"] {
 			fmt.Fprintf(w, "%s\t%s\n", key, val)
 		}
 		w.Flush()
