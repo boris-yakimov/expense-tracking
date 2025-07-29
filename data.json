@@ -41,11 +41,18 @@
           "amount": 23.5,
           "category": "food",
           "note": "pizza"
+        }
+      ],
+      "Investments": [
+        {
+          "amount": 78,
+          "category": "insurance",
+          "note": "life insurance monthly payment"
         },
         {
-          "amount": 19.5,
+          "amount": 19.25,
           "category": "insurance",
-          "note": "property insurance"
+          "note": "property insurance monthly payment"
         }
       ]
     }

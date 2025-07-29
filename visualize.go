@@ -71,13 +71,12 @@ func showTotal(args []string) error {
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
 
-	// TODO: fix this so it shows all transaction types
 	monthTransactions, ok := transactions[year][month]["Expenses"]
 	if !ok || len(monthTransactions) == 0 {
 		fmt.Printf("\nNo transactions found for %s %s.\n", month, year)
 	}
 
-	fmt.Printf("\nSummary for %v %v\n", month, year)
+	fmt.Printf("\n%s summary for %v %v\n", "Expenses", month, year)
 
 	//table border width: + 2 (padding per field) * 3 columns + 4 (pipes) + field widths
 	border := "+" + strings.Repeat("-", amountWidth+categoryWidth+noteWidth+10) + "+"
@@ -97,7 +96,9 @@ func showTotal(args []string) error {
 	}
 
 	fmt.Println(border)
-	fmt.Printf("Summary of transactions: $%.2f\n", total)
+	fmt.Printf("Total P&L: $%.2f\n", total)
+	// TODO: calculate p&l %
+	// fmt.Printf("Total P&L %: $%.2f\n", totalPercentage)
 
 	return nil
 }
@@ -134,7 +135,7 @@ func showAllowedCategories(categoryType string) error {
 	}
 
 	w.Flush()
-	return fmt.Errorf("\nallowed transaction types are expense, income, or investment - provided %s", categoryType)
+	return fmt.Errorf("\nallowed types are expense, income, or investment - provided %s", categoryType)
 }
 
 // trim string to fit a preset width

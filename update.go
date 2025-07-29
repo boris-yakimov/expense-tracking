@@ -13,7 +13,7 @@ const (
 
 func addTransaction(args []string) error {
 	if len(args) < 4 {
-		return fmt.Errorf("usage: add <transcation typ> <amount> <category> <note>")
+		return fmt.Errorf("usage: add <transcation type> <amount> <category> <note>")
 	}
 
 	transactionType := args[0]
@@ -58,7 +58,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, note
 	}
 
 	if transactionType == "investment" || transactionType == "investments" {
-		transactionType = "Expenses"
+		transactionType = "Investments"
 	}
 
 	if transactionType == "income" {
