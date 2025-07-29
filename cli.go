@@ -53,7 +53,7 @@ help:       Display a help message
 exit:       Exit the expense-tracking tool
 
 Detailed usage:
-help add:   Format of the add command 
+help add:   Get more detailed info about the add command 
 help del/delete : TO BE IMPLEMENTED
 `)
 

@@ -60,6 +60,11 @@
           "amount": 19.25,
           "category": "insurance",
           "note": "property insurance monthly payment"
+        },
+        {
+          "amount": 100,
+          "category": "funds",
+          "note": "ibkr etf investment"
         }
       ]
     }

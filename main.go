@@ -50,16 +50,51 @@ func main() {
 		input := scanner.Text()
 		sanitizedInput := cleanInput(input)
 
-		command, validCommand := supportedCommands[sanitizedInput[0]]
+		// if blank enter just prompt again
+		if len(sanitizedInput) == 0 {
+			continue
+		}
+
+		inputCommand := sanitizedInput[0]
 		args := sanitizedInput[1:]
+
+		command, validCommand := supportedCommands[inputCommand]
+		cmdMatches := []string{}
 
 		if validCommand {
 			if err := command.callback(args); err != nil {
 				fmt.Printf("\n\nError with command: %s\n", command.name)
 				fmt.Printf("%s\n", err)
 			}
+			// if successful command run just prompt again
+			continue
 		} else {
-			fmt.Println("Unkown command, please run the :help command to see valid options")
+			// try partial command match
+			for cmd := range supportedCommands {
+				if len(inputCommand) > 0 && len(cmd) >= len(inputCommand) && cmd[:len(inputCommand)] == inputCommand {
+					cmdMatches = append(cmdMatches, cmd)
+				}
+			}
+
+			if len(cmdMatches) == 1 {
+				command = supportedCommands[cmdMatches[0]]
+				if err := command.callback(args); err != nil {
+					fmt.Printf("\n\nError with command: %s\n", command.name)
+					fmt.Printf("%s\n", err)
+				}
+				// if successful command run just prompt again
+				continue
+			} else if len(cmdMatches) > 1 {
+				fmt.Println("did you mean one of these?")
+				for _, m := range cmdMatches {
+					fmt.Printf("  - %s\n", m)
+				}
+				// give suggestion and re-prompt
+				continue
+			}
+
+			// fallback: unknown command
+			fmt.Printf("Unkown command: \"%s\", please run the :help command to see valid options", inputCommand)
 		}
 	}
 }
