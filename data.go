@@ -26,6 +26,7 @@ var allowedTranscationCategories = map[string]map[string]string{
 		"donations":      "charity, crowdfunding support",
 		"fees":           "bank fees, late fees, penalties, subscriptions that don't fall under entertainment",
 		"services":       "cleaners, repairs, movers, consultants, etc",
+		"cash":           "money withdrawn from ATM and harder to track down under the separate categories, can just be expensed together under this category",
 	},
 
 	"investment": {

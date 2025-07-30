@@ -3,15 +3,12 @@ package main
 import (
 	"fmt"
 	"os"
-	"sort"
-	"strconv"
 	"strings"
 	"text/tabwriter"
-	"time"
 )
 
 // TODO: calculate % savings rate (should show minus percent of expenses exceed income)
-// TODO: montly totals with less details - income, expense, investement, % p&l
+// TODO: montly totals with less details - income, expense, investment, % p&l
 // TODO: yearly totals with less details - income, expense, investment, %p&l
 // TODO: draw a terminal diagram/pie chart
 
@@ -33,21 +30,63 @@ func listTransactions(args []string) error {
 		return nil
 	}
 
+	var transactionType string
+	if len(args) > 0 {
+		transactionType = args[0]
+		if _, ok := validTranscationTypes[transactionType]; !ok {
+			return fmt.Errorf("invalid transaction type %s, please use expenses, income, or investments", transactionType)
+		}
+		// TODO: can i make this into a function so that i don't have to constantly do these cheks
+		if transactionType == "expense" || transactionType == "expenses" {
+			transactionType = "Expenses"
+		}
+		if transactionType == "investment" || transactionType == "investments" {
+			transactionType = "Investments"
+		}
+		if transactionType == "income" {
+			transactionType = "Income"
+		}
+	} else {
+		transactionType = ""
+	}
+
 	// years
 	for year, months := range transactions {
 		fmt.Printf("\nYear: %s\n", year)
 
-		// months
-		for month, transactionTypes := range months {
-			fmt.Printf("  Month: %s\n\n", month)
+		// if only "list" command without args is passed, print all
+		if transactionType == "" {
+			// months
+			for month, transactionTypes := range months {
+				fmt.Printf("  Month: %s\n\n", month)
 
-			// expenses, investments, or income
-			for transcationType, transactionList := range transactionTypes {
-				fmt.Printf("    %s\n", transcationType)
-				if len(transactionList) == 0 {
-					fmt.Println("\nNo transactions recorded.")
-					continue
+				// expenses, investments, or income
+				for transcationType, transactionList := range transactionTypes {
+					fmt.Printf("    %s\n", transcationType)
+					if len(transactionList) == 0 {
+						fmt.Println("\nNo transactions recorded.")
+						continue
+					}
+
+					// list of each transaction
+					for i, e := range transactionList {
+						fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+					}
+
+					fmt.Println()
 				}
+			}
+			// move to next month/year after we've printed all
+			continue
+		} else {
+			for month, transactionTypes := range months {
+				transactionList, ok := transactionTypes[transactionType]
+				if !ok || len(transactionList) == 0 {
+					continue // skip months with no data for the requested transaction type
+				}
+
+				fmt.Printf("  Month: %s\n\n", month)
+				fmt.Printf("    %s\n", transactionType)
 
 				// list of each transaction
 				for i, e := range transactionList {
@@ -57,62 +96,41 @@ func listTransactions(args []string) error {
 				fmt.Println()
 			}
 		}
+		// move to next month/year after we've printed all
+		continue
 	}
 
 	return nil
 }
 
-// TODO: maybe just use listTransactions() function inside showTotal() and similar for the others or just convert listTransactions() to be able to work with each
-// TODO: should print a nice summary with separate section for expenses, investments and income and a total p&l based on those
 func showTotal(args []string) error {
-	transactions, loadFileErr := loadTransactions()
-	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+	// essentially forcing args[0] to be a specific transaction type in order to list transactions inside
+	if err := listTransactions([]string{"expenses"}); err != nil {
+		return fmt.Errorf("%s", err)
 	}
 
-	year := strconv.Itoa(time.Now().Year())
-	month := time.Now().Month().String()
-
-	monthTransactions, ok := transactions[year][month]["Expenses"]
-	if !ok || len(monthTransactions) == 0 {
-		fmt.Printf("\nNo transactions found for %s %s.\n", month, year)
+	if err := listTransactions([]string{"investments"}); err != nil {
+		return fmt.Errorf("%s", err)
 	}
 
-	fmt.Printf("\n%s summary for %v %v\n", "Expenses", month, year)
-
-	//table border width: + 2 (padding per field) * 3 columns + 4 (pipes) + field widths
-	border := "+" + strings.Repeat("-", amountWidth+categoryWidth+noteWidth+10) + "+"
-	fmt.Println(border)
-
-	// sort expenses by category in alphabetical order
-	sort.Slice(monthTransactions, func(i, j int) bool {
-		return monthTransactions[i].Category < monthTransactions[j].Category
-	})
-
-	var total float64
-	for i, e := range monthTransactions {
-		category := padRight(e.Category, categoryWidth)
-		note := truncateOrPad(e.Note, noteWidth)
-		fmt.Printf("| %2d. €%-8.2f | %-*s | %-*s |\n", i+1, e.Amount, categoryWidth, category, noteWidth, note)
-		total += e.Amount
+	if err := listTransactions([]string{"income"}); err != nil {
+		return fmt.Errorf("%s", err)
 	}
 
-	fmt.Println(border)
-	fmt.Printf("Total P&L: €%.2f\n", total)
-	// TODO: calculate p&l %
-	// fmt.Printf("Total P&L %: $%.2f\n", totalPercentage)
+	// TODO: print a nice summary with separate section for expenses, investments and income and a total p&l based on those
 
 	return nil
 }
 
-func showAllowedCategories(categoryType string) error {
+func showAllowedCategories(transactionType string) error {
 	fmt.Println("\nallowed categories are: ")
 
 	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
 	fmt.Fprintln(w, "\nCategory\tDescription")
 	fmt.Fprintln(w, "--------\t-----------")
 
-	if categoryType == "expense" || categoryType == "expenses" {
+	// TODO: can i make this into a function so that i don't have to constantly do these cheks
+	if transactionType == "expense" || transactionType == "expenses" {
 		for key, val := range allowedTranscationCategories["expense"] {
 			fmt.Fprintf(w, "%s\t%s\n", key, val)
 		}
@@ -120,7 +138,7 @@ func showAllowedCategories(categoryType string) error {
 		return nil
 	}
 
-	if categoryType == "investement" || categoryType == "investments" {
+	if transactionType == "investment" || transactionType == "investments" {
 		for key, val := range allowedTranscationCategories["investment"] {
 			fmt.Fprintf(w, "%s\t%s\n", key, val)
 		}
@@ -128,7 +146,7 @@ func showAllowedCategories(categoryType string) error {
 		return nil
 	}
 
-	if categoryType == "income" {
+	if transactionType == "income" {
 		for key, val := range allowedTranscationCategories["income"] {
 			fmt.Fprintf(w, "%s\t%s\n", key, val)
 		}
@@ -137,7 +155,7 @@ func showAllowedCategories(categoryType string) error {
 	}
 
 	w.Flush()
-	return fmt.Errorf("\nallowed types are expense, income, or investment - provided %s", categoryType)
+	return fmt.Errorf("\nallowed types are expense, income, or investment - provided %s", transactionType)
 }
 
 // trim string to fit a preset width
