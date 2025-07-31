@@ -11,45 +11,45 @@ const (
 	noteMaxLength = 42
 )
 
-func addTransaction(args []string) error {
+func addTransaction(args []string) (success bool, err error) {
 	if len(args) < 4 {
-		return fmt.Errorf("usage: add <transcation type> <amount> <category> <note>")
+		return false, fmt.Errorf("usage: add <transcation type> <amount> <category> <note>")
 	}
 
 	transactionType := args[0]
 	if _, ok := validTranscationTypes[transactionType]; !ok {
-		return fmt.Errorf("invalid transaction type %s, please use expense, income, or investment", transactionType)
+		return false, fmt.Errorf("invalid transaction type %s, please use expense, income, or investment", transactionType)
 	}
 
 	amount, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
 		// TODO: simulate this and validate the output
-		return fmt.Errorf("invalid amount: %v", err)
+		return false, fmt.Errorf("invalid amount: %v", err)
 	}
 
 	category := args[2]
 	if _, ok := allowedTranscationCategories[transactionType][category]; !ok {
 		fmt.Printf("\ninvalid transaction category: \"%s\"", category)
 		showAllowedCategories(transactionType) // expense, income, investment
-		return fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
+		return false, fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
 	}
 
 	note := strings.Join(args[3:], " ")
 	if len(note) > noteMaxLength {
-		return fmt.Errorf("\nnote should be a maximum of %v characters, provided %v", noteMaxLength, len(note))
+		return false, fmt.Errorf("\nnote should be a maximum of %v characters, provided %v", noteMaxLength, len(note))
 	}
 
 	if !validNoteInputFormat(note) {
-		return fmt.Errorf("\ninvalid character in note, notes should contain only letters, numbers, spaces, commas, or dashes")
+		return false, fmt.Errorf("\ninvalid character in note, notes should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
 	return handleTransactionAdd(transactionType, amount, category, note)
 }
 
-func handleTransactionAdd(transactionType string, amount float64, category, note string) error {
+func handleTransactionAdd(transactionType string, amount float64, category, note string) (success bool, err error) {
 	transcations, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
 	if transactionType == "expense" || transactionType == "expenses" {
@@ -88,7 +88,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, note
 
 	transcations[year][month][transactionType] = append(transcations[year][month][transactionType], newTransaction)
 	if saveTransactionErr := saveTransactions(transcations); saveTransactionErr != nil {
-		return fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
+		return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
 	}
 
 	fmt.Printf("\nadded $%.2f | %s | %s\n", amount, category, note)
@@ -97,5 +97,5 @@ func handleTransactionAdd(transactionType string, amount float64, category, note
 	var args []string
 	showTotal(args)
 
-	return nil
+	return true, nil
 }

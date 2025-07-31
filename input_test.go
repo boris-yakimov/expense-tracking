@@ -4,9 +4,6 @@ import (
 	"testing"
 )
 
-// TODO: write tests for expnese add with a variety of inputs
-// TODO: write tests for expense del
-// TODO: tests for list and show-total
 func TestCleanInput(t *testing.T) {
 	cases := []struct {
 		input    string

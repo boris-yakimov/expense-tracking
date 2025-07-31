@@ -8,16 +8,16 @@ import (
 type cliCommand struct {
 	name        string
 	description string
-	callback    func(args []string) error
+	callback    func(args []string) (success bool, err error)
 }
 
-func commandExit(args []string) error {
+func commandExit(args []string) (success bool, err error) {
 	fmt.Println("Closing the expense-tracking tool... goodbye!")
 	os.Exit(0)
-	return nil
+	return true, nil
 }
 
-func commandHelp(args []string) error {
+func commandHelp(args []string) (success bool, err error) {
 	if len(args) > 0 {
 
 		// help add
@@ -36,7 +36,7 @@ example
         output :
         added $25.00 | food | vegetables from store
 `)
-			return nil
+			return true, nil
 		}
 	}
 
@@ -57,5 +57,5 @@ help add:   Get more detailed info about the add command
 help del/delete : TO BE IMPLEMENTED
 `)
 
-	return nil
+	return true, nil
 }

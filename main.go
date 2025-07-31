@@ -62,7 +62,7 @@ func main() {
 		cmdMatches := []string{}
 
 		if validCommand {
-			if err := command.callback(args); err != nil {
+			if _, err := command.callback(args); err != nil {
 				fmt.Printf("\n\nError with command: %s\n", command.name)
 				fmt.Printf("%s\n", err)
 			}
@@ -78,7 +78,7 @@ func main() {
 
 			if len(cmdMatches) == 1 {
 				command = supportedCommands[cmdMatches[0]]
-				if err := command.callback(args); err != nil {
+				if _, err := command.callback(args); err != nil {
 					fmt.Printf("\n\nError with command: %s\n", command.name)
 					fmt.Printf("%s\n", err)
 				}

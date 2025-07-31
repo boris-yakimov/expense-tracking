@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"os"
-	"strings"
 	"text/tabwriter"
 )
 
@@ -18,23 +17,23 @@ const (
 	noteWidth     = 40
 )
 
-func listTransactions(args []string) error {
+func listTransactions(args []string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
 	}
 
 	if len(transactions) == 0 {
 		// TODO: simulate this to see how the output looks like
 		fmt.Println("No transactions found")
-		return nil
+		return true, nil
 	}
 
 	var transactionType string
 	if len(args) > 0 {
 		transactionType = args[0]
 		if _, ok := validTranscationTypes[transactionType]; !ok {
-			return fmt.Errorf("invalid transaction type %s, please use expenses, income, or investments", transactionType)
+			return false, fmt.Errorf("invalid transaction type %s, please use expenses, income, or investments", transactionType)
 		}
 		// TODO: can i make this into a function so that i don't have to constantly do these cheks
 		if transactionType == "expense" || transactionType == "expenses" {
@@ -100,26 +99,27 @@ func listTransactions(args []string) error {
 		continue
 	}
 
-	return nil
+	return true, nil
 }
 
-func showTotal(args []string) error {
+// TODO: show total by passing a specific month or a year
+func showTotal(args []string) (success bool, err error) {
 	// essentially forcing args[0] to be a specific transaction type in order to list transactions inside
-	if err := listTransactions([]string{"expenses"}); err != nil {
-		return fmt.Errorf("%s", err)
+	if _, err := listTransactions([]string{"expenses"}); err != nil {
+		return false, fmt.Errorf("%s", err)
 	}
 
-	if err := listTransactions([]string{"investments"}); err != nil {
-		return fmt.Errorf("%s", err)
+	if _, err := listTransactions([]string{"investments"}); err != nil {
+		return false, fmt.Errorf("%s", err)
 	}
 
-	if err := listTransactions([]string{"income"}); err != nil {
-		return fmt.Errorf("%s", err)
+	if _, err := listTransactions([]string{"income"}); err != nil {
+		return false, fmt.Errorf("%s", err)
 	}
 
 	// TODO: print a nice summary with separate section for expenses, investments and income and a total p&l based on those
 
-	return nil
+	return true, nil
 }
 
 func showAllowedCategories(transactionType string) error {
@@ -156,21 +156,4 @@ func showAllowedCategories(transactionType string) error {
 
 	w.Flush()
 	return fmt.Errorf("\nallowed types are expense, income, or investment - provided %s", transactionType)
-}
-
-// trim string to fit a preset width
-func padRight(str string, width int) string {
-	if len(str) > width {
-		return str[:width]
-	}
-	return str + strings.Repeat(" ", width-len(str))
-}
-
-// ensure note fits within a preset width
-func truncateOrPad(str string, width int) string {
-	runes := []rune(str)
-	if len(runes) > width {
-		return string(runes[:width])
-	}
-	return str + strings.Repeat(" ", width-len(runes))
 }

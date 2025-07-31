@@ -77,8 +77,10 @@ type Transaction struct {
 // structrure year -> month -> transcation type (expense, income, or investment) -> transaction
 type TransactionHistory map[string]map[string]map[string][]Transaction
 
+var transactionsFilePath = "data.json"
+
 func loadTransactions() (TransactionHistory, error) {
-	file, err := os.Open("data.json")
+	file, err := os.Open(transactionsFilePath)
 	if os.IsNotExist(err) {
 		return make(TransactionHistory), nil
 	}
@@ -95,7 +97,7 @@ func loadTransactions() (TransactionHistory, error) {
 }
 
 func saveTransactions(transactions TransactionHistory) error {
-	file, err := os.Create("data.json")
+	file, err := os.Create(transactionsFilePath)
 	if err != nil {
 		return err
 	}
