@@ -6,7 +6,6 @@ import (
 	"text/tabwriter"
 )
 
-// TODO: calculate % savings rate (should show minus percent of expenses exceed income)
 // TODO: montly totals with less details - income, expense, investment, % p&l
 // TODO: yearly totals with less details - income, expense, investment, %p&l
 // TODO: draw a terminal diagram/pie chart
