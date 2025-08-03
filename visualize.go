@@ -16,7 +16,7 @@ const (
 	noteWidth     = 40
 )
 
-// TODO: show total by passing a specific month or a year
+// TODO: move the looping through year and month in showTotal and remove it from listTransactions, listTransactions should accept the month and year as arguments and just loop through those
 func showTotal(args []string) (success bool, err error) {
 	// essentially forcing args[0] to be a specific transaction type in order to list transactions inside
 	if _, err := listTransactions([]string{"expenses"}); err != nil {
@@ -30,8 +30,6 @@ func showTotal(args []string) (success bool, err error) {
 	if _, err := listTransactions([]string{"income"}); err != nil {
 		return false, fmt.Errorf("%s", err)
 	}
-
-	// TODO: print a nice summary with separate section for expenses, investments and income and a total p&l based on those
 
 	calculatePnL()
 

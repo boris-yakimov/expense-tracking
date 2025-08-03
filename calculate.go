@@ -22,12 +22,10 @@ func calculatePnL() (PnLResult, error) {
 	// TODO: figure out a good way to pass year/month to reduce the amount of time I have to loop over these
 
 	// years
-	for year, months := range transactions {
-		fmt.Printf("\nYear: %s\n", year)
+	for _, months := range transactions {
 
 		// months
-		for month, transactionTypes := range months {
-			fmt.Printf("  Month: %s\n\n", month)
+		for _, transactionTypes := range months {
 
 			// expenses, investments, or income
 			for transcationType, transactionList := range transactionTypes {
