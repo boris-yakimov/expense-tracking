@@ -6,7 +6,7 @@ import (
 )
 
 // TODO: auto complete or show list of allowed expense categories
-var allowedTranscationCategories = map[string]map[string]string{
+var allowedTransactionCategories = map[string]map[string]string{
 	"expense": {
 		"bills":          "utilities (usually recurring) - electricity, water, gas, internet, phone, etc",
 		"car":            "any expense around car ownership - insurance, fuel, lease, etc",
@@ -58,7 +58,7 @@ var allowedTranscationCategories = map[string]map[string]string{
 	},
 }
 
-var validTranscationTypes = map[string]struct{}{
+var validTransactionTypes = map[string]struct{}{
 	"expenses":    {},
 	"expense":     {},
 	"investments": {},

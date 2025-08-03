@@ -8,7 +8,7 @@
           "note": "groceries"
         },
         {
-          "amount": 5432,
+          "amount": 432,
           "category": "renovation",
           "note": "fence"
         },
@@ -45,7 +45,7 @@
       ],
       "Income": [
         {
-          "amount": 500,
+          "amount": 1500,
           "category": "salary",
           "note": "income from employment"
         }

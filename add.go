@@ -17,7 +17,7 @@ func addTransaction(args []string) (success bool, err error) {
 	}
 
 	transactionType := args[0]
-	if _, ok := validTranscationTypes[transactionType]; !ok {
+	if _, ok := validTransactionTypes[transactionType]; !ok {
 		return false, fmt.Errorf("invalid transaction type %s, please use expense, income, or investment", transactionType)
 	}
 
@@ -28,7 +28,7 @@ func addTransaction(args []string) (success bool, err error) {
 	}
 
 	category := args[2]
-	if _, ok := allowedTranscationCategories[transactionType][category]; !ok {
+	if _, ok := allowedTransactionCategories[transactionType][category]; !ok {
 		fmt.Printf("\ninvalid transaction category: \"%s\"", category)
 		showAllowedCategories(transactionType) // expense, income, investment
 		return false, fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
