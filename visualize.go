@@ -18,6 +18,7 @@ const (
 
 // TODO: move the looping through year and month in showTotal and remove it from listTransactions, listTransactions should accept the month and year as arguments and just loop through those
 func showTotal(args []string) (success bool, err error) {
+
 	// essentially forcing args[0] to be a specific transaction type in order to list transactions inside
 	if _, err := listTransactions([]string{"expenses"}); err != nil {
 		return false, fmt.Errorf("%s", err)
@@ -31,7 +32,12 @@ func showTotal(args []string) (success bool, err error) {
 		return false, fmt.Errorf("%s", err)
 	}
 
-	calculatePnL()
+	// TODO: fix
+	calculatedPnL, err := calculatePnL("July", "2025")
+	if err != nil {
+		return false, fmt.Errorf("Unable to calculate P&L: %s", err)
+	}
+	fmt.Printf("\np&l result: €%.2f | %.1f%%\n", calculatedPnL.Amount, calculatedPnL.Percent)
 
 	return true, nil
 }

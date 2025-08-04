@@ -4,14 +4,14 @@ import (
 	"fmt"
 )
 
-// TODO: calculate p&l % (should show minus percent if expenses and investments exceed income)
-
 type PnLResult struct {
 	Amount  float64
 	Percent float64
 }
 
-func calculatePnL() (PnLResult, error) {
+func calculatePnL(month, year string) (PnLResult, error) {
+	var monthReceived float64
+	var monthSpent float64
 	var calculatedPnL PnLResult
 
 	transactions, loadFileErr := loadTransactions()
@@ -19,39 +19,26 @@ func calculatePnL() (PnLResult, error) {
 		return calculatedPnL, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
-	// TODO: figure out a good way to pass year/month to reduce the amount of time I have to loop over these
+	for transcationType, transactionList := range transactions[year][month] {
+		if len(transactionList) == 0 {
+			fmt.Printf("\nNo transactions of type %s\n", transcationType)
+			continue
+		}
 
-	// years
-	for _, months := range transactions {
+		for _, transaction := range transactionList {
 
-		// months
-		for _, transactionTypes := range months {
-
-			// expenses, investments, or income
-			for transcationType, transactionList := range transactionTypes {
-				if len(transactionList) == 0 {
-					fmt.Printf("\nNo transactions of type %s\n", transcationType)
-					continue
-				}
-
-				for _, transaction := range transactionList {
-
-					if transcationType == "Income" {
-						calculatedPnL.Amount += transaction.Amount
-					}
-
-					if transcationType == "Expenses" || transcationType == "Investments" {
-						calculatedPnL.Amount -= transaction.Amount
-					}
-				}
+			if transcationType == "Income" {
+				monthReceived += transaction.Amount
+				calculatedPnL.Amount += transaction.Amount
 			}
 
-			fmt.Printf("\np&l result: €%.2f\n", calculatedPnL.Amount)
-			calculatedPnL.Amount = 0
+			if transcationType == "Expenses" || transcationType == "Investments" {
+				monthSpent += transaction.Amount
+				calculatedPnL.Amount -= transaction.Amount
+			}
 		}
-		// move to next month/year after we've printed all
-		continue
 	}
+	calculatedPnL.Percent = ((monthReceived - monthSpent) / monthReceived) * 100
 
 	return calculatedPnL, nil
 }
