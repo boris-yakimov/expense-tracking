@@ -7,6 +7,7 @@ import (
 
 func TestListTransactions(t *testing.T) {
 	fmt.Println("\nList Transactions without arguments:")
+	// TODO: Fix
 	if _, err := listTransactions([]string{}); err != nil {
 		t.Errorf("list transactions without args failed: %v", err)
 	}

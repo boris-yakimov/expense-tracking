@@ -20,3 +20,20 @@ func validNoteInputFormat(note string) bool {
 
 	return matched
 }
+
+func normalizeTransactionType(t string) string {
+	switch t {
+
+	case "expense", "expenses":
+		return "Expenses"
+
+	case "investment", "investments":
+		return "Investments"
+
+	case "income":
+		return "Income"
+
+	default:
+		return t // unknown type returned as is
+	}
+}

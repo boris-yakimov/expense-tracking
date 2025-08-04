@@ -1,5 +1,33 @@
 {
   "2025": {
+    "August": {
+      "Expenses": [
+        {
+          "amount": 13.489,
+          "category": "food",
+          "note": "test food in next month"
+        }
+      ],
+      "Income": [
+        {
+          "amount": 700,
+          "category": "rentals",
+          "note": "income from rent"
+        }
+      ],
+      "Investments": [
+        {
+          "amount": 19.25,
+          "category": "insurance",
+          "note": "prorperty insurance august 2025"
+        },
+        {
+          "amount": 78,
+          "category": "insurance",
+          "note": "life insurance august 2025"
+        }
+      ]
+    },
     "July": {
       "Expenses": [
         {

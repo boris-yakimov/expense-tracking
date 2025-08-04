@@ -10,13 +10,13 @@ type PnLResult struct {
 }
 
 func calculatePnL(month, year string) (PnLResult, error) {
-	var monthReceived float64
-	var monthSpent float64
-	var calculatedPnL PnLResult
+	var incomeTotal float64
+	var spendTotal float64
+	var pnl PnLResult
 
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return calculatedPnL, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+		return pnl, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
 	for transcationType, transactionList := range transactions[year][month] {
@@ -28,17 +28,22 @@ func calculatePnL(month, year string) (PnLResult, error) {
 		for _, transaction := range transactionList {
 
 			if transcationType == "Income" {
-				monthReceived += transaction.Amount
-				calculatedPnL.Amount += transaction.Amount
+				incomeTotal += transaction.Amount
 			}
 
 			if transcationType == "Expenses" || transcationType == "Investments" {
-				monthSpent += transaction.Amount
-				calculatedPnL.Amount -= transaction.Amount
+				spendTotal += transaction.Amount
 			}
 		}
 	}
-	calculatedPnL.Percent = ((monthReceived - monthSpent) / monthReceived) * 100
 
-	return calculatedPnL, nil
+	// avoid division by zero
+	if incomeTotal == 0 {
+		pnl.Percent = 0
+	} else {
+		pnl.Amount = incomeTotal - spendTotal
+		pnl.Percent = ((incomeTotal - spendTotal) / incomeTotal) * 100
+	}
+
+	return pnl, nil
 }

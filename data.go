@@ -61,9 +61,14 @@ var allowedTransactionCategories = map[string]map[string]string{
 var validTransactionTypes = map[string]struct{}{
 	"expenses":    {},
 	"expense":     {},
+	"Expense":     {},
+	"Expenses":    {},
 	"investments": {},
 	"investment":  {},
+	"Investment":  {},
+	"Investments": {},
 	"income":      {},
+	"Income":      {},
 }
 
 // minimal expense without year and date
