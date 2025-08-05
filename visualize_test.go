@@ -8,22 +8,22 @@ import (
 func TestListTransactions(t *testing.T) {
 	fmt.Println("\nList Transactions without arguments:")
 	// TODO: Fix
-	if _, err := listTransactions([]string{}); err != nil {
+	if _, err := listAllTransactions([]string{}); err != nil {
 		t.Errorf("list transactions without args failed: %v", err)
 	}
 
 	fmt.Println("\nList Transactions with \"expenses\" argument:")
-	if _, err := listTransactions([]string{"expenses"}); err != nil {
+	if _, err := listTransactionsByMonth("expenses", "July", "2025"); err != nil {
 		t.Errorf("list expeses failed: %v", err)
 	}
 
 	fmt.Println("\nList Transactions with the \"investments\" argument:")
-	if _, err := listTransactions([]string{"investments"}); err != nil {
+	if _, err := listTransactionsByMonth("investments", "July", "2025"); err != nil {
 		t.Errorf("list investments failed: %v", err)
 	}
 
-	if _, err := listTransactions([]string{"income"}); err != nil {
-		fmt.Println("\nList Transactions with the \"income\" argument:")
+	fmt.Println("\nList Transactions with the \"income\" argument:")
+	if _, err := listTransactionsByMonth("income", "July", "2025"); err != nil {
 		t.Errorf("list income failed: %v", err)
 	}
 }
@@ -33,8 +33,6 @@ func TestShowTotal(t *testing.T) {
 	if _, err := showTotal([]string{}); err != nil {
 		t.Errorf("show total failed: %v", err)
 	}
-
-	// TODO: show total by passing a specific month or a year
 }
 
 func TestShowAllowedCategories(t *testing.T) {

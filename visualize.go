@@ -6,21 +6,16 @@ import (
 	"text/tabwriter"
 )
 
-// TODO: montly totals with less details - income, expense, investment, % p&l
-// TODO: yearly totals with less details - income, expense, investment, %p&l
-// TODO: draw a terminal diagram/pie chart
-
 const (
 	amountWidth   = 10
 	categoryWidth = 12
 	noteWidth     = 40
 )
 
-// TODO: move the looping through year and month in showTotal and remove it from listTransactions, listTransactions should accept the month and year as arguments and just loop through those
-func showTotal(args []string) (success bool, err error) {
+func listAllTransactions(args []string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
 	}
 
 	// years
@@ -28,19 +23,50 @@ func showTotal(args []string) (success bool, err error) {
 		fmt.Printf("\nYear: %s\n", year)
 
 		// months
-		for month, _ := range months {
+		for month, transactionTypes := range months {
 			fmt.Printf("  Month: %s\n\n", month)
 
-			if _, err := listTransactionsByMonth([]string{"expenses", month, year}); err != nil {
-				return false, fmt.Errorf("%s", err)
-			}
+			// expenses, investments, or income
+			for transactionType, transactionList := range transactionTypes {
+				fmt.Printf("    %s\n", transactionType)
+				if len(transactionList) == 0 {
+					fmt.Println("\nNo transactions recorded.")
+					continue
+				}
 
-			if _, err := listTransactionsByMonth([]string{"investments", month, year}); err != nil {
-				return false, fmt.Errorf("%s", err)
-			}
+				// list of each transaction
+				for i, e := range transactionList {
+					fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+				}
 
-			if _, err := listTransactionsByMonth([]string{"income", month, year}); err != nil {
-				return false, fmt.Errorf("%s", err)
+				fmt.Println()
+			}
+		}
+	}
+
+	return true, nil
+}
+
+func showTotal(args []string) (success bool, err error) {
+	transactions, loadFileErr := loadTransactions()
+	if loadFileErr != nil {
+		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+	}
+
+	transactionTypes := []string{"expenses", "investments", "income"}
+
+	for year, months := range transactions {
+		// years
+		fmt.Printf("\nYear: %s\n", year)
+
+		// months
+		for month := range months {
+			fmt.Printf("  Month: %s\n\n", month)
+
+			for _, t := range transactionTypes {
+				if _, err := listTransactionsByMonth(t, month, year); err != nil {
+					return false, fmt.Errorf("%s", err)
+				}
 			}
 
 			calculatedPnL, err := calculatePnL(month, year)
@@ -54,7 +80,7 @@ func showTotal(args []string) (success bool, err error) {
 	return true, nil
 }
 
-func listTransactionsByMonth(args []string) (success bool, err error) {
+func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
 		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
@@ -65,65 +91,18 @@ func listTransactionsByMonth(args []string) (success bool, err error) {
 		return true, nil
 	}
 
-	var transactionType string
-	var month string
-	var year string
+	transactionType = normalizeTransactionType(transactionType)
 
-	if len(args) > 0 {
-		transactionType = normalizeTransactionType(args[0])
-		// TODO: seems hacky, figure out a better way
-		// panic: runtime error: index out of range [1] with length 1
-		if len(args) >= 2 {
-			month = args[1]
-		}
-		if len(args) >= 3 {
-			year = args[2]
-		}
-
-		if _, ok := validTransactionTypes[transactionType]; !ok {
-			return false, fmt.Errorf("invalid transaction type %s, please use expenses, income, or investments", transactionType)
-		}
-	} else {
-		transactionType = "" // used to list all transactions no matter their type in case list is called without arguments
+	if _, ok := validTransactionTypes[transactionType]; !ok {
+		return false, fmt.Errorf("invalid transaction type %s, please use expenses, income, or investments", transactionType)
 	}
 
-	if transactionType == "" {
-		// years
-		for year, months := range transactions {
-			fmt.Printf("\nYear: %s\n", year)
-
-			// months
-			for month, transactionTypes := range months {
-				fmt.Printf("  Month: %s\n\n", month)
-				// expenses, investments, or income
-				for transactionType, transactionList := range transactionTypes {
-					fmt.Printf("    %s\n", transactionType)
-					if len(transactionList) == 0 {
-						fmt.Println("\nNo transactions recorded.")
-						continue
-					}
-
-					// list of each transaction
-					for i, e := range transactionList {
-						fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
-					}
-
-					fmt.Println()
-				}
-			}
-		}
-	} else {
-		// fmt.Printf("%s %s\n", month, year)
-		fmt.Printf("    %s\n", transactionType)
-		// if month and year are passed also passed, list only relevant transactions
-		// list of each transaction
-		for i, t := range transactions[year][month][transactionType] {
-			// TODO: check if transaction list is empty for a specific month and if it is skip it
-			fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, t.Amount, t.Category, t.Note)
-		}
-
-		fmt.Println()
+	fmt.Printf("    %s\n", transactionType)
+	for i, t := range transactions[year][month][transactionType] {
+		fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, t.Amount, t.Category, t.Note)
 	}
+
+	fmt.Println()
 
 	return true, nil
 }

@@ -18,12 +18,10 @@ func main() {
 			description: "Display a help message",
 			callback:    commandHelp,
 		},
-		// TODO: list <transcation_type> <amount> <category> <note>
-		// TODO: add option list all
 		"list": {
 			name:        "list",
 			description: "List transactions",
-			callback:    listTransactions,
+			callback:    listAllTransactions,
 		},
 		"show-total": {
 			name:        "show-total",
