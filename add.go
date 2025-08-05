@@ -23,8 +23,7 @@ func addTransaction(args []string) (success bool, err error) {
 
 	amount, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
-		// TODO: simulate this and validate the output
-		return false, fmt.Errorf("invalid amount: %v", err)
+		return false, fmt.Errorf("\ninvalid amount: %v\n", err)
 	}
 
 	category := args[2]
