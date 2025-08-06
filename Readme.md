@@ -6,7 +6,7 @@ Usage:
 
 list:       List transactions
 show-total: Show totals of all transactions
-add:        Add a transaction - add <transaction type> <amount> <category> <note>
+add:        Add a transaction - add <transaction type> <amount> <category> <description>
 del/delete: Delete a transaction - TO BE IMPLEMENTED
 help:       Display a help message
 exit:       Exit the expense-tracking tool

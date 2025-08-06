@@ -7,9 +7,9 @@ import (
 )
 
 const (
-	amountWidth   = 10
-	categoryWidth = 12
-	noteWidth     = 40
+	amountWidth      = 10
+	categoryWidth    = 12
+	descriptionWidth = 40
 )
 
 func listAllTransactions(args []string) (success bool, err error) {

@@ -40,28 +40,31 @@ func TestCleanInput(t *testing.T) {
 	}
 }
 
-func TestValidNoteFormat(t *testing.T) {
+func TestValidDescriptionFormat(t *testing.T) {
 	cases := []struct {
 		input    string
 		expected bool
 	}{
-		{"correct note", true},
-		{"Valid note 123", true},
-		{"Another-note, with commas", true},
-		{"dash-separated-note", true},
-		{"note with 'single quotes'", true},
+		{"correct description", true},
+		{"Valid description 123", true},
+		{"Another-description, with commas", true},
+		{"dash-separated-description", true},
+		{"description with 'single quotes'", true},
 		{"contains_underscore", false},
 		{"contains@symbol", false},
 		{"contains/slash", false},
 		{"", false},   // empty string is not valid based on the regex
 		{"   ", true}, // spaces only, allowed by regex
-		{"strings that is too long for what might be expected as a note, but is still valid also includes - and Capital letter", true},
+		{"strings that is too long for what might be expected as a description, but is still valid also includes - and Capital letter", true},
 	}
 
 	for _, c := range cases {
-		validFormat := validNoteInputFormat(c.input)
+		validFormat := validDescriptionInputFormat(c.input)
 		if validFormat != c.expected {
-			t.Errorf("validNoteInputFormat(%q) = %v; expected %v", c.input, validFormat, c.expected)
+			t.Errorf("validDescriptionInputFormat(%q) = %v; expected %v", c.input, validFormat, c.expected)
 		}
 	}
 }
+
+// TODO: tests for normalizeTransactionType
+// TODO: tests for generateTransactionId - check for errors; check for exact length of id

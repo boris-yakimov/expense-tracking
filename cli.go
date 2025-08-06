@@ -25,7 +25,7 @@ func commandHelp(args []string) (success bool, err error) {
 			// TODO: add info what is the max char limit
 			fmt.Printf(`
 Expense Tracking Tool
-Usage: add <transaction> <amount> <category> <note>
+Usage: add <transaction> <amount> <category> <description>
 
 example 
         - add 12 food "meat from store"
@@ -47,7 +47,7 @@ Usage:
 
 list:       List transactions
 show-total: Show totals of all transactions
-add:        Add a transaction - add <transaction type> <amount> <category> <note>
+add:        Add a transaction - add <transaction type> <amount> <category> <description>
 del/delete: Delete a transaction - TO BE IMPLEMENTED
 help:       Display a help message
 exit:       Exit the expense-tracking tool

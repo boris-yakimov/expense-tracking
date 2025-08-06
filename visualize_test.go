@@ -6,8 +6,10 @@ import (
 )
 
 func TestListTransactions(t *testing.T) {
+	// make sure to use the actual data file for those tests
+	transactionsFilePath = "data.json"
+
 	fmt.Println("\nList Transactions without arguments:")
-	// TODO: Fix
 	if _, err := listAllTransactions([]string{}); err != nil {
 		t.Errorf("list transactions without args failed: %v", err)
 	}
@@ -25,6 +27,11 @@ func TestListTransactions(t *testing.T) {
 	fmt.Println("\nList Transactions with the \"income\" argument:")
 	if _, err := listTransactionsByMonth("income", "July", "2025"); err != nil {
 		t.Errorf("list income failed: %v", err)
+	}
+
+	fmt.Println("\nList Transactions with invalid type")
+	if _, err := listTransactionsByMonth("invalidtype", "July", "2025"); err == nil {
+		t.Error("expected error for invalid transaction type, got nil")
 	}
 }
 

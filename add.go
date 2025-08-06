@@ -8,12 +8,12 @@ import (
 )
 
 const (
-	noteMaxLength = 42
+	descriptionMaxLength = 42
 )
 
 func addTransaction(args []string) (success bool, err error) {
 	if len(args) < 4 {
-		return false, fmt.Errorf("usage: add <transcation type> <amount> <category> <note>")
+		return false, fmt.Errorf("usage: add <transcation type> <amount> <category> <description>")
 	}
 
 	transactionType := args[0]
@@ -33,19 +33,19 @@ func addTransaction(args []string) (success bool, err error) {
 		return false, fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
 	}
 
-	note := strings.Join(args[3:], " ")
-	if len(note) > noteMaxLength {
-		return false, fmt.Errorf("\nnote should be a maximum of %v characters, provided %v", noteMaxLength, len(note))
+	description := strings.Join(args[3:], " ")
+	if len(description) > descriptionMaxLength {
+		return false, fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxLength, len(description))
 	}
 
-	if !validNoteInputFormat(note) {
-		return false, fmt.Errorf("\ninvalid character in note, notes should contain only letters, numbers, spaces, commas, or dashes")
+	if !validDescriptionInputFormat(description) {
+		return false, fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
-	return handleTransactionAdd(transactionType, amount, category, note)
+	return handleTransactionAdd(transactionType, amount, category, description)
 }
 
-func handleTransactionAdd(transactionType string, amount float64, category, note string) (success bool, err error) {
+func handleTransactionAdd(transactionType string, amount float64, category, description string) (success bool, err error) {
 	transcations, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
@@ -88,7 +88,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, note
 		Id:          transactionId,
 		Amount:      amount,
 		Category:    category,
-		Description: note,
+		Description: description,
 	}
 
 	transcations[year][month][transactionType] = append(transcations[year][month][transactionType], newTransaction)
@@ -96,7 +96,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, note
 		return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
 	}
 
-	fmt.Printf("\nadded $%.2f | %s | %s\n", amount, category, note)
+	fmt.Printf("\nadded $%.2f | %s | %s\n", amount, category, description)
 
 	// TODO: figure out a better way to define cli callback funcs to avoid just passing aroungs args even in places where they are not mandatory
 	var args []string

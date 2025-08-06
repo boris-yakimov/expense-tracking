@@ -5,7 +5,6 @@ import (
 	"os"
 )
 
-// TODO: auto complete or show list of allowed expense categories
 var allowedTransactionCategories = map[string]map[string]string{
 	"expense": {
 		"bills":          "utilities (usually recurring) - electricity, water, gas, internet, phone, etc",
@@ -79,7 +78,7 @@ type Transaction struct {
 	Description string  `json:"description"`
 }
 
-// structrure year -> month -> transcation type (expense, income, or investment) -> transaction
+// year -> month -> transcation type (expense, income, or investment) -> transaction
 type TransactionHistory map[string]map[string]map[string][]Transaction
 
 var transactionsFilePath = "data.json"

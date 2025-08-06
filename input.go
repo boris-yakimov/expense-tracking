@@ -13,10 +13,10 @@ func cleanInput(cmdArgs string) []string {
 	return strings.Split(sanitizedText, " ")
 }
 
-func validNoteInputFormat(note string) bool {
+func validDescriptionInputFormat(description string) bool {
 	// only letters, numbers, commas, spaces or dashes
 	pattern := `^[a-zA-Z0-9,' '-]+$`
-	matched, err := regexp.MatchString(pattern, note)
+	matched, err := regexp.MatchString(pattern, description)
 	if err != nil {
 		return false
 	}
@@ -51,4 +51,4 @@ func generateTransactionId() (id string, err error) {
 	return hex.EncodeToString(bytes), nil
 }
 
-// TODO: function to validate there are no ID is not used already in data json
+// TODO: function to validate that ID is not used already in data json

@@ -30,8 +30,13 @@ func main() {
 		},
 		"add": {
 			name:        "add",
-			description: "Add a transaction (expense, income or investment)",
+			description: "Add a transaction (expense, investment or income)",
 			callback:    addTransaction,
+		},
+		"delete": {
+			name:        "delete",
+			description: "Delete a transaction (expense, investment or income)",
+			callback:    deleteTransaction,
 		},
 	}
 
