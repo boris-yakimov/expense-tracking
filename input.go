@@ -1,6 +1,9 @@
 package main
 
 import (
+	"crypto/rand"
+	"encoding/hex"
+	"fmt"
 	"regexp"
 	"strings"
 )
@@ -37,3 +40,15 @@ func normalizeTransactionType(t string) string {
 		return t // unknown type returned as is
 	}
 }
+
+func generateTransactionId() (id string, err error) {
+	bytes := make([]byte, 4) // 4 bytes = 8 hex characters
+	_, err = rand.Read(bytes)
+	if err != nil {
+		return "", fmt.Errorf("error generating transaction id: %s", err)
+	}
+
+	return hex.EncodeToString(bytes), nil
+}
+
+// TODO: function to validate there are no ID is not used already in data json

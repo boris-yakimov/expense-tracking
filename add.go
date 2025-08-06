@@ -79,7 +79,13 @@ func handleTransactionAdd(transactionType string, amount float64, category, note
 		transcations[year][month][transactionType] = []Transaction{}
 	}
 
+	var transactionId string
+	if transactionId, err = generateTransactionId(); err != nil {
+		return false, fmt.Errorf("Unable to generate transaction id: %s", err)
+	}
+
 	newTransaction := Transaction{
+		Id:       transactionId,
 		Amount:   amount,
 		Category: category,
 		Note:     note,

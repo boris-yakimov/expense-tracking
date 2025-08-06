@@ -28,15 +28,18 @@ func listAllTransactions(args []string) (success bool, err error) {
 
 			// expenses, investments, or income
 			for transactionType, transactionList := range transactionTypes {
-				fmt.Printf("    %s\n", transactionType)
+				fmt.Printf("    %s\n\n", transactionType)
 				if len(transactionList) == 0 {
 					fmt.Println("\nNo transactions recorded.")
 					continue
 				}
 
+				// TODO: make this better using padding
+				fmt.Printf("ID             Amount      Category     Description\n")
+
 				// list of each transaction
-				for i, e := range transactionList {
-					fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, e.Amount, e.Category, e.Note)
+				for _, e := range transactionList {
+					fmt.Printf("%s |    €%-8.2f | %-10s | %-25s\n", e.Id, e.Amount, e.Category, e.Note)
 				}
 
 				fmt.Println()
