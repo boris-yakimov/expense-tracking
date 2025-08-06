@@ -6,13 +6,13 @@
           "id": "b1a289b3",
           "amount": 13.489,
           "category": "food",
-          "note": "test food in next month"
+          "description": "test food in next month"
         },
         {
           "id": "d529cb01",
           "amount": 200,
           "category": "cash",
-          "note": "atm withdrawal"
+          "description": "atm withdrawal"
         }
       ],
       "Income": [
@@ -20,7 +20,7 @@
           "id": "fc1050c9",
           "amount": 700,
           "category": "rentals",
-          "note": "income from rent"
+          "description": "income from rent"
         }
       ],
       "Investments": [
@@ -28,13 +28,13 @@
           "id": "023b3574",
           "amount": 19.25,
           "category": "insurance",
-          "note": "prorperty insurance august 2025"
+          "description": "prorperty insurance august 2025"
         },
         {
           "id": "076e25589",
           "amount": 78,
           "category": "insurance",
-          "note": "life insurance august 2025"
+          "description": "life insurance august 2025"
         }
       ]
     },
@@ -44,49 +44,49 @@
           "id": "13b6b6a49",
           "amount": 53.4,
           "category": "food",
-          "note": "groceries"
+          "description": "groceries"
         },
         {
           "id": "273a9a823",
           "amount": 432,
           "category": "renovation",
-          "note": "fence"
+          "description": "fence"
         },
         {
           "id": "36d6dcafc",
           "amount": 45,
           "category": "food",
-          "note": "burgers"
+          "description": "burgers"
         },
         {
           "id": "45863f2ea",
           "amount": 12.35,
           "category": "food",
-          "note": "sandwitch"
+          "description": "sandwitch"
         },
         {
           "id": "5af73139d",
           "amount": 100,
           "category": "travel",
-          "note": "rent a car gas"
+          "description": "rent a car gas"
         },
         {
           "id": "6aa855862",
           "amount": 52,
           "category": "food",
-          "note": "groceries"
+          "description": "groceries"
         },
         {
           "id": "7bff8fe37",
           "amount": 317,
           "category": "food",
-          "note": "large amount of groceries"
+          "description": "large amount of groceries"
         },
         {
           "id": "8c7c3df8e",
           "amount": 23.5,
           "category": "food",
-          "note": "pizza"
+          "description": "pizza"
         }
       ],
       "Income": [
@@ -94,7 +94,7 @@
           "id": "0c644f95e",
           "amount": 1500,
           "category": "salary",
-          "note": "income from employment"
+          "description": "income from employment"
         }
       ],
       "Investments": [
@@ -102,19 +102,19 @@
           "id": "1da0f6fdb",
           "amount": 78,
           "category": "insurance",
-          "note": "life insurance monthly payment"
+          "description": "life insurance monthly payment"
         },
         {
           "id": "2cd6d09cd",
           "amount": 19.25,
           "category": "insurance",
-          "note": "property insurance monthly payment"
+          "description": "property insurance monthly payment"
         },
         {
           "id": "32640254f",
           "amount": 100,
           "category": "funds",
-          "note": "ibkr etf investment"
+          "description": "ibkr etf investment"
         }
       ]
     }

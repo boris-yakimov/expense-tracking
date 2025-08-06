@@ -85,10 +85,10 @@ func handleTransactionAdd(transactionType string, amount float64, category, note
 	}
 
 	newTransaction := Transaction{
-		Id:       transactionId,
-		Amount:   amount,
-		Category: category,
-		Note:     note,
+		Id:          transactionId,
+		Amount:      amount,
+		Category:    category,
+		Description: note,
 	}
 
 	transcations[year][month][transactionType] = append(transcations[year][month][transactionType], newTransaction)

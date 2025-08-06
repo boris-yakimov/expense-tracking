@@ -73,11 +73,10 @@ var validTransactionTypes = map[string]struct{}{
 
 // minimal expense without year and date
 type Transaction struct {
-	Id       string  `json:"id"`
-	Amount   float64 `json:"amount"`
-	Category string  `json:"category"`
-	// TODO: is description a better term for this ?
-	Note string `json:"note"`
+	Id          string  `json:"id"`
+	Amount      float64 `json:"amount"`
+	Category    string  `json:"category"`
+	Description string  `json:"description"`
 }
 
 // structrure year -> month -> transcation type (expense, income, or investment) -> transaction

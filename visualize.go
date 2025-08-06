@@ -39,7 +39,7 @@ func listAllTransactions(args []string) (success bool, err error) {
 
 				// list of each transaction
 				for _, e := range transactionList {
-					fmt.Printf("%s |    €%-8.2f | %-10s | %-25s\n", e.Id, e.Amount, e.Category, e.Note)
+					fmt.Printf("%s |    €%-8.2f | %-10s | %-25s\n", e.Id, e.Amount, e.Category, e.Description)
 				}
 
 				fmt.Println()
@@ -102,7 +102,7 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 
 	fmt.Printf("    %s\n", transactionType)
 	for i, t := range transactions[year][month][transactionType] {
-		fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, t.Amount, t.Category, t.Note)
+		fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, t.Amount, t.Category, t.Description)
 	}
 
 	fmt.Println()
