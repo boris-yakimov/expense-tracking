@@ -22,19 +22,34 @@ func commandHelp(args []string) (success bool, err error) {
 
 		// help add
 		if args[0] == "add" {
-			// TODO: add info what is the max char limit
+			fmt.Printf(`
+Expense Tracking Tool
+Usage: add <transaction> <amount> <category> <description>
+
+max char limit for description is 40 characters
+
+example 
+        - add expense 12.30 food tacos
+        expected output :
+        added expense €12.30 | food | tacos
+    or
+        - add investment 78.00 insurance life insurance monthly payment
+        expected output :
+        added investment €78.00 | insurance | life insurance monthly payment
+`)
+			return true, nil
+		}
+
+		// help delete
+		if args[0] == "delete" {
 			fmt.Printf(`
 Expense Tracking Tool
 Usage: add <transaction> <amount> <category> <description>
 
 example 
-        - add 12 food "meat from store"
+        - del expense 33c6ce38
         output :
-        added $12.00 | food | "meat from store"
-    or
-        - add 25 food vegetables from store
-        output :
-        added $25.00 | food | vegetables from store
+        successfully removed transaction with id 33c6ce38
 `)
 			return true, nil
 		}
@@ -48,7 +63,7 @@ Usage:
 list:       List transactions
 show-total: Show totals of all transactions
 add:        Add a transaction - add <transaction_type> <amount> <category> <description>
-delete:     Delete a transaction - delete <transaction_type> <transaction_id> (transaction IDs can be seen in list and show-total)
+del/delete:     Delete a transaction - delete <transaction_type> <transaction_id> (transaction IDs can be seen in list and show-total)
 help:       Display a help message
 exit:       Exit the expense-tracking tool
 

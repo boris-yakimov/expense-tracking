@@ -13,14 +13,12 @@
           "amount": 200,
           "category": "cash",
           "description": "atm withdrawal"
-        }
-      ],
-      "Income": [
+        },
         {
-          "id": "fc1050c9",
-          "amount": 700,
-          "category": "rentals",
-          "description": "income from rent"
+          "id": "2a11aa59",
+          "amount": 12.3,
+          "category": "food",
+          "description": "tacos"
         }
       ],
       "Investments": [
@@ -75,12 +73,6 @@
           "amount": 52,
           "category": "food",
           "description": "groceries"
-        },
-        {
-          "id": "7bff8fe3",
-          "amount": 317,
-          "category": "food",
-          "description": "large amount of groceries"
         },
         {
           "id": "8c7c3df8",

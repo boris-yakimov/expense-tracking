@@ -51,17 +51,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
-	if transactionType == "expense" || transactionType == "expenses" {
-		transactionType = "Expenses"
-	}
-
-	if transactionType == "investment" || transactionType == "investments" {
-		transactionType = "Investments"
-	}
-
-	if transactionType == "income" {
-		transactionType = "Income"
-	}
+	txType := normalizeTransactionType(transactionType)
 
 	year := strconv.Itoa(time.Now().Year())
 	month := time.Now().Month().String()
@@ -75,8 +65,8 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		transcations[year][month] = make(map[string][]Transaction)
 	}
 
-	if _, ok := transcations[year][month][transactionType]; !ok {
-		transcations[year][month][transactionType] = []Transaction{}
+	if _, ok := transcations[year][month][txType]; !ok {
+		transcations[year][month][txType] = []Transaction{}
 	}
 
 	var transactionId string
@@ -91,12 +81,12 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		Description: description,
 	}
 
-	transcations[year][month][transactionType] = append(transcations[year][month][transactionType], newTransaction)
+	transcations[year][month][txType] = append(transcations[year][month][txType], newTransaction)
 	if saveTransactionErr := saveTransactions(transcations); saveTransactionErr != nil {
 		return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
 	}
 
-	fmt.Printf("\nadded $%.2f | %s | %s\n", amount, category, description)
+	fmt.Printf("\nadded %s €%.2f | %s | %s\n", transactionType, amount, category, description)
 
 	// TODO: figure out a better way to define cli callback funcs to avoid just passing aroungs args even in places where they are not mandatory
 	var args []string
