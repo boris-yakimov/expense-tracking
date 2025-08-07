@@ -4,6 +4,7 @@ import (
 	"fmt"
 )
 
+// delete <transaction_type> <transaction_id>
 func deleteTransaction(args []string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
@@ -50,7 +51,7 @@ func deleteTransaction(args []string) (success bool, err error) {
 		}
 	}
 
-	return false, fmt.Errorf("\ndid not match any transaction by id %s, please run list or show-total and confirm the transaction id that you want to delete\n", transactionId)
+	return false, fmt.Errorf("\ndid not match any transaction by id %s, please run list %s or show-total and confirm the transaction id that you want to delete\n", transactionId, transactionType)
 }
 
 func removeTransactionAtIndex(transactions []Transaction, index int) []Transaction {

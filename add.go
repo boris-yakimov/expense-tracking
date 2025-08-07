@@ -11,6 +11,7 @@ const (
 	descriptionMaxLength = 42
 )
 
+// add <transaction_type> <amount> <category> <description>
 func addTransaction(args []string) (success bool, err error) {
 	if len(args) < 4 {
 		return false, fmt.Errorf("usage: add <transcation type> <amount> <category> <description>")
