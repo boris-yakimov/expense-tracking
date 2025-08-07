@@ -20,7 +20,6 @@ func deleteTransaction(args []string) (success bool, err error) {
 	}
 
 	transactionId := args[1]
-	// TODO: maybe a separate function to do this validation and to also check its format for special chars, spaces, and stuff
 	if len(transactionId) != 8 {
 		return false, fmt.Errorf("invalid transaction id, expected 8 char id, got %s", transactionId)
 	}
@@ -37,9 +36,14 @@ func deleteTransaction(args []string) (success bool, err error) {
 					if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
 						return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
 					}
-					fmt.Printf("successfully removed transaction with id %s", transactionId)
+					fmt.Printf("successfully removed transaction with id %s\n\n", transactionId)
 
-					// TODO: show a list of remaining transactions after the deletion has happened
+					fmt.Printf("%s for %s %s\n", transactionType, month, year)
+					_, err = listTransactionsByMonth(transactionType, month, year)
+					if err != nil {
+						return false, fmt.Errorf("unable to list remaining transactions: %s", err)
+					}
+
 					return true, nil
 				}
 			}
