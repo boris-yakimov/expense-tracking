@@ -60,16 +60,16 @@ example
 Expense Tracking Tool
 Usage:
 
-list:       List transactions
-show-total: Show totals of all transactions
-add:        Add a transaction - add <transaction_type> <amount> <category> <description>
-del/delete:     Delete a transaction - delete <transaction_type> <transaction_id> (transaction IDs can be seen in list and show-total)
-help:       Display a help message
-exit:       Exit the expense-tracking tool
+list:             List transactions
+show-total:       Show totals of all transactions
+add:              Add a transaction - add <transaction_type> <amount> <category> <description>
+del/delete        Delete a transaction - delete <transaction_type> <transaction_id> (transaction IDs can be seen in list and show-total)
+help              Display a help message
+exit              Exit the expense-tracking tool
 
 Detailed usage:
-help add:   Get more detailed info about the add command 
-help del/delete : TO BE IMPLEMENTED
+help add:         Get more info how to use the add command 
+help del/delete:  Get more info how to use the delete command
 `)
 
 	return true, nil
