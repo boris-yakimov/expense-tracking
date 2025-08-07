@@ -31,7 +31,7 @@
           "description": "prorperty insurance august 2025"
         },
         {
-          "id": "076e25589",
+          "id": "076e2589",
           "amount": 78,
           "category": "insurance",
           "description": "life insurance august 2025"
@@ -41,49 +41,49 @@
     "July": {
       "Expenses": [
         {
-          "id": "13b6b6a49",
+          "id": "13b6b6a4",
           "amount": 53.4,
           "category": "food",
           "description": "groceries"
         },
         {
-          "id": "273a9a823",
+          "id": "273a9a82",
           "amount": 432,
           "category": "renovation",
           "description": "fence"
         },
         {
-          "id": "36d6dcafc",
+          "id": "36d6dcaf",
           "amount": 45,
           "category": "food",
           "description": "burgers"
         },
         {
-          "id": "45863f2ea",
+          "id": "45863f2e",
           "amount": 12.35,
           "category": "food",
           "description": "sandwitch"
         },
         {
-          "id": "5af73139d",
+          "id": "5af73139",
           "amount": 100,
           "category": "travel",
           "description": "rent a car gas"
         },
         {
-          "id": "6aa855862",
+          "id": "6aa85586",
           "amount": 52,
           "category": "food",
           "description": "groceries"
         },
         {
-          "id": "7bff8fe37",
+          "id": "7bff8fe3",
           "amount": 317,
           "category": "food",
           "description": "large amount of groceries"
         },
         {
-          "id": "8c7c3df8e",
+          "id": "8c7c3df8",
           "amount": 23.5,
           "category": "food",
           "description": "pizza"
@@ -91,7 +91,7 @@
       ],
       "Income": [
         {
-          "id": "0c644f95e",
+          "id": "0c644f95",
           "amount": 1500,
           "category": "salary",
           "description": "income from employment"
@@ -99,7 +99,7 @@
       ],
       "Investments": [
         {
-          "id": "1da0f6fdb",
+          "id": "1da0ffdb",
           "amount": 78,
           "category": "insurance",
           "description": "life insurance monthly payment"
@@ -111,7 +111,7 @@
           "description": "property insurance monthly payment"
         },
         {
-          "id": "32640254f",
+          "id": "32640254",
           "amount": 100,
           "category": "funds",
           "description": "ibkr etf investment"

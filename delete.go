@@ -11,30 +11,28 @@ func deleteTransaction(args []string) (success bool, err error) {
 	}
 
 	if len(args) < 2 {
-		return false, fmt.Errorf("expected arguments for delete: <delete> <transaction_id>, provided %s", args)
+		return false, fmt.Errorf("expected arguments for delete: <transaction_type> <transaction_id>, provided %s", args)
 	}
 
-	transactionType := args[0]
+	transactionType := normalizeTransactionType(args[0])
 	if _, ok := validTransactionTypes[transactionType]; !ok {
 		return false, fmt.Errorf("invalid transaction type %s, please use expense, investment, income", transactionType)
 	}
 
 	transactionId := args[1]
 	// TODO: maybe a separate function to do this validation and to also check its format for special chars, spaces, and stuff
-	if len(transactionId) != 9 {
+	if len(transactionId) != 8 {
 		return false, fmt.Errorf("invalid transaction id, expected 8 char id, got %s", transactionId)
 	}
 
-	// for loop through year, than month, than each transaction, compare transactionId with t.id and if they match ?
-	// maybe re-wraite the whole transactions file without the one that matches
-	// isn't there a more efficient way ?
-
 	for year, months := range transactions {
+
 		for month := range months {
+
 			var txList = transactions[year][month][transactionType]
 			for i, t := range txList {
 				if t.Id == transactionId {
-					removeTransactionAtIndex(txList, i)
+					transactions[year][month][transactionType] = removeTransactionAtIndex(txList, i)
 
 					if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
 						return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
