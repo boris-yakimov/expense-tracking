@@ -1,7 +1,7 @@
 {
   "2025": {
     "August": {
-      "Expenses": [
+      "expense": [
         {
           "id": "b1a289b3",
           "amount": 13.489,
@@ -19,9 +19,15 @@
           "amount": 12.3,
           "category": "food",
           "description": "tacos"
+        },
+        {
+          "id": "b3f921d7",
+          "amount": 33.62,
+          "category": "food",
+          "description": "switch back to pizza"
         }
       ],
-      "Investments": [
+      "investment": [
         {
           "id": "023b3574",
           "amount": 19.25,
@@ -37,7 +43,7 @@
       ]
     },
     "July": {
-      "Expenses": [
+      "expense": [
         {
           "id": "13b6b6a4",
           "amount": 53.4,
@@ -73,15 +79,9 @@
           "amount": 52,
           "category": "food",
           "description": "groceries"
-        },
-        {
-          "id": "8c7c3df8",
-          "amount": 23.5,
-          "category": "food",
-          "description": "pizza"
         }
       ],
-      "Income": [
+      "income": [
         {
           "id": "0c644f95",
           "amount": 1500,
@@ -89,7 +89,7 @@
           "description": "income from employment"
         }
       ],
-      "Investments": [
+      "investment": [
         {
           "id": "1da0ffdb",
           "amount": 78,
@@ -97,7 +97,7 @@
           "description": "life insurance monthly payment"
         },
         {
-          "id": "2cd6d09cd",
+          "id": "2cd6d09c",
           "amount": 19.25,
           "category": "insurance",
           "description": "property insurance monthly payment"

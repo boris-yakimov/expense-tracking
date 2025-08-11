@@ -43,19 +43,23 @@ func addTransaction(args []string) (success bool, err error) {
 		return false, fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
-	return handleTransactionAdd(transactionType, amount, category, description)
+	// TODO: extend this to support adding transactions for a specific month and not only the current one
+	year := strconv.Itoa(time.Now().Year())
+	month := time.Now().Month().String()
+
+	return handleTransactionAdd(transactionType, amount, category, description, month, year)
 }
 
-func handleTransactionAdd(transactionType string, amount float64, category, description string) (success bool, err error) {
+func handleTransactionAdd(transactionType string, amount float64, category, description, month, year string) (success bool, err error) {
 	transcations, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
-	txType := normalizeTransactionType(transactionType)
-
-	year := strconv.Itoa(time.Now().Year())
-	month := time.Now().Month().String()
+	txType, err := normalizeTransactionType(transactionType)
+	if err != nil {
+		return false, fmt.Errorf("transaction type normalization error: %s", err)
+	}
 
 	// ensure nested structure exists
 	if _, ok := transcations[year]; !ok {

@@ -24,20 +24,20 @@ func validDescriptionInputFormat(description string) bool {
 	return matched
 }
 
-func normalizeTransactionType(t string) string {
+func normalizeTransactionType(t string) (string, error) {
 	switch t {
 
-	case "expense", "expenses":
-		return "Expenses"
+	case "expense", "expenses", "Expenses", "Expense":
+		return "expense", nil
 
-	case "investment", "investments":
-		return "Investments"
+	case "investment", "investments", "Investments", "Investment":
+		return "investment", nil
 
-	case "income":
-		return "Income"
+	case "income", "Income":
+		return "income", nil
 
 	default:
-		return t // unknown type returned as is
+		return "", fmt.Errorf("\ninvalid transaction type %s - supported transactions types are income, expense, and investment", t)
 	}
 }
 

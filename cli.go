@@ -40,11 +40,25 @@ example
 			return true, nil
 		}
 
+		// help update
+		if args[0] == "update" {
+			fmt.Printf(`
+Expense Tracking Tool
+Usage: update <transaction_type> <transaction_id> <amount> <category> <description>
+
+example 
+        - update expense b3f921d7 33.62 food switch back to pizza
+        output :
+        transaction successully updated 
+`)
+			return true, nil
+		}
+
 		// help delete
 		if args[0] == "delete" {
 			fmt.Printf(`
 Expense Tracking Tool
-Usage: add <transaction> <amount> <category> <description>
+Usage: delete <transaction_type> <transaction_id>
 
 example 
         - del expense 33c6ce38
@@ -65,7 +79,7 @@ list                    List transactions
 show-total              Show totals of all transactions
 add:                    Add a transaction - add <transaction_type> <amount> <category> <description>
 delete (del)            Delete a transaction - delete <transaction_type> <transaction_id> (transaction IDs can be seen in list and show-total)
-update                  Update transaction - update <transaction_type> <transaction_id> - TO BE IMPLEMENTED
+update                  Update transaction - update <transaction_type> <transaction_id> <amount> <category> <description>
 help                    Display a help message
 exit                    Exit the expense-tracking tool
      
@@ -73,7 +87,7 @@ Detailed usage:
 
 help add                Get more info on add command 
 help delete (del)       Get more info on delete command
-help update             Get more info on update command - TO BE IMPLEMENTED
+help update             Get more info on update command
 `)
 
 	return true, nil

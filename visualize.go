@@ -94,7 +94,10 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 		return true, nil
 	}
 
-	transactionType = normalizeTransactionType(transactionType)
+	transactionType, err = normalizeTransactionType(transactionType)
+	if err != nil {
+		return false, fmt.Errorf("transaction type normalization error: %s", err)
+	}
 
 	if _, ok := validTransactionTypes[transactionType]; !ok {
 		return false, fmt.Errorf("invalid transaction type %s, please use expenses, income, or investments", transactionType)
@@ -117,31 +120,14 @@ func showAllowedCategories(transactionType string) error {
 	fmt.Fprintln(w, "\nCategory\tDescription")
 	fmt.Fprintln(w, "--------\t-----------")
 
-	// TODO: can i make this into a function so that i don't have to constantly do these cheks
-	if transactionType == "expense" || transactionType == "expenses" {
-		for key, val := range allowedTransactionCategories["expense"] {
-			fmt.Fprintf(w, "%s\t%s\n", key, val)
-		}
-		w.Flush()
-		return nil
+	txType, err := normalizeTransactionType(transactionType)
+	if err != nil {
+		return fmt.Errorf("%s", err)
 	}
 
-	if transactionType == "investment" || transactionType == "investments" {
-		for key, val := range allowedTransactionCategories["investment"] {
-			fmt.Fprintf(w, "%s\t%s\n", key, val)
-		}
-		w.Flush()
-		return nil
+	for key, val := range allowedTransactionCategories[txType] {
+		fmt.Fprintf(w, "%s\t%s\n", key, val)
 	}
-
-	if transactionType == "income" {
-		for key, val := range allowedTransactionCategories["income"] {
-			fmt.Fprintf(w, "%s\t%s\n", key, val)
-		}
-		w.Flush()
-		return nil
-	}
-
 	w.Flush()
-	return fmt.Errorf("\nallowed types are expense, income, or investment - provided %s", transactionType)
+	return nil
 }
