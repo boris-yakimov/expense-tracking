@@ -27,6 +27,14 @@
           "description": "switch back to pizza"
         }
       ],
+      "income": [
+        {
+          "id": "5c45c8a3",
+          "amount": 1500,
+          "category": "salary",
+          "description": "income from employment"
+        }
+      ],
       "investment": [
         {
           "id": "023b3574",

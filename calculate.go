@@ -27,11 +27,11 @@ func calculatePnL(month, year string) (PnLResult, error) {
 
 		for _, transaction := range transactionList {
 
-			if transcationType == "Income" {
+			if transcationType == "income" {
 				incomeTotal += transaction.Amount
 			}
 
-			if transcationType == "Expenses" || transcationType == "Investments" {
+			if transcationType == "expense" || transcationType == "investment" {
 				spendTotal += transaction.Amount
 			}
 		}

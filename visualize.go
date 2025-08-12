@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"text/tabwriter"
 )
 
@@ -56,7 +57,28 @@ func showTotal(args []string) (success bool, err error) {
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
-	transactionTypes := []string{"expenses", "investments", "income"}
+	transactionTypes := []string{"expense", "investment", "income"}
+
+	if len(args) > 0 {
+		// TODO: add validation that both are provided and match a valid year and month
+		month := strings.Title(args[0])
+		year := strings.Title(args[1])
+		var totalPnl PnLResult
+
+		for _, txType := range transactionTypes {
+			fmt.Printf("\n%s\n", txType)
+			for i, t := range transactions[year][month][txType] {
+				fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, t.Amount, t.Category, t.Description)
+			}
+		}
+
+		totalPnl, err = calculatePnL(month, year)
+		if err != nil {
+			return false, fmt.Errorf("Unable to calculate P&L: %s", err)
+		}
+		fmt.Printf("\np&l result: €%.2f | %.1f%%\n\n", totalPnl.Amount, totalPnl.Percent)
+		return true, nil
+	}
 
 	for year, months := range transactions {
 		// years
@@ -81,6 +103,11 @@ func showTotal(args []string) (success bool, err error) {
 	}
 
 	return true, nil
+}
+
+// TODO: add func to calculate pnl for the whole year
+func showTotalForYear(year string) error {
+	return nil
 }
 
 func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {
