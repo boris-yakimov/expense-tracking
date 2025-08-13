@@ -21,6 +21,10 @@ func addTransaction(args []string) (success bool, err error) {
 	if _, ok := validTransactionTypes[transactionType]; !ok {
 		return false, fmt.Errorf("invalid transaction type %s, please use expense, income, or investment", transactionType)
 	}
+	txType, err := normalizeTransactionType(transactionType)
+	if err != nil {
+		return false, fmt.Errorf("transaction type normalization error: %s", err)
+	}
 
 	amount, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
@@ -28,9 +32,9 @@ func addTransaction(args []string) (success bool, err error) {
 	}
 
 	category := args[2]
-	if _, ok := allowedTransactionCategories[transactionType][category]; !ok {
+	if _, ok := allowedTransactionCategories[txType][category]; !ok {
 		fmt.Printf("\ninvalid transaction category: \"%s\"", category)
-		showAllowedCategories(transactionType) // expense, income, investment
+		showAllowedCategories(txType) // expense, income, investment
 		return false, fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
 	}
 
@@ -44,8 +48,8 @@ func addTransaction(args []string) (success bool, err error) {
 	}
 
 	// TODO: extend this to support adding transactions for a specific month and not only the current one
-	year := strconv.Itoa(time.Now().Year())
-	month := time.Now().Month().String()
+	year := strings.ToLower(strconv.Itoa(time.Now().Year()))
+	month := strings.ToLower(time.Now().Month().String())
 
 	return handleTransactionAdd(transactionType, amount, category, description, month, year)
 }
@@ -54,11 +58,6 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 	transcations, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
-	}
-
-	txType, err := normalizeTransactionType(transactionType)
-	if err != nil {
-		return false, fmt.Errorf("transaction type normalization error: %s", err)
 	}
 
 	// ensure nested structure exists
@@ -70,8 +69,8 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		transcations[year][month] = make(map[string][]Transaction)
 	}
 
-	if _, ok := transcations[year][month][txType]; !ok {
-		transcations[year][month][txType] = []Transaction{}
+	if _, ok := transcations[year][month][transactionType]; !ok {
+		transcations[year][month][transactionType] = []Transaction{}
 	}
 
 	var transactionId string
@@ -86,7 +85,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		Description: description,
 	}
 
-	transcations[year][month][txType] = append(transcations[year][month][txType], newTransaction)
+	transcations[year][month][transactionType] = append(transcations[year][month][transactionType], newTransaction)
 	if saveTransactionErr := saveTransactions(transcations); saveTransactionErr != nil {
 		return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
 	}

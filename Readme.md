@@ -18,4 +18,5 @@ Detailed usage:
 help add                Get more info on add command 
 help delete (del)       Get more info on delete command
 help update             Get more info on update command
+help show-total         Get more info on show-total command
 ```

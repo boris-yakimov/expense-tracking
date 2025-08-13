@@ -24,7 +24,9 @@ func commandHelp(args []string) (success bool, err error) {
 		if args[0] == "add" {
 			fmt.Printf(`
 Expense Tracking Tool
-Usage: add <transaction> <amount> <category> <description>
+Usage:
+
+add <transaction> <amount> <category> <description>
 
 max char limit for description is 40 characters
 
@@ -44,7 +46,9 @@ example
 		if args[0] == "update" {
 			fmt.Printf(`
 Expense Tracking Tool
-Usage: update <transaction_type> <transaction_id> <amount> <category> <description>
+Usage:
+
+update <transaction_type> <transaction_id> <amount> <category> <description>
 
 example 
         - update expense b3f921d7 33.62 food switch back to pizza
@@ -58,7 +62,9 @@ example
 		if args[0] == "delete" {
 			fmt.Printf(`
 Expense Tracking Tool
-Usage: delete <transaction_type> <transaction_id>
+Usage:
+
+delete <transaction_type> <transaction_id>
 
 example 
         - del expense 33c6ce38
@@ -67,11 +73,10 @@ example
 `)
 			return true, nil
 		}
-	}
 
-	// help show-total
-	if args[0] == "show-total" {
-		fmt.Printf(`
+		// help show-total
+		if args[0] == "show-total" {
+			fmt.Printf(`
 Expense Tracking Tool
 Usage: 
 
@@ -160,12 +165,9 @@ income
 
 p&l result: €608.00 | 40.5%%
 
-
------------------------------------------------------------------------------------------------
-
-
 `)
-		return true, nil
+			return true, nil
+		}
 	}
 
 	// default help menu
@@ -189,6 +191,5 @@ help delete (del)       Get more info on delete command
 help update             Get more info on update command
 help show-total         Get more info on show-total command
 `)
-
 	return true, nil
 }

@@ -3,12 +3,6 @@
     "august": {
       "expense": [
         {
-          "id": "b1a289b3",
-          "amount": 13.489,
-          "category": "food",
-          "description": "test food in next month"
-        },
-        {
           "id": "d529cb01",
           "amount": 200,
           "category": "cash",
@@ -25,6 +19,12 @@
           "amount": 33.62,
           "category": "food",
           "description": "switch back to pizza"
+        },
+        {
+          "id": "a2b734a0",
+          "amount": 9.68,
+          "category": "food",
+          "description": "sandwitch"
         }
       ],
       "income": [
