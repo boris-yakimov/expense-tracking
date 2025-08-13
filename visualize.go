@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"slices"
 	"text/tabwriter"
 )
 
@@ -18,16 +19,40 @@ func listAllTransactions(args []string) (success bool, err error) {
 		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
 	}
 
-	// years
-	for year, months := range transactions {
-		fmt.Printf("\nYear: %s\n", year)
+	// extract and sort years
+	var years []string
+	for year := range transactions {
+		years = append(years, year)
+	}
+	slices.Sort(years) // ascending order
 
-		// months
-		for month, transactionTypes := range months {
-			fmt.Printf("  Month: %s\n\n", month)
+	for _, year := range years {
+
+		// extract and sort months
+		var months []string
+		for month := range transactions[year] {
+			months = append(months, month)
+		}
+		slices.SortFunc(months, func(a, b string) int {
+			return monthOrder[a] - monthOrder[b] // ascending order
+		})
+
+		for _, month := range months {
+			fmt.Printf("%s %s\n\n", month, year)
+
+			// extract and sort transaction types
+			var transactionTypes []string
+			for txType := range transactions[year][month] {
+				transactionTypes = append(transactionTypes, txType)
+			}
+			slices.SortFunc(transactionTypes, func(a, b string) int {
+				return transactionTypeOrder[a] - transactionTypeOrder[b] // ascending order
+			})
 
 			// expenses, investments, or income
-			for transactionType, transactionList := range transactionTypes {
+			for _, transactionType := range transactionTypes {
+				transactionList := transactions[year][month][transactionType]
+
 				fmt.Printf("    %s\n\n", transactionType)
 				if len(transactionList) == 0 {
 					fmt.Println("\nNo transactions recorded.")

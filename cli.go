@@ -11,7 +11,6 @@ type cliCommand struct {
 	callback    func(args []string) (success bool, err error)
 }
 
-// TODO: functions like calculateMonthPnL, addTransaction, deleteTransaction, updateTransaction print to stdout. maybe they should return data and let CLI-layer functions handle printing.
 var supportedCommands = map[string]cliCommand{
 	"exit": {
 		name:        "exit",

@@ -8,6 +8,28 @@ import (
 	"strings"
 )
 
+var monthOrder = map[string]int{
+	"january":   1,
+	"february":  2,
+	"march":     3,
+	"april":     4,
+	"may":       5,
+	"june":      6,
+	"july":      7,
+	"august":    8,
+	"september": 9,
+	"october":   10,
+	"november":  11,
+	"december":  12,
+}
+
+var transactionTypeOrder = map[string]int{
+	// descending
+	"income":     1,
+	"expense":    2,
+	"investment": 3,
+}
+
 func cleanTerminalInput(cmdArgs string) []string {
 	var sanitizedText = strings.Trim(strings.ToLower(cmdArgs), " ")
 	return strings.Split(sanitizedText, " ")
