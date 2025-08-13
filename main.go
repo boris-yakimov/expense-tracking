@@ -7,44 +7,6 @@ import (
 )
 
 func main() {
-	supportedCommands := map[string]cliCommand{
-		"exit": {
-			name:        "exit",
-			description: "Exit the expense-tracking tool",
-			callback:    commandExit,
-		},
-		"help": {
-			name:        "help",
-			description: "Display a help message",
-			callback:    commandHelp,
-		},
-		"list": {
-			name:        "list",
-			description: "List transactions",
-			callback:    listAllTransactions,
-		},
-		"show-total": {
-			name:        "show-total",
-			description: "Show totals of all transactions",
-			callback:    showTotal,
-		},
-		"add": {
-			name:        "add",
-			description: "Add a transaction (expense, investment or income)",
-			callback:    addTransaction,
-		},
-		"delete": {
-			name:        "delete",
-			description: "Delete a transaction (expense, investment or income)",
-			callback:    deleteTransaction,
-		},
-		"update": {
-			name:        "update",
-			description: "Update a transaction (expense, investment or income)",
-			callback:    updateTransaction,
-		},
-	}
-
 	scanner := bufio.NewScanner(os.Stdin)
 
 	// print help menu on start
@@ -68,7 +30,7 @@ func main() {
 
 		command, validCommand := supportedCommands[inputCommand]
 		cmdMatches := []string{}
-		// TODO: functions like calculateMonthPnL, addTransaction, deleteTransaction, updateTransaction print to stdout. maybe they should return data and let CLI-layer functions handle printing.
+
 		if validCommand {
 			if _, err := command.callback(args); err != nil {
 				fmt.Printf("\n\nError with command: %s\n", command.name)

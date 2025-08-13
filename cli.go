@@ -11,6 +11,45 @@ type cliCommand struct {
 	callback    func(args []string) (success bool, err error)
 }
 
+// TODO: functions like calculateMonthPnL, addTransaction, deleteTransaction, updateTransaction print to stdout. maybe they should return data and let CLI-layer functions handle printing.
+var supportedCommands = map[string]cliCommand{
+	"exit": {
+		name:        "exit",
+		description: "Exit the expense-tracking tool",
+		callback:    commandExit,
+	},
+	"help": {
+		name:        "help",
+		description: "Display a help message",
+		callback:    commandHelp,
+	},
+	"list": {
+		name:        "list",
+		description: "List transactions",
+		callback:    listAllTransactions,
+	},
+	"show-total": {
+		name:        "show-total",
+		description: "Show totals of all transactions",
+		callback:    showTotal,
+	},
+	"add": {
+		name:        "add",
+		description: "Add a transaction (expense, investment or income)",
+		callback:    addTransaction,
+	},
+	"delete": {
+		name:        "delete",
+		description: "Delete a transaction (expense, investment or income)",
+		callback:    deleteTransaction,
+	},
+	"update": {
+		name:        "update",
+		description: "Update a transaction (expense, investment or income)",
+		callback:    updateTransaction,
+	},
+}
+
 func commandExit(args []string) (success bool, err error) {
 	fmt.Println("Closing the expense-tracking tool... goodbye!")
 	os.Exit(0)
