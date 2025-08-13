@@ -17,13 +17,9 @@ func addTransaction(args []string) (success bool, err error) {
 		return false, fmt.Errorf("usage: add <transcation type> <amount> <category> <description>")
 	}
 
-	transactionType := args[0]
-	if _, ok := validTransactionTypes[transactionType]; !ok {
-		return false, fmt.Errorf("invalid transaction type %s, please use expense, income, or investment", transactionType)
-	}
-	txType, err := normalizeTransactionType(transactionType)
+	transactionType, err := normalizeTransactionType(args[0])
 	if err != nil {
-		return false, fmt.Errorf("transaction type normalization error: %s", err)
+		return false, fmt.Errorf("transaction type error: %s", err)
 	}
 
 	amount, err := strconv.ParseFloat(args[1], 64)
@@ -32,9 +28,9 @@ func addTransaction(args []string) (success bool, err error) {
 	}
 
 	category := args[2]
-	if _, ok := allowedTransactionCategories[txType][category]; !ok {
+	if _, ok := allowedTransactionCategories[transactionType][category]; !ok {
 		fmt.Printf("\ninvalid transaction category: \"%s\"", category)
-		showAllowedCategories(txType) // expense, income, investment
+		showAllowedCategories(transactionType) // expense, income, investment
 		return false, fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
 	}
 

@@ -56,7 +56,7 @@ func main() {
 
 		scanner.Scan()
 		input := scanner.Text()
-		sanitizedInput := cleanInput(input)
+		sanitizedInput := cleanTerminalInput(input)
 
 		// if blank enter just prompt again
 		if len(sanitizedInput) == 0 {
@@ -68,7 +68,7 @@ func main() {
 
 		command, validCommand := supportedCommands[inputCommand]
 		cmdMatches := []string{}
-
+		// TODO: functions like calculateMonthPnL, addTransaction, deleteTransaction, updateTransaction print to stdout. maybe they should return data and let CLI-layer functions handle printing.
 		if validCommand {
 			if _, err := command.callback(args); err != nil {
 				fmt.Printf("\n\nError with command: %s\n", command.name)

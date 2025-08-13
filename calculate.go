@@ -21,7 +21,7 @@ func calculateMonthPnL(month, year string) (PnLResult, error) {
 
 	for transcationType, transactionList := range transactions[year][month] {
 		if len(transactionList) == 0 {
-			fmt.Printf("\nNo transactions of type %s\n", transcationType)
+			fmt.Printf("\nNo transactions of type %s for %s %s\n", transcationType, month, year)
 			continue
 		}
 

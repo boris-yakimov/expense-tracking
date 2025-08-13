@@ -24,7 +24,7 @@ func TestCleanInput(t *testing.T) {
 	}
 
 	for _, c := range cases {
-		actual := cleanInput(c.input)
+		actual := cleanTerminalInput(c.input)
 		actualSize := len(actual)
 		expectedSize := len(c.expected)
 		if actualSize != expectedSize {

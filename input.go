@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func cleanInput(cmdArgs string) []string {
+func cleanTerminalInput(cmdArgs string) []string {
 	var sanitizedText = strings.Trim(strings.ToLower(cmdArgs), " ")
 	return strings.Split(sanitizedText, " ")
 }

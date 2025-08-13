@@ -56,6 +56,7 @@ func showTotal(args []string) (success bool, err error) {
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
+	// TODO: can this be done better ?
 	transactionTypes := []string{"expense", "investment", "income"}
 
 	// TODO: this should be done better, expected behaviour :
@@ -135,11 +136,7 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 
 	transactionType, err = normalizeTransactionType(transactionType)
 	if err != nil {
-		return false, fmt.Errorf("transaction type normalization error: %s", err)
-	}
-
-	if _, ok := validTransactionTypes[transactionType]; !ok {
-		return false, fmt.Errorf("invalid transaction type %s, please use expenses, income, or investments", transactionType)
+		return false, fmt.Errorf("transaction type error: %s", err)
 	}
 
 	fmt.Printf("    %s\n", transactionType)

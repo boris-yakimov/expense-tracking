@@ -17,11 +17,7 @@ func deleteTransaction(args []string) (success bool, err error) {
 
 	transactionType, err := normalizeTransactionType(args[0])
 	if err != nil {
-		return false, fmt.Errorf("transaction type normalization error: %s", err)
-	}
-
-	if _, ok := validTransactionTypes[transactionType]; !ok {
-		return false, fmt.Errorf("invalid transaction type %s, please use expense, investment, income", transactionType)
+		return false, fmt.Errorf("transaction type error: %s", err)
 	}
 
 	transactionId := args[1]
