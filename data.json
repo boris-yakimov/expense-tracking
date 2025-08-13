@@ -1,6 +1,6 @@
 {
   "2025": {
-    "August": {
+    "august": {
       "expense": [
         {
           "id": "b1a289b3",
@@ -50,7 +50,7 @@
         }
       ]
     },
-    "July": {
+    "july": {
       "expense": [
         {
           "id": "13b6b6a4",
