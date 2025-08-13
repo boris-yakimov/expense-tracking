@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	descriptionMaxLength = 42
+	descriptionMaxLength = 40 // chars
 )
 
 // add <transaction_type> <amount> <category> <description>

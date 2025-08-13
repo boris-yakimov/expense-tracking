@@ -28,7 +28,7 @@ Usage:
 
 add <transaction> <amount> <category> <description>
 
-max char limit for description is 40 characters
+max char limit for description is %v characters
 
 example 
         - add expense 12.30 food tacos
@@ -38,7 +38,7 @@ example
         - add investment 78.00 insurance life insurance monthly payment
         expected output :
         added investment €78.00 | insurance | life insurance monthly payment
-`)
+`, descriptionMaxLength)
 			return true, nil
 		}
 
@@ -50,11 +50,13 @@ Usage:
 
 update <transaction_type> <transaction_id> <amount> <category> <description>
 
+max char limit for description is %v characters
+
 example 
         - update expense b3f921d7 33.62 food switch back to pizza
         output :
         transaction successully updated 
-`)
+`, descriptionMaxLength)
 			return true, nil
 		}
 
