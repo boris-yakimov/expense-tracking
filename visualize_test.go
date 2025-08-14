@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TODO: all of these have to be refactored to match the new visualization model
 func TestListTransactions(t *testing.T) {
 	// make sure to use the actual data file for those tests
 	transactionsFilePath = "data.json"
@@ -35,12 +36,12 @@ func TestListTransactions(t *testing.T) {
 	}
 }
 
-func TestShowTotal(t *testing.T) {
-	fmt.Println("\nShow Total Without Arguments:")
-	if _, err := showTotal([]string{}); err != nil {
-		t.Errorf("show total failed: %v", err)
-	}
-}
+// func TestShowTotal(t *testing.T) {
+// 	fmt.Println("\nShow Total Without Arguments:")
+// 	if _, err := showTotal([]string{}); err != nil {
+// 		t.Errorf("show total failed: %v", err)
+// 	}
+// }
 
 func TestShowAllowedCategories(t *testing.T) {
 	fmt.Println("\nShow Allowed Expense Categories:")

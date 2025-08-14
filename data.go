@@ -5,6 +5,12 @@ import (
 	"os"
 )
 
+var allowedTransactionTypes = map[string]struct{}{
+	"income":     {},
+	"expense":    {},
+	"investment": {},
+}
+
 var allowedTransactionCategories = map[string]map[string]string{
 	"expense": {
 		"bills":          "utilities (usually recurring) - electricity, water, gas, internet, phone, etc",
@@ -55,19 +61,6 @@ var allowedTransactionCategories = map[string]map[string]string{
 		"insurance":      "insurance claims",
 		"refunds":        "tax refunds, product returns",
 	},
-}
-
-var validTransactionTypes = map[string]struct{}{
-	"expenses":    {},
-	"expense":     {},
-	"Expense":     {},
-	"Expenses":    {},
-	"investments": {},
-	"investment":  {},
-	"Investment":  {},
-	"Investments": {},
-	"income":      {},
-	"Income":      {},
 }
 
 // minimal expense without year and date

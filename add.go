@@ -88,9 +88,9 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 
 	fmt.Printf("\nadded %s €%.2f | %s | %s\n", transactionType, amount, category, description)
 
-	// TODO: figure out a better way to define cli callback funcs to avoid just passing aroungs args even in places where they are not mandatory
 	var args []string
-	showTotal(args)
+	// TODO: is this the right function to call here ?
+	listAllTransactions(args)
 
 	return true, nil
 }

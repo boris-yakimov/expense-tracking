@@ -24,13 +24,13 @@ var supportedCommands = map[string]cliCommand{
 	},
 	"list": {
 		name:        "list",
-		description: "List transactions",
-		callback:    listAllTransactions,
+		description: "Show a list of transactions and p&l",
+		callback:    visualizeTransactions,
 	},
-	"show-total": {
-		name:        "show-total",
-		description: "Show totals of all transactions",
-		callback:    showTotal,
+	"show": {
+		name:        "show",
+		description: "Alias to list - show a list of transactions and p&l",
+		callback:    visualizeTransactions,
 	},
 	"add": {
 		name:        "add",
