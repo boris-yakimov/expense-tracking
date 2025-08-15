@@ -14,7 +14,7 @@ func updateTransaction(args []string) (success bool, err error) {
 
 	transactionType, err := normalizeTransactionType(args[0])
 	if err != nil {
-		return false, fmt.Errorf("transaction type error: %s", err)
+		return false, fmt.Errorf("transaction type error: %w", err)
 	}
 
 	transactionId := args[1]
@@ -24,7 +24,7 @@ func updateTransaction(args []string) (success bool, err error) {
 
 	updatedAmount, err := strconv.ParseFloat(args[2], 64)
 	if err != nil {
-		return false, fmt.Errorf("\ninvalid amount: %v\n", err)
+		return false, fmt.Errorf("\ninvalid amount: %w\n", err)
 	}
 
 	updatedCategory := args[3]
@@ -67,7 +67,7 @@ func updateTransaction(args []string) (success bool, err error) {
 	}
 
 	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
-		return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
+		return false, fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 	fmt.Printf("transaction successully updated")
 

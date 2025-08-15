@@ -92,7 +92,7 @@ func TestAddTransaction(t *testing.T) {
 		}
 
 		if (err != nil) != c.expectedError {
-			t.Errorf("input: add %v\nexpected error: %v\nactual erorr: %v", c.input, c.expectedError, err)
+			t.Errorf("input: add %v\nexpected error: %v\nactual erorr: %s", c.input, c.expectedError, err)
 		}
 	}
 }

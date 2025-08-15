@@ -85,7 +85,7 @@ func listAllTransactions() (success bool, err error) {
 
 			var calculatedPnl PnLResult
 			if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
-				return false, fmt.Errorf("Unable to calculate P&L: %s\n", err)
+				return false, fmt.Errorf("Unable to calculate P&L: %w\n", err)
 			}
 
 			var pnlColour string
@@ -118,7 +118,7 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 
 	transactionType, err = normalizeTransactionType(transactionType)
 	if err != nil {
-		return false, fmt.Errorf("transaction type error: %s", err)
+		return false, fmt.Errorf("transaction type error: %w", err)
 	}
 
 	// transaction type header
@@ -150,7 +150,7 @@ func visualizeTransactions(args []string) (success bool, err error) {
 	// list -  prints all transactions with P&L for each month
 	if len(args) == 0 {
 		if _, err := listAllTransactions(); err != nil {
-			return false, fmt.Errorf("%s", err)
+			return false, fmt.Errorf("%w", err)
 		}
 
 		return true, nil
@@ -166,7 +166,7 @@ func visualizeTransactions(args []string) (success bool, err error) {
 		}
 
 		if calculatedPnl, err = calculateYearPnL(year); err != nil {
-			return false, fmt.Errorf("Unable to calculate P&L: %s\n", err)
+			return false, fmt.Errorf("Unable to calculate P&L: %w\n", err)
 		}
 		fmt.Printf("\np&l result: €%.2f | %.1f%%\n\n", calculatedPnl.Amount, calculatedPnl.Percent)
 		return true, nil
@@ -175,7 +175,7 @@ func visualizeTransactions(args []string) (success bool, err error) {
 	// list <month> <year> - prints tranasctions and P&L for a specific month
 	if len(args) == 2 {
 		if _, ok := monthOrder[args[0]]; !ok {
-			return false, fmt.Errorf("invalid month %s", err)
+			return false, fmt.Errorf("invalid month %w", err)
 		} else {
 			month = args[0]
 		}
@@ -196,7 +196,7 @@ func visualizeTransactions(args []string) (success bool, err error) {
 		}
 
 		if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
-			return false, fmt.Errorf("Unable to calculate P&L: %s\n", err)
+			return false, fmt.Errorf("Unable to calculate P&L: %w\n", err)
 		}
 
 		var pnlColour string
@@ -225,7 +225,7 @@ func showAllowedCategories(transactionType string) error {
 
 	txType, err := normalizeTransactionType(transactionType)
 	if err != nil {
-		return fmt.Errorf("%s", err)
+		return fmt.Errorf("%w", err)
 	}
 
 	for key, val := range allowedTransactionCategories[txType] {

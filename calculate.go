@@ -16,7 +16,7 @@ func calculateMonthPnL(month, year string) (PnLResult, error) {
 
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return pnl, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+		return pnl, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
 	}
 
 	for transcationType, transactionList := range transactions[year][month] {
@@ -56,7 +56,7 @@ func calculateYearPnL(year string) (PnLResult, error) {
 
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return pnl, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+		return pnl, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
 	}
 
 	for month := range transactions[year] {

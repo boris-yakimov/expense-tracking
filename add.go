@@ -19,12 +19,12 @@ func addTransaction(args []string) (success bool, err error) {
 
 	transactionType, err := normalizeTransactionType(args[0])
 	if err != nil {
-		return false, fmt.Errorf("transaction type error: %s", err)
+		return false, fmt.Errorf("transaction type error: %w", err)
 	}
 
 	amount, err := strconv.ParseFloat(args[1], 64)
 	if err != nil {
-		return false, fmt.Errorf("\ninvalid amount: %v\n", err)
+		return false, fmt.Errorf("\ninvalid amount: %w\n", err)
 	}
 
 	category := args[2]
@@ -53,7 +53,7 @@ func addTransaction(args []string) (success bool, err error) {
 func handleTransactionAdd(transactionType string, amount float64, category, description, month, year string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
+		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
 	}
 
 	if _, ok := transactions[year]; !ok {
@@ -70,7 +70,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 
 	var transactionId string
 	if transactionId, err = generateTransactionId(); err != nil {
-		return false, fmt.Errorf("Unable to generate transaction id: %s", err)
+		return false, fmt.Errorf("Unable to generate transaction id: %w", err)
 	}
 
 	// make sure only unique IDs are used
@@ -93,7 +93,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		}
 
 		if transactionId, err = generateTransactionId(); err != nil {
-			return false, fmt.Errorf("Unable to generate transaction id: %s", err)
+			return false, fmt.Errorf("Unable to generate transaction id: %w", err)
 		}
 	}
 
@@ -106,7 +106,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 
 	transactions[year][month][transactionType] = append(transactions[year][month][transactionType], newTransaction)
 	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
-		return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
+		return false, fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 
 	fmt.Printf("\nsuccessfully added %s €%.2f | %s | %s\n", transactionType, amount, category, description)

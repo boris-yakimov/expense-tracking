@@ -68,7 +68,7 @@ func generateTransactionId() (id string, err error) {
 	bytes := make([]byte, 4) // 4 bytes = 8 hex characters
 	_, err = rand.Read(bytes)
 	if err != nil {
-		return "", fmt.Errorf("error generating transaction id: %s", err)
+		return "", fmt.Errorf("error generating transaction id: %w", err)
 	}
 
 	return hex.EncodeToString(bytes), nil
