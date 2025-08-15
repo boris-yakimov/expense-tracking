@@ -46,7 +46,6 @@ func listAllTransactions() (success bool, err error) {
 		})
 
 		for _, month := range months {
-			// fmt.Printf("%s %s\n\n", month, year)
 			fmt.Printf("\n====================\n%s %s\n====================\n\n", capitalize(month), year)
 
 			// extract and sort transaction types
@@ -122,11 +121,21 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 		return false, fmt.Errorf("transaction type error: %s", err)
 	}
 
-	fmt.Printf("    %s\n", transactionType)
-	for i, t := range transactions[year][month][transactionType] {
-		fmt.Printf("    %2d. €%-8.2f | %-10s | %-25s\n", i+1, t.Amount, t.Category, t.Description)
+	// transaction type header
+	fmt.Println()
+	fmt.Printf("  %s\n", capitalize(transactionType))
+	fmt.Printf("  %s\n", strings.Repeat("-", len(transactionType)))
+
+	// transaction table format
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+	fmt.Fprintln(w, "    ID\tAmount\tCategory\tDescription")
+	fmt.Fprintln(w, "    --\t------\t--------\t-----------")
+
+	for _, t := range transactions[year][month][transactionType] {
+		fmt.Fprintf(w, "    %s\t€%.2f\t%s\t%s\n", t.Id, t.Amount, t.Category, t.Description)
 	}
 
+	w.Flush()
 	fmt.Println()
 
 	return true, nil
@@ -177,6 +186,8 @@ func visualizeTransactions(args []string) (success bool, err error) {
 			return false, fmt.Errorf("invalid year format provided %s", args[1])
 		}
 
+		fmt.Printf("\n====================\n%s %s\n====================\n\n", capitalize(month), year)
+
 		for txType := range allowedTransactionTypes {
 			if _, err := listTransactionsByMonth(txType, month, year); err != nil {
 				return false, err
@@ -186,7 +197,18 @@ func visualizeTransactions(args []string) (success bool, err error) {
 		if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
 			return false, fmt.Errorf("Unable to calculate P&L: %s\n", err)
 		}
-		fmt.Printf("\np&l result: €%.2f | %.1f%%\n\n", calculatedPnl.Amount, calculatedPnl.Percent)
+
+		var pnlColour string
+		if calculatedPnl.Amount < 0 {
+			pnlColour = lightRed
+		} else {
+			pnlColour = lightGreen
+		}
+
+		// non-color
+		// fmt.Printf("  p&l result: €%.2f | %.1f%%\n\n", calculatedPnl.Amount, calculatedPnl.Percent)
+		// color
+		fmt.Printf("  P&L Result: %s€%.2f | %.1f%%%s\n\n", pnlColour, calculatedPnl.Amount, calculatedPnl.Percent, resetColour)
 		return true, nil
 	}
 
