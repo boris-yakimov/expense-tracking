@@ -53,7 +53,7 @@ func addTransaction(args []string) (success bool, err error) {
 func handleTransactionAdd(transactionType string, amount float64, category, description, month, year string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	if _, ok := transactions[year]; !ok {
@@ -70,7 +70,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 
 	var transactionId string
 	if transactionId, err = generateTransactionId(); err != nil {
-		return false, fmt.Errorf("Unable to generate transaction id: %w", err)
+		return false, fmt.Errorf("unable to generate transaction id: %w", err)
 	}
 
 	// make sure only unique IDs are used
@@ -93,7 +93,7 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		}
 
 		if transactionId, err = generateTransactionId(); err != nil {
-			return false, fmt.Errorf("Unable to generate transaction id: %w", err)
+			return false, fmt.Errorf("unable to generate transaction id: %w", err)
 		}
 	}
 

@@ -64,7 +64,7 @@ func main() {
 			}
 
 			// fallback: unknown command
-			fmt.Printf("Unkown command: \"%s\", please run the :help command to see valid options", inputCommand)
+			fmt.Printf("unkown command: \"%s\", please run the :help command to see valid options", inputCommand)
 		}
 	}
 }

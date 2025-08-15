@@ -8,7 +8,7 @@ import (
 func deleteTransaction(args []string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	if len(args) < 2 {
@@ -35,7 +35,7 @@ func deleteTransaction(args []string) (success bool, err error) {
 					transactions[year][month][transactionType] = removeTransactionAtIndex(txList, i)
 
 					if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
-						return false, fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
+						return false, fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 					}
 					fmt.Printf("successfully removed transaction with id %s\n\n", transactionId)
 

@@ -24,7 +24,7 @@ const (
 func listAllTransactions() (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	// extract and sort years
@@ -66,7 +66,7 @@ func listAllTransactions() (success bool, err error) {
 				fmt.Printf("  %s\n", capitalize(transactionType))
 				fmt.Printf("  %s\n", strings.Repeat("-", len(transactionType)))
 				if len(transactionList) == 0 {
-					fmt.Println("\nNo transactions recorded.")
+					fmt.Println("\nno transactions recorded.")
 					continue
 				}
 
@@ -85,7 +85,7 @@ func listAllTransactions() (success bool, err error) {
 
 			var calculatedPnl PnLResult
 			if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
-				return false, fmt.Errorf("Unable to calculate P&L: %w\n", err)
+				return false, fmt.Errorf("unable to calculate P&L: %w\n", err)
 			}
 
 			var pnlColour string
@@ -108,11 +108,11 @@ func listAllTransactions() (success bool, err error) {
 func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	if len(transactions) == 0 {
-		fmt.Println("\nNo transactions found")
+		fmt.Println("\nno transactions found")
 		return true, nil
 	}
 
@@ -166,7 +166,7 @@ func visualizeTransactions(args []string) (success bool, err error) {
 		}
 
 		if calculatedPnl, err = calculateYearPnL(year); err != nil {
-			return false, fmt.Errorf("Unable to calculate P&L: %w\n", err)
+			return false, fmt.Errorf("unable to calculate P&L: %w\n", err)
 		}
 		fmt.Printf("\np&l result: €%.2f | %.1f%%\n\n", calculatedPnl.Amount, calculatedPnl.Percent)
 		return true, nil
@@ -196,7 +196,7 @@ func visualizeTransactions(args []string) (success bool, err error) {
 		}
 
 		if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
-			return false, fmt.Errorf("Unable to calculate P&L: %w\n", err)
+			return false, fmt.Errorf("unable to calculate P&L: %w\n", err)
 		}
 
 		var pnlColour string

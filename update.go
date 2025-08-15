@@ -32,7 +32,7 @@ func updateTransaction(args []string) (success bool, err error) {
 		fmt.Println(allowedTransactionCategories[transactionType])
 		fmt.Printf("\ninvalid transaction category: \"%s\"", updatedCategory)
 		showAllowedCategories(transactionType) // expense, income, investment
-		return false, fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
+		return false, fmt.Errorf("\n\nplease pick a valid transaction category from the list above.")
 	}
 
 	updatedDescription := strings.Join(args[4:], " ")
@@ -45,7 +45,7 @@ func updateTransaction(args []string) (success bool, err error) {
 
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	// years
@@ -67,7 +67,7 @@ func updateTransaction(args []string) (success bool, err error) {
 	}
 
 	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
-		return false, fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
+		return false, fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 	}
 	fmt.Printf("transaction successully updated")
 

@@ -16,12 +16,12 @@ func calculateMonthPnL(month, year string) (PnLResult, error) {
 
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return pnl, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return pnl, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	for transcationType, transactionList := range transactions[year][month] {
 		if len(transactionList) == 0 {
-			fmt.Printf("\nNo transactions of type %s for %s %s\n", transcationType, month, year)
+			fmt.Printf("\nno transactions of type %s for %s %s\n", transcationType, month, year)
 			continue
 		}
 
@@ -56,13 +56,13 @@ func calculateYearPnL(year string) (PnLResult, error) {
 
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return pnl, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
+		return pnl, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	for month := range transactions[year] {
 		for txType, txList := range transactions[year][month] {
 			if len(txList) == 0 {
-				fmt.Printf("\nNo transactions of type %s for month %s\n", txType, month)
+				fmt.Printf("\nno transactions of type %s for month %s\n", txType, month)
 				continue
 			}
 
