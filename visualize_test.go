@@ -11,7 +11,7 @@ func TestListTransactions(t *testing.T) {
 	transactionsFilePath = "data.json"
 
 	fmt.Println("\nList Transactions without arguments:")
-	if _, err := listAllTransactions([]string{}); err != nil {
+	if _, err := listAllTransactions(); err != nil {
 		t.Errorf("list transactions without args failed: %v", err)
 	}
 

@@ -56,7 +56,6 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
-	// ensure nested structure exists
 	if _, ok := transcations[year]; !ok {
 		transcations[year] = make(map[string]map[string][]Transaction)
 	}
@@ -88,9 +87,9 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 
 	fmt.Printf("\nadded %s €%.2f | %s | %s\n", transactionType, amount, category, description)
 
-	var args []string
-	// TODO: is this the right function to call here ?
-	listAllTransactions(args)
+	if _, err = listAllTransactions(); err != nil {
+		return false, fmt.Errorf("%s", err)
+	}
 
 	return true, nil
 }

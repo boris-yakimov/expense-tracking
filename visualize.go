@@ -14,7 +14,7 @@ const (
 	descriptionWidth = 40
 )
 
-func listAllTransactions(args []string) (success bool, err error) {
+func listAllTransactions() (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
 		return false, fmt.Errorf("Unable to load transactions file: %w", loadFileErr)
@@ -115,7 +115,7 @@ func visualizeTransactions(args []string) (success bool, err error) {
 
 	// list -  prints all transactions with P&L for each month
 	if len(args) == 0 {
-		if _, err := listAllTransactions(args); err != nil {
+		if _, err := listAllTransactions(); err != nil {
 			return false, fmt.Errorf("%s", err)
 		}
 	}
