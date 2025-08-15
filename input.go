@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"regexp"
 	"strings"
+	"unicode"
 )
 
 var monthOrder = map[string]int{
@@ -71,6 +72,21 @@ func generateTransactionId() (id string, err error) {
 	}
 
 	return hex.EncodeToString(bytes), nil
+}
+
+func capitalize(word string) string {
+	if len(word) == 0 {
+		return ""
+	}
+
+	runes := []rune(word)
+	runes[0] = unicode.ToUpper(runes[0])
+
+	for i := 1; i < len(runes); i++ {
+		runes[i] = unicode.ToLower(runes[i])
+	}
+
+	return string(runes)
 }
 
 // TODO: function to validate that ID is not used already in data json
