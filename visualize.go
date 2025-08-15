@@ -60,15 +60,16 @@ func listAllTransactions() (success bool, err error) {
 					continue
 				}
 
-				// TODO: make this better using padding
-				fmt.Printf("ID             Amount      Category     Description\n")
+				w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+				fmt.Fprintln(w, "ID\tAmount\tCategory\tDescription")
+				fmt.Fprintln(w, "--\t------\t--------\t-----------")
 
 				// list of each transaction
 				for _, e := range transactionList {
-					fmt.Printf("%s |    €%-8.2f | %-10s | %-25s\n", e.Id, e.Amount, e.Category, e.Description)
+					fmt.Fprintf(w, "%s\t€%.2f\t%s\t%s\n", e.Id, e.Amount, e.Category, e.Description)
 				}
 
-				fmt.Println()
+				w.Flush()
 			}
 
 			var calculatedPnl PnLResult
@@ -118,6 +119,8 @@ func visualizeTransactions(args []string) (success bool, err error) {
 		if _, err := listAllTransactions(); err != nil {
 			return false, fmt.Errorf("%s", err)
 		}
+
+		return true, nil
 	}
 
 	// list <year> - prints only P&L for the year
