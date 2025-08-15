@@ -25,6 +25,12 @@
           "amount": 9.68,
           "category": "food",
           "description": "sandwitch"
+        },
+        {
+          "id": "59c494be",
+          "amount": 15,
+          "category": "food",
+          "description": "patato"
         }
       ],
       "income": [
@@ -33,6 +39,12 @@
           "amount": 1500,
           "category": "salary",
           "description": "income from employment"
+        },
+        {
+          "id": "ec6cbc9a",
+          "amount": 500,
+          "category": "rentals",
+          "description": "apartment rental"
         }
       ],
       "investment": [
@@ -47,6 +59,12 @@
           "amount": 78,
           "category": "insurance",
           "description": "life insurance august 2025"
+        },
+        {
+          "id": "9c022af9",
+          "amount": 50,
+          "category": "crypto",
+          "description": "eth"
         }
       ]
     },

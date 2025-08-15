@@ -51,26 +51,50 @@ func addTransaction(args []string) (success bool, err error) {
 }
 
 func handleTransactionAdd(transactionType string, amount float64, category, description, month, year string) (success bool, err error) {
-	transcations, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
 		return false, fmt.Errorf("Unable to load transactions file: %s", loadFileErr)
 	}
 
-	if _, ok := transcations[year]; !ok {
-		transcations[year] = make(map[string]map[string][]Transaction)
+	if _, ok := transactions[year]; !ok {
+		transactions[year] = make(map[string]map[string][]Transaction)
 	}
 
-	if _, ok := transcations[year][month]; !ok {
-		transcations[year][month] = make(map[string][]Transaction)
+	if _, ok := transactions[year][month]; !ok {
+		transactions[year][month] = make(map[string][]Transaction)
 	}
 
-	if _, ok := transcations[year][month][transactionType]; !ok {
-		transcations[year][month][transactionType] = []Transaction{}
+	if _, ok := transactions[year][month][transactionType]; !ok {
+		transactions[year][month][transactionType] = []Transaction{}
 	}
 
 	var transactionId string
 	if transactionId, err = generateTransactionId(); err != nil {
 		return false, fmt.Errorf("Unable to generate transaction id: %s", err)
+	}
+
+	// make sure only unique IDs are used
+	for {
+		var duplicateIdFound bool
+		for txType := range transactions[year][month] {
+			for _, t := range transactions[year][month][txType] {
+				if transactionId == t.Id {
+					duplicateIdFound = true
+					break // id is already in use
+				}
+			}
+			if duplicateIdFound {
+				break
+			}
+		}
+
+		if !duplicateIdFound {
+			break // id is unique
+		}
+
+		if transactionId, err = generateTransactionId(); err != nil {
+			return false, fmt.Errorf("Unable to generate transaction id: %s", err)
+		}
 	}
 
 	newTransaction := Transaction{
@@ -80,16 +104,11 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		Description: description,
 	}
 
-	transcations[year][month][transactionType] = append(transcations[year][month][transactionType], newTransaction)
-	if saveTransactionErr := saveTransactions(transcations); saveTransactionErr != nil {
+	transactions[year][month][transactionType] = append(transactions[year][month][transactionType], newTransaction)
+	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
 		return false, fmt.Errorf("Error saving transaction: %s", saveTransactionErr)
 	}
 
-	fmt.Printf("\nadded %s €%.2f | %s | %s\n", transactionType, amount, category, description)
-
-	if _, err = listAllTransactions(); err != nil {
-		return false, fmt.Errorf("%s", err)
-	}
-
+	fmt.Printf("\nsuccessfully added %s €%.2f | %s | %s\n", transactionType, amount, category, description)
 	return true, nil
 }

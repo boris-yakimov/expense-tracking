@@ -141,6 +141,7 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 	return true, nil
 }
 
+// TODO: add flags --month / --year so that they can be passed in any order (still validate their content)
 func visualizeTransactions(args []string) (success bool, err error) {
 	var calculatedPnl PnLResult
 	var year string
