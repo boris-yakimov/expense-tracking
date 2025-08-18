@@ -21,6 +21,19 @@ func mainMenu() error {
 	return nil
 }
 
-func addTransactionForm() error {
+func formAddTransaction() error {
 	tui := tview.NewApplication()
+	form := tview.NewForm().
+		AddDropDown("Transaction Type", []string{"income", "expense", "investment"}, 0, nil).
+		AddInputField("Amount", "", 20, nil, nil).
+		AddInputField("Category", "", 20, nil, nil).
+		AddInputField("Description", "", 20, nil, nil).
+		AddButton("Add", nil).
+		AddButton("Cancel", nil)
+	form.SetBorder(true).SetTitle("add transaction").SetTitleAlign(tview.AlignLeft)
+	if err := tui.SetRoot(form, true).EnableMouse(true).Run(); err != nil {
+		return fmt.Errorf("tui error: %w", err)
+	}
+
+	return nil
 }
