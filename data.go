@@ -35,8 +35,8 @@ var allowedTransactionCategories = map[string]map[string]string{
 	},
 
 	"investment": {
-		"stocks":        "direct stock ownership in public comapnies",
-		"bonds":         "government, corporrate, etc",
+		"stocks":        "direct stock ownership in public companies",
+		"bonds":         "government, corporate, municipal, etc",
 		"funds":         "ETFs or mutual funds",
 		"insurance":     "only insurance with an investment element (such as a fund that buys assets)",
 		"privateEquity": "direct ownership in private companies",
@@ -45,7 +45,7 @@ var allowedTransactionCategories = map[string]map[string]string{
 		"retirement":    "retirement fund contributions",
 		"p2p":           "peer-to-peer lending",
 		"crypto":        "bitcoin, ethereum, etc",
-		"forex":         "oreign currency investments",
+		"forex":         "foreign currency investments",
 		"options":       "stock options",
 		"commodities":   "gold, silver, oil, etc",
 	},
