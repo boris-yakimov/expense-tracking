@@ -10,8 +10,8 @@ func main() {
 	scanner := bufio.NewScanner(os.Stdin)
 
 	// print help menu on start
-	// TODO: fix this so that I don't have to constantly pass around args even where they are not really needed
-	commandHelp([]string{""})
+	var args []string
+	commandHelp(args)
 
 	for {
 		fmt.Printf("\n$ expense-tracking > ")
