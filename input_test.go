@@ -4,7 +4,7 @@ import (
 	"testing"
 )
 
-func TestCleanInput(t *testing.T) {
+func TestCleanTerminalInput(t *testing.T) {
 	cases := []struct {
 		input    string
 		expected []string
@@ -40,7 +40,7 @@ func TestCleanInput(t *testing.T) {
 	}
 }
 
-func TestValidDescriptionFormat(t *testing.T) {
+func TestValidDescriptionInputFormat(t *testing.T) {
 	cases := []struct {
 		input    string
 		expected bool
@@ -66,5 +66,6 @@ func TestValidDescriptionFormat(t *testing.T) {
 	}
 }
 
-// TODO: tests for normalizeTransactionType
-// TODO: tests for generateTransactionId - check for errors; check for exact length of id
+// TODO: tests for normalizeTransactionType()
+// TODO: tests for generateTransactionId() - check for errors; check for exact length of id
+// TODO: tests for capitalize()
