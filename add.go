@@ -80,11 +80,11 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 			for _, t := range transactions[year][month][txType] {
 				if transactionId == t.Id {
 					duplicateIdFound = true
-					break // id is already in use
+					break
 				}
 			}
 			if duplicateIdFound {
-				break
+				break // id is already in use
 			}
 		}
 
@@ -95,6 +95,10 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		if transactionId, err = generateTransactionId(); err != nil {
 			return false, fmt.Errorf("unable to generate transaction id: %w", err)
 		}
+	}
+
+	if len(transactionId) > 8 {
+		return false, fmt.Errorf("transcation id should have a maximum of 8 chars, current id %s with length of %v", transactionId, len(transactionId))
 	}
 
 	newTransaction := Transaction{
