@@ -8,13 +8,23 @@ import (
 
 func mainMenu() error {
 	tui := tview.NewApplication()
-	list := tview.NewList().
-		AddItem("help", "display help menu", 'h', nil).
-		AddItem("list", "list transactions", 'l', nil).
+	menu := tview.NewList().
+		AddItem("list", "list transactions", 'l', func() {
+			if _, err := listAllTransactions(); err != nil {
+				fmt.Printf("list transactions error: %s", err)
+			}
+		}).
+		AddItem("add", "add a new transaction", 'a', func() {
+			if err := formAddTransaction(); err != nil {
+				fmt.Printf("add error: %s", err)
+			}
+		}).
+		// AddItem("help", "display help menu", 'h', nil).
 		AddItem("Quit", "press to exit", 'q', func() {
 			tui.Stop()
 		})
-	if err := tui.SetRoot(list, true).SetFocus(list).Run(); err != nil {
+
+	if err := tui.SetRoot(menu, true).SetFocus(menu).Run(); err != nil {
 		return fmt.Errorf("tui error: %w", err)
 	}
 
@@ -23,17 +33,89 @@ func mainMenu() error {
 
 func formAddTransaction() error {
 	tui := tview.NewApplication()
+
+	var transactionType string
+	dropdown := tview.NewDropDown().
+		SetLabel("Transaction Type").
+		// TODO: can i not hardcode them like this ?
+		SetOptions([]string{"income", "expense", "investment"}, func(selectedOption string, index int) {
+			transactionType = selectedOption
+		})
+	dropdown.SetCurrentOption(0)
+	// TODO: is a default really needed for this ?
+	transactionType = "expense" // default
+
+	amountField := tview.NewInputField().SetLabel("Amount")
+	categoryField := tview.NewInputField().SetLabel("Category")
+	descriptionField := tview.NewInputField().SetLabel("Description")
+
 	form := tview.NewForm().
-		AddDropDown("Transaction Type", []string{"income", "expense", "investment"}, 0, nil).
-		AddInputField("Amount", "", 20, nil, nil).
-		AddInputField("Category", "", 20, nil, nil).
-		AddInputField("Description", "", 20, nil, nil).
-		AddButton("Add", nil).
-		AddButton("Cancel", nil)
+		AddFormItem(dropdown).
+		AddFormItem(amountField).
+		AddFormItem(categoryField).
+		AddFormItem(descriptionField).
+		AddButton("Add", func() {
+			amount := amountField.GetText()
+			category := categoryField.GetText()
+			description := descriptionField.GetText()
+
+			// TODO: refactor add transactions to no longer expect cli args so we can just pass these cleanly
+			if _, err := addTransaction([]string{transactionType, amount, category, description}); err != nil {
+				// TODO: figure out how to better handle these errors
+				fmt.Printf("failed to add transaction: %s", err)
+				return
+			}
+		}).
+		AddButton("Clear", func() {
+			amountField.SetText("")
+			categoryField.SetText("")
+			descriptionField.SetText("")
+			dropdown.SetCurrentOption(0)
+			transactionType = "expense"
+		}).
+		AddButton("Cancel", func() {
+			mainMenu()
+		})
+
 	form.SetBorder(true).SetTitle("add transaction").SetTitleAlign(tview.AlignLeft)
+
 	if err := tui.SetRoot(form, true).EnableMouse(true).Run(); err != nil {
 		return fmt.Errorf("tui error: %w", err)
 	}
 
 	return nil
 }
+
+// func gridVisualizeTransactions() error {
+// 	newPrimitive := func(text string) tview.Primitive {
+// 		return tview.NewTextView().
+// 			SetTextAlign(tview.AlignCenter).
+// 			SetText(text)
+// 	}
+// 	leftScreen := newPrimitive("Income")
+// 	middleScreen := newPrimitive("Expenses")
+// 	rightScreen := newPrimitive("Investments")
+//
+// 	grid := tview.NewGrid().
+// 		SetRows(3, 0, 3).
+// 		SetColumns(30, 0, 30).
+// 		SetBorders(true).
+// 		AddItem(newPrimitive("July 2025"), 0, 0, 1, 3, 0, 0, false).
+// 		AddItem(newPrimitive("press ESC to go back"), 2, 0, 1, 3, 0, 0, false)
+//
+// 	// Layout for screens narrower than 100 cells (menu and side bar are hidden).
+// 	grid.AddItem(leftScreen, 0, 0, 0, 0, 0, 0, false).
+// 		AddItem(middleScreen, 1, 0, 1, 3, 0, 0, false).
+// 		AddItem(rightScreen, 0, 0, 0, 0, 0, 0, false)
+//
+// 	// Layout for screens wider than 100 cells.
+// 	grid.AddItem(leftScreen, 1, 0, 1, 1, 0, 100, false).
+// 		AddItem(middleScreen, 1, 1, 1, 1, 0, 100, false).
+// 		AddItem(rightScreen, 1, 2, 1, 1, 0, 100, false)
+//
+// 	if err := tview.NewApplication().SetRoot(grid, true).SetFocus(grid).Run(); err != nil {
+// 		return fmt.Errorf("tui error: %w", err)
+// 	}
+//
+// 	return nil
+// }

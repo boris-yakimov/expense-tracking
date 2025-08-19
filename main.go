@@ -3,9 +3,20 @@ package main
 import ()
 
 func main() {
-	if err := startTui(); err != nil {
+	if err := mainMenu(); err != nil {
 		panic(err)
 	}
+	//
+	//
+	// err := formAddTransaction()
+	// if err != nil {
+	// 	panic(err)
+	// }
+
+	
+	// if err := gridVisualizeTransactions(); err != nil {
+	// 	panic(err)
+	// }
 }
 
 // func main() {

@@ -31,6 +31,12 @@
           "amount": 15,
           "category": "food",
           "description": "patato"
+        },
+        {
+          "id": "ae9c0fd4",
+          "amount": 20.08,
+          "category": "food",
+          "description": "fruit"
         }
       ],
       "income": [
