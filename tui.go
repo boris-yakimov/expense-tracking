@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -30,21 +31,19 @@ func mainMenu() error {
 // TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
 func formAddTransaction() error {
 	var transactionType string
-	dropdown := tview.NewDropDown().
+	dropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction Type").
-		// TODO: can i not hardcode them like this ?
+		// TODO: probably should not be hardcoded
 		SetOptions([]string{"income", "expense", "investment"}, func(selectedOption string, index int) {
 			transactionType = selectedOption
-		})
+		}))
 	dropdown.SetCurrentOption(0)
-	// TODO: is a default really needed for this ?
-	transactionType = "expense" // default
 
-	amountField := tview.NewInputField().SetLabel("Amount")
-	categoryField := tview.NewInputField().SetLabel("Category")
-	descriptionField := tview.NewInputField().SetLabel("Description")
+	amountField := styleInputField(tview.NewInputField().SetLabel("Amount"))
+	categoryField := styleInputField(tview.NewInputField().SetLabel("Category"))
+	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
 
-	form := tview.NewForm().
+	form := styleForm(tview.NewForm().
 		AddFormItem(dropdown).
 		AddFormItem(amountField).
 		AddFormItem(categoryField).
@@ -72,9 +71,13 @@ func formAddTransaction() error {
 		}).
 		AddButton("Cancel", func() {
 			mainMenu()
-		})
+		}))
 
-	form.SetBorder(true).SetTitle("add transaction").SetTitleAlign(tview.AlignLeft)
+	form.SetButtonTextColor(tcell.ColorBlack).
+		SetButtonBackgroundColor(tcell.ColorGreen).
+		SetLabelColor(tcell.ColorYellow)
+
+	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignLeft)
 
 	tui.SetRoot(form, true).SetFocus(form)
 	return nil
