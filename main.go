@@ -1,23 +1,16 @@
 package main
 
-import ()
+import "github.com/rivo/tview"
+
+var tui *tview.Application
 
 func main() {
+	tui = tview.NewApplication()
 	if err := mainMenu(); err != nil {
 		panic(err)
 	}
-	//
-	//
-	// err := formAddTransaction()
-	// if err != nil {
-	// 	panic(err)
-	// }
-
-	
-	// if err := gridVisualizeTransactions(); err != nil {
-	// 	panic(err)
-	// }
 }
+
 
 // func main() {
 // 	scanner := bufio.NewScanner(os.Stdin)

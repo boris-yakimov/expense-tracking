@@ -7,7 +7,6 @@ import (
 )
 
 func mainMenu() error {
-	tui := tview.NewApplication()
 	menu := tview.NewList().
 		AddItem("list", "list transactions", 'l', func() {
 			if _, err := listAllTransactions(); err != nil {
@@ -24,16 +23,12 @@ func mainMenu() error {
 			tui.Stop()
 		})
 
-	if err := tui.SetRoot(menu, true).SetFocus(menu).Run(); err != nil {
-		return fmt.Errorf("tui error: %w", err)
-	}
-
-	return nil
+	tui.SetRoot(menu, true).SetFocus(menu)
+	return tui.Run()
 }
 
+// TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
 func formAddTransaction() error {
-	tui := tview.NewApplication()
-
 	var transactionType string
 	dropdown := tview.NewDropDown().
 		SetLabel("Transaction Type").
@@ -65,6 +60,8 @@ func formAddTransaction() error {
 				fmt.Printf("failed to add transaction: %s", err)
 				return
 			}
+
+			mainMenu() // go back to menu
 		}).
 		AddButton("Clear", func() {
 			amountField.SetText("")
@@ -79,10 +76,7 @@ func formAddTransaction() error {
 
 	form.SetBorder(true).SetTitle("add transaction").SetTitleAlign(tview.AlignLeft)
 
-	if err := tui.SetRoot(form, true).EnableMouse(true).Run(); err != nil {
-		return fmt.Errorf("tui error: %w", err)
-	}
-
+	tui.SetRoot(form, true).SetFocus(form)
 	return nil
 }
 
