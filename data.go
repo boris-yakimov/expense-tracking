@@ -63,6 +63,15 @@ var allowedTransactionCategories = map[string]map[string]string{
 	},
 }
 
+func listOfAllowedCategories(transactionType string) []string {
+	var categories []string
+	for c := range allowedTransactionCategories[transactionType] {
+		categories = append(categories, c)
+	}
+
+	return categories
+}
+
 // minimal expense without year and date
 type Transaction struct {
 	Id          string  `json:"id"`

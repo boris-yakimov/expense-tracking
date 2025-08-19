@@ -31,26 +31,34 @@ func mainMenu() error {
 // TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
 func formAddTransaction() error {
 	var transactionType string
-	dropdown := styleDropdown(tview.NewDropDown().
+	var category string
+	typeDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction Type").
 		// TODO: probably should not be hardcoded
 		SetOptions([]string{"income", "expense", "investment"}, func(selectedOption string, index int) {
 			transactionType = selectedOption
 		}))
-	dropdown.SetCurrentOption(0)
+	typeDropdown.SetCurrentOption(0)
 
 	amountField := styleInputField(tview.NewInputField().SetLabel("Amount"))
-	categoryField := styleInputField(tview.NewInputField().SetLabel("Category"))
+	categoryDropdown := styleDropdown(tview.NewDropDown().
+		SetLabel("Category")).
+		// TODO: to be fixed - this gets the values instead of the keys
+		SetOptions(listOfAllowedCategories(transactionType), func(selectedOption string, index int) {
+			category = selectedOption
+		})
+	categoryDropdown.SetCurrentOption(0)
+
+	// categoryField := styleInputField(tview.NewInputField().SetLabel("Category"))
 	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
 
 	form := styleForm(tview.NewForm().
-		AddFormItem(dropdown).
+		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
-		AddFormItem(categoryField).
+		AddFormItem(categoryDropdown).
 		AddFormItem(descriptionField).
 		AddButton("Add", func() {
 			amount := amountField.GetText()
-			category := categoryField.GetText()
 			description := descriptionField.GetText()
 
 			// TODO: refactor add transactions to no longer expect cli args so we can just pass these cleanly
@@ -63,10 +71,10 @@ func formAddTransaction() error {
 			mainMenu() // go back to menu
 		}).
 		AddButton("Clear", func() {
+			typeDropdown.SetCurrentOption(0)
 			amountField.SetText("")
-			categoryField.SetText("")
+			categoryDropdown.SetCurrentOption(0)
 			descriptionField.SetText("")
-			dropdown.SetCurrentOption(0)
 			transactionType = "expense"
 		}).
 		AddButton("Cancel", func() {

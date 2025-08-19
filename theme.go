@@ -13,17 +13,18 @@ type TuiTheme struct {
 	ButtonBackgroundColor tcell.Color
 	BorderColor           tcell.Color
 	TitleColor            tcell.Color
+	BackgroundColor       tcell.Color
 }
 
-// TODO: configure a tokyo equivalent scheme as default
 var theme = TuiTheme{
-	LabelColor:            tcell.ColorYellow,
-	FieldTextColor:        tcell.ColorWhite,
-	FieldBackgroundColor:  tcell.ColorBlack,
-	ButtonTextColor:       tcell.ColorBlack,
-	ButtonBackgroundColor: tcell.ColorGreen,
-	BorderColor:           tcell.ColorDarkCyan,
-	TitleColor:            tcell.ColorAqua,
+	LabelColor:            tcell.ColorLightCyan,             // cyan labels
+	FieldTextColor:        tcell.ColorWhite,                 // light text
+	FieldBackgroundColor:  tcell.NewRGBColor(40, 44, 52),    // deep gray for inputs
+	ButtonTextColor:       tcell.ColorBlack,                 // black text on buttons
+	ButtonBackgroundColor: tcell.NewRGBColor(152, 195, 121), // soft green buttons
+	BorderColor:           tcell.ColorTeal,                  // teal borders
+	TitleColor:            tcell.ColorAqua,                  // aqua titles
+	BackgroundColor:       tcell.NewRGBColor(26, 27, 38),    // dark navy base
 }
 
 // helper to style input fields in TUI
@@ -44,7 +45,9 @@ func styleDropdown(dropdown *tview.DropDown) *tview.DropDown {
 func styleForm(form *tview.Form) *tview.Form {
 	form.SetButtonTextColor(theme.ButtonTextColor).
 		SetButtonBackgroundColor(theme.ButtonBackgroundColor).
-		SetLabelColor(theme.LabelColor)
+		SetLabelColor(theme.LabelColor).
+		SetFieldBackgroundColor(theme.FieldBackgroundColor).
+		SetFieldTextColor(theme.FieldTextColor)
 
 	form.SetBorderColor(theme.BorderColor)
 	form.SetTitleColor(theme.TitleColor)
