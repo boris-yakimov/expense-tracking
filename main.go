@@ -14,7 +14,12 @@ func main() {
 		screen.Fill(' ', tcell.StyleDefault.Background(theme.BackgroundColor))
 		return false
 	})
+
 	if err := mainMenu(); err != nil {
+		panic(err)
+	}
+
+	if err := tui.Run(); err != nil {
 		panic(err)
 	}
 }

@@ -89,4 +89,27 @@ func capitalize(word string) string {
 	return string(runes)
 }
 
-// TODO: function to validate that ID is not used already in data json
+func listOfAllowedCategories(transactionType string) (categories []string, err error) {
+	for c := range allowedTransactionCategories[transactionType] {
+		categories = append(categories, c)
+	}
+
+	if len(categories) <= 0 {
+		return categories, fmt.Errorf("something went wrong with getting list of allowed categories for transaction type %s", transactionType)
+	}
+
+	return categories, nil
+}
+
+func listOfAllowedTransactionTypes() (categories []string, err error) {
+	var transactionTypes []string
+	for t := range allowedTransactionTypes {
+		transactionTypes = append(transactionTypes, t)
+	}
+
+	if len(transactionTypes) <= 0 {
+		return transactionTypes, fmt.Errorf("something went wrong with getting list of allowed transaction types")
+	}
+
+	return transactionTypes, nil
+}

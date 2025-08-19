@@ -113,6 +113,6 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		return false, fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 
-	fmt.Printf("\nsuccessfully added %s €%.2f | %s | %s\n", transactionType, amount, category, description)
+	fmt.Printf("\n successfully added %s €%.2f | %s | %s\n", transactionType, amount, category, description)
 	return true, nil
 }

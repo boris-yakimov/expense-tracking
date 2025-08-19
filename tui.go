@@ -25,31 +25,63 @@ func mainMenu() error {
 		})
 
 	tui.SetRoot(menu, true).SetFocus(menu)
-	return tui.Run()
+	return nil
 }
 
+// TODO: go through all of this again to make sure I understand what I am doing here
 // TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
 func formAddTransaction() error {
 	var transactionType string
 	var category string
+	var categoryDropdown *tview.DropDown
+
+	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
 	typeDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction Type").
-		// TODO: probably should not be hardcoded
-		SetOptions([]string{"income", "expense", "investment"}, func(selectedOption string, index int) {
+		SetOptions(allowedTransactionTypes, func(selectedOption string, index int) {
 			transactionType = selectedOption
+			if categoryDropdown != nil {
+				opts, err := listOfAllowedCategories(transactionType)
+				if err != nil {
+					fmt.Println(err)
+				}
+				categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
+					category = selectedOption
+				})
+				if len(opts) > 0 {
+					categoryDropdown.SetCurrentOption(0)
+					category = opts[0]
+				} else {
+					category = ""
+				}
+			}
 		}))
 	typeDropdown.SetCurrentOption(0)
 
+	if _, opt := typeDropdown.GetCurrentOption(); opt != "" {
+		transactionType = opt
+	}
+
 	amountField := styleInputField(tview.NewInputField().SetLabel("Amount"))
-	categoryDropdown := styleDropdown(tview.NewDropDown().
-		SetLabel("Category")).
-		// TODO: to be fixed - this gets the values instead of the keys
-		SetOptions(listOfAllowedCategories(transactionType), func(selectedOption string, index int) {
+
+	categoryDropdown = styleDropdown(tview.NewDropDown().
+		SetLabel("Category"))
+	{
+		opts, err := listOfAllowedCategories(transactionType)
+		if err != nil {
+			fmt.Println(err)
+		}
+		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
 		})
+	}
+
 	categoryDropdown.SetCurrentOption(0)
 
-	// categoryField := styleInputField(tview.NewInputField().SetLabel("Category"))
 	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
 
 	form := styleForm(tview.NewForm().
@@ -118,9 +150,7 @@ func formAddTransaction() error {
 // 		AddItem(middleScreen, 1, 1, 1, 1, 0, 100, false).
 // 		AddItem(rightScreen, 1, 2, 1, 1, 0, 100, false)
 //
-// 	if err := tview.NewApplication().SetRoot(grid, true).SetFocus(grid).Run(); err != nil {
-// 		return fmt.Errorf("tui error: %w", err)
-// 	}
+// 	tui.SetRoot(grid, true).SetFocus(grid)
 //
 // 	return nil
 // }

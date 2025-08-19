@@ -37,6 +37,12 @@
           "amount": 20.08,
           "category": "food",
           "description": "fruit"
+        },
+        {
+          "id": "07503556",
+          "amount": 12.17,
+          "category": "food",
+          "description": "lunch"
         }
       ],
       "income": [
@@ -51,6 +57,12 @@
           "amount": 500,
           "category": "rentals",
           "description": "apartment rental"
+        },
+        {
+          "id": "d0294eb5",
+          "amount": 200,
+          "category": "dividends",
+          "description": "from stonks"
         }
       ],
       "investment": [
