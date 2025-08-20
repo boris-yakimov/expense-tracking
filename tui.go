@@ -87,6 +87,7 @@ func formAddTransaction() error {
 
 	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
 
+	// TODO: display footer that shows ESC or 'q' can be pressed to go back to menu
 	form := styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
@@ -118,6 +119,15 @@ func formAddTransaction() error {
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
+	// back to mainMenu on ESC or q key press
+	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+			mainMenu()
+			return nil
+		}
+		return event
+	})
+
 	tui.SetRoot(form, true).SetFocus(form)
 	return nil
 }
@@ -127,6 +137,11 @@ func gridVisualizeTransactions() error {
 	if err != nil {
 		return fmt.Errorf("unable to load transactions file: %w", err)
 	}
+
+	// TODO: ability to pick a specific month or year
+	// the default shows the current one
+	// key press shows a list of months or years that have transactions
+	// selecting one shows a table of transactions in that specific month and year
 
 	// determine latest year
 	var latestYear string
@@ -159,6 +174,7 @@ func gridVisualizeTransactions() error {
 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
 	footer := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText("press ESC or 'q' to go back")
 
+	// TODO: extend to include the P&L
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3).
 		SetColumns(0, 0, 0).
@@ -171,7 +187,7 @@ func gridVisualizeTransactions() error {
 
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
-	// exist grid on ESC or q key press
+	// back to mainMenu on ESC or q key press
 	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
 			mainMenu()
