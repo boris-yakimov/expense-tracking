@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
+// TODO: apply theme to main menu as well
 func mainMenu() error {
 	menu := tview.NewList().
 		AddItem("list", "list transactions", 'l', func() {
-			if _, err := listAllTransactions(); err != nil {
+			if err := gridVisualizeTransactions(); err != nil {
 				fmt.Printf("list transactions error: %s", err)
 			}
 		}).
@@ -24,11 +24,12 @@ func mainMenu() error {
 			tui.Stop()
 		})
 
+	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+
 	tui.SetRoot(menu, true).SetFocus(menu)
 	return nil
 }
 
-// TODO: go through all of this again to make sure I understand what I am doing here
 // TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
 func formAddTransaction() error {
 	var transactionType string
@@ -70,6 +71,7 @@ func formAddTransaction() error {
 
 	categoryDropdown = styleDropdown(tview.NewDropDown().
 		SetLabel("Category"))
+	// scope boundary to isolate opts and err from leaking in the rest of the function
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
@@ -113,44 +115,42 @@ func formAddTransaction() error {
 			mainMenu()
 		}))
 
-	form.SetButtonTextColor(tcell.ColorBlack).
-		SetButtonBackgroundColor(tcell.ColorGreen).
-		SetLabelColor(tcell.ColorYellow)
-
-	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignLeft)
+	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	tui.SetRoot(form, true).SetFocus(form)
 	return nil
 }
 
-// func gridVisualizeTransactions() error {
-// 	newPrimitive := func(text string) tview.Primitive {
-// 		return tview.NewTextView().
-// 			SetTextAlign(tview.AlignCenter).
-// 			SetText(text)
-// 	}
-// 	leftScreen := newPrimitive("Income")
-// 	middleScreen := newPrimitive("Expenses")
-// 	rightScreen := newPrimitive("Investments")
-//
-// 	grid := tview.NewGrid().
-// 		SetRows(3, 0, 3).
-// 		SetColumns(30, 0, 30).
-// 		SetBorders(true).
-// 		AddItem(newPrimitive("July 2025"), 0, 0, 1, 3, 0, 0, false).
-// 		AddItem(newPrimitive("press ESC to go back"), 2, 0, 1, 3, 0, 0, false)
-//
-// 	// Layout for screens narrower than 100 cells (menu and side bar are hidden).
-// 	grid.AddItem(leftScreen, 0, 0, 0, 0, 0, 0, false).
-// 		AddItem(middleScreen, 1, 0, 1, 3, 0, 0, false).
-// 		AddItem(rightScreen, 0, 0, 0, 0, 0, 0, false)
-//
-// 	// Layout for screens wider than 100 cells.
-// 	grid.AddItem(leftScreen, 1, 0, 1, 1, 0, 100, false).
-// 		AddItem(middleScreen, 1, 1, 1, 1, 0, 100, false).
-// 		AddItem(rightScreen, 1, 2, 1, 1, 0, 100, false)
-//
-// 	tui.SetRoot(grid, true).SetFocus(grid)
-//
-// 	return nil
-// }
+func gridVisualizeTransactions() error {
+	newPrimitive := func(text string) tview.Primitive {
+		return tview.NewTextView().
+			SetTextAlign(tview.AlignCenter).
+			SetText(text)
+	}
+	leftScreen := newPrimitive("Income")
+	middleScreen := newPrimitive("Expenses")
+	rightScreen := newPrimitive("Investments")
+
+	grid := tview.NewGrid().
+		SetRows(3, 0, 3).
+		SetColumns(30, 0, 30).
+		SetBorders(true).
+		// TODO: dynamic
+		AddItem(newPrimitive("July 2025"), 0, 0, 1, 3, 0, 0, false).
+		AddItem(newPrimitive("press ESC to go back"), 2, 0, 1, 3, 0, 0, false)
+
+	// Layout for screens narrower than 100 cells (menu and side bar are hidden).
+	grid.AddItem(leftScreen, 0, 0, 0, 0, 0, 0, false).
+		AddItem(middleScreen, 1, 0, 1, 3, 0, 0, false).
+		AddItem(rightScreen, 0, 0, 0, 0, 0, 0, false)
+
+	// Layout for screens wider than 100 cells.
+	grid.AddItem(leftScreen, 1, 0, 1, 1, 0, 100, false).
+		AddItem(middleScreen, 1, 1, 1, 1, 0, 100, false).
+		AddItem(rightScreen, 1, 2, 1, 1, 0, 100, false)
+
+	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+	tui.SetRoot(grid, true).SetFocus(grid)
+
+	return nil
+}
