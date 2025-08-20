@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -122,35 +123,95 @@ func formAddTransaction() error {
 }
 
 func gridVisualizeTransactions() error {
-	newPrimitive := func(text string) tview.Primitive {
-		return tview.NewTextView().
-			SetTextAlign(tview.AlignCenter).
-			SetText(text)
+	transactions, err := loadTransactions()
+	if err != nil {
+		return fmt.Errorf("unable to load transactions file: %w", err)
 	}
-	leftScreen := newPrimitive("Income")
-	middleScreen := newPrimitive("Expenses")
-	rightScreen := newPrimitive("Investments")
 
-	grid := tview.NewGrid().
+	// determine latest year
+	var latestYear string
+	for y := range transactions {
+		if latestYear == "" || y > latestYear {
+			latestYear = y
+		}
+	}
+
+	// determine latest month for the year
+	var latestMonth string
+	if latestYear != "" {
+		for m := range transactions[latestYear] {
+			if latestMonth == "" || monthOrder[m] > monthOrder[latestMonth] {
+				latestMonth = m
+			}
+		}
+	}
+
+	var headerText string
+	if latestYear != "" && latestMonth != "" {
+		headerText = fmt.Sprintf("%s %s", capitalize(latestMonth), latestYear)
+	}
+
+	// build tx table for each tx type
+	incomeTable := createTransactionsTable("income", latestMonth, latestYear, transactions)
+	expenseTable := createTransactionsTable("expense", latestMonth, latestYear, transactions)
+	investmentTable := createTransactionsTable("investment", latestMonth, latestYear, transactions)
+
+	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
+	footer := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText("press ESC or 'q' to go back")
+
+	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3).
-		SetColumns(30, 0, 30).
+		SetColumns(0, 0, 0).
 		SetBorders(true).
-		// TODO: dynamic
-		AddItem(newPrimitive("July 2025"), 0, 0, 1, 3, 0, 0, false).
-		AddItem(newPrimitive("press ESC to go back"), 2, 0, 1, 3, 0, 0, false)
-
-	// Layout for screens narrower than 100 cells (menu and side bar are hidden).
-	grid.AddItem(leftScreen, 0, 0, 0, 0, 0, 0, false).
-		AddItem(middleScreen, 1, 0, 1, 3, 0, 0, false).
-		AddItem(rightScreen, 0, 0, 0, 0, 0, 0, false)
-
-	// Layout for screens wider than 100 cells.
-	grid.AddItem(leftScreen, 1, 0, 1, 1, 0, 100, false).
-		AddItem(middleScreen, 1, 1, 1, 1, 0, 100, false).
-		AddItem(rightScreen, 1, 2, 1, 1, 0, 100, false)
+		AddItem(header, 0, 0, 1, 3, 0, 0, false).
+		AddItem(footer, 2, 0, 1, 3, 0, 0, false).
+		AddItem(incomeTable, 1, 0, 1, 1, 0, 0, false).
+		AddItem(expenseTable, 1, 1, 1, 1, 0, 0, false).
+		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false))
 
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+
+	// exist grid on ESC or q key press
+	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+			mainMenu()
+			return nil
+		}
+		return event
+	})
+
 	tui.SetRoot(grid, true).SetFocus(grid)
 
 	return nil
+}
+
+// helper to build a table for a specific transaction type for visualization in the TUI
+func createTransactionsTable(txType, month, year string, transactions TransactionHistory) *tview.Table {
+	table := tview.NewTable()
+	table.SetBorder(false)
+	table.SetTitle(capitalize(txType)).SetBorder(true)
+
+	headers := []string{"ID", "Amount", "Category", "Description"}
+	for c, h := range headers {
+		table.SetCell(0, c, tview.NewTableCell(h).SetSelectable(false))
+	}
+
+	if year == "" || month == "" {
+		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
+		return table
+	}
+
+	txList := transactions[year][month][txType]
+	if len(txList) == 0 {
+		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
+		return table
+	}
+
+	for r, tx := range txList {
+		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)))
+		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
+		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
+		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
+	}
+	return table
 }

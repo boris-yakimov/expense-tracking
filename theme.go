@@ -54,3 +54,11 @@ func styleForm(form *tview.Form) *tview.Form {
 
 	return form
 }
+
+func styleGrid(grid *tview.Grid) *tview.Grid {
+	grid.SetBackgroundColor(theme.BackgroundColor)
+	grid.SetBorderColor(theme.BorderColor)
+	grid.SetTitleColor(theme.TitleColor)
+
+	return grid
+}
