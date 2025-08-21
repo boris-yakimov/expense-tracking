@@ -26,8 +26,6 @@ func main() {
 	}
 }
 
-// TODO: navigate up and down with vim keys as well
-
 func mainMenu() error {
 	menu := styleList(tview.NewList().
 		AddItem("list", "list transactions", 'l', func() {
@@ -55,6 +53,28 @@ func mainMenu() error {
 		}))
 
 	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+
+	// Add vim-like navigation with j and k keys
+	menu.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyRune:
+			switch event.Rune() {
+			case 'j':
+				// move down
+				currentIndex := menu.GetCurrentItem()
+				menu.SetCurrentItem(currentIndex + 1)
+				return nil
+			case 'k':
+				// move up
+				currentIndex := menu.GetCurrentItem()
+				if currentIndex > 0 {
+					menu.SetCurrentItem(currentIndex - 1)
+				}
+				return nil
+			}
+		}
+		return event
+	})
 
 	tui.SetRoot(menu, true).SetFocus(menu)
 	return nil
