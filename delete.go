@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -15,14 +14,17 @@ func formDeleteTransaction() error {
 		SetLabel("Transaction ID"))
 
 	{
-		// TODO: show info what is behind this id so it is easier to understand what you are deleting
-		opts, err := getListOfTransactoinIds()
+		// show detailed transaction information so user knows what they are deleting
+		opts, err := getListOfDetailedTransactions()
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
-			transactionId = selectedOption
-			// Get transaction type after user selects an ID
+			// extract ID from the selected option (format: "ID: 12345678 | ...")
+			if len(selectedOption) > 4 {
+				transactionId = selectedOption[4:12] // extract ID from position 4-12
+			}
+			// get transaction type after user selects an ID
 			var err error
 			transactionType, err = getTransactionTypeById(transactionId)
 			if err != nil {
@@ -46,14 +48,28 @@ func formDeleteTransaction() error {
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
-	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		// back to mainMenu on ESC or q key press
-		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-			mainMenu()
-			return nil
-		}
-		return event
-	})
+	// TODO: can we navigate with vim motions
+	// form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+	// 	switch event.Key() {
+	// 	case tcell.KeyRune:
+	// 		switch event.Rune() {
+	// 		case 'j': // move down
+	// 			currentIndex := form.GetCurrentItem()
+	// 			form.SetCurrentItem(currentIndex + 1)
+	// 			return nil
+	// 		case 'k': // move up
+	// 			currentIndex := form.GetCurrentItem()
+	// 			if currentIndex > 0 {
+	// 				form.SetCurrentItem(currentIndex - 1)
+	// 			}
+	// 			return nil
+	// 		case 'q', 'Q':
+	// 			mainMenu()
+	// 			return nil
+	// 		}
+	// 	}
+	// 	return event
+	// })
 
 	tui.SetRoot(form, true).SetFocus(form)
 	return nil
