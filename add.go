@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	descriptionMaxLength = 40 // chars
+	descriptionMaxCharLength = 40
 )
 
 // TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
@@ -70,8 +70,8 @@ func formAddTransaction() error {
 
 	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
 	// TODO: can I not just set a limit on the field when users type it ?
-	if len(descriptionField.GetText()) > descriptionMaxLength {
-		return fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxLength, len(description))
+	if len(descriptionField.GetText()) > descriptionMaxCharLength {
+		return fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxCharLength, len(description))
 	}
 
 	// TODO: by default this and than provide the option to add for a specific month or year by selecting it from dropdown
@@ -89,7 +89,7 @@ func formAddTransaction() error {
 
 			description := descriptionField.GetText()
 
-			if err := addTransaction(transactionType, amount, category, description, month, year); err != nil {
+			if err := handleAddTransaction(transactionType, amount, category, description, month, year); err != nil {
 				// TODO: figure out how to better handle these errors
 				fmt.Printf("failed to add transaction: %s", err)
 				return
@@ -123,7 +123,7 @@ func formAddTransaction() error {
 	return nil
 }
 
-func addTransaction(transactionType, amount, category, description, month, year string) error {
+func handleAddTransaction(transactionType, amount, category, description, month, year string) error {
 	txType, err := normalizeTransactionType(transactionType)
 	if err != nil {
 		return fmt.Errorf("transaction type error: %w", err)

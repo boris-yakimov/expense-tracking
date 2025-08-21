@@ -11,6 +11,7 @@ func formUpdateTransaction() error {
 	return nil
 }
 
+// TODO: make a common function that does all validations as we seems to be doing the same checks on add, update, and delete which is redundant - amount float conversion; txType checks; txId validation; category checks; description checks
 // TODO: remove these after TUI approach is implemented
 
 // update <transaction_type> <transaction_id> <amount> <category> <description>
@@ -43,8 +44,8 @@ func updateTransaction(args []string) (success bool, err error) {
 	}
 
 	updatedDescription := strings.Join(args[4:], " ")
-	if len(updatedDescription) > descriptionMaxLength {
-		return false, fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxLength, len(updatedDescription))
+	if len(updatedDescription) > descriptionMaxCharLength {
+		return false, fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxCharLength, len(updatedDescription))
 	}
 	if !validDescriptionInputFormat(updatedDescription) {
 		return false, fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")

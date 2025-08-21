@@ -78,7 +78,7 @@ example
         - add investment 78.00 insurance life insurance monthly payment
         expected output :
         added investment €78.00 | insurance | life insurance monthly payment
-`, descriptionMaxLength)
+`, descriptionMaxCharLength)
 			return true, nil
 		}
 
@@ -96,7 +96,7 @@ example
         - update expense b3f921d7 33.62 food switch back to pizza
         output :
         transaction successully updated 
-`, descriptionMaxLength)
+`, descriptionMaxCharLength)
 			return true, nil
 		}
 

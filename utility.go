@@ -113,3 +113,44 @@ func listOfAllowedTransactionTypes() (categories []string, err error) {
 
 	return transactionTypes, nil
 }
+
+func getListOfTransactoinIds() (transactionIdList []string, err error) {
+	transactions, loadFileErr := loadTransactions()
+	if loadFileErr != nil {
+		return transactionIdList, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+	}
+
+	// build a list of transaction IDs
+	for year := range transactions {
+		for month := range transactions[year] {
+			for txType := range transactions[year][month] {
+				for _, tx := range transactions[year][month][txType] {
+					transactionIdList = append(transactionIdList, tx.Id)
+				}
+			}
+		}
+	}
+
+	return transactionIdList, nil
+}
+
+func getTransactionTypeById(txId string) (txType string, err error) {
+	transactions, loadFileErr := loadTransactions()
+	if loadFileErr != nil {
+		return "", fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+	}
+
+	// find what type of transaction is the particular id related to
+	for year := range transactions {
+		for month := range transactions[year] {
+			for txType := range transactions[year][month] {
+				for _, tx := range transactions[year][month][txType] {
+					if txId == tx.Id {
+						return txType, nil
+					}
+				}
+			}
+		}
+	}
+	return "", fmt.Errorf("transaction ID %s could not be found in transaction list", txId)
+}

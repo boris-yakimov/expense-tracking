@@ -8,7 +8,6 @@ import (
 )
 
 func formDeleteTransaction() error {
-
 	var transactionId string
 	var transactionType string
 
@@ -16,27 +15,27 @@ func formDeleteTransaction() error {
 		SetLabel("Transaction ID"))
 
 	{
-		// TODO: show info what is behind this id
-		opts, err := listOfTransactionIds() // TODO: to be implemented
+		// TODO: show info what is behind this id so it is easier to understand what you are deleting
+		opts, err := getListOfTransactoinIds()
 		if err != nil {
 			return fmt.Errorf("%w", err)
 		}
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
 			transactionId = selectedOption
+			// Get transaction type after user selects an ID
+			var err error
+			transactionType, err = getTransactionTypeById(transactionId)
+			if err != nil {
+				fmt.Printf("Error getting transaction type: %s\n", err)
+			}
 		})
-	}
-
-	// TODO: how to get type from id ?
-	transactionType, err := getTxTypeById() // TODO: to be implemented
-	if err != nil {
-		return fmt.Errorf("%w", err)
 	}
 
 	// TODO: build out form
 	form := styleForm(tview.NewForm().
 		AddFormItem(idDropDown).
 		AddButton("Delete", func() {
-			if _, err := deleteTransaction(transactionType, transactionId); err != nil {
+			if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
 				fmt.Printf("failed to delete transaction: %s", err)
 				return
 			}
@@ -46,7 +45,7 @@ func formDeleteTransaction() error {
 		}))
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
-	// TOOD: q / ESC also goes back to main menu
+
 	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// back to mainMenu on ESC or q key press
 		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
@@ -60,22 +59,20 @@ func formDeleteTransaction() error {
 	return nil
 }
 
-// TODO: remove these after TUI approach is implemented
-
 // delete <transaction_type> <transaction_id>
-func deleteTransaction(transactionType, transactionId string) (success bool, err error) {
+func handleDeleteTransaction(transactionType, transactionId string) error {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
 	txType, err := normalizeTransactionType(transactionType)
 	if err != nil {
-		return false, fmt.Errorf("transaction type error: %w", err)
+		return fmt.Errorf("transaction type error: %w", err)
 	}
 
 	if len(transactionId) != 8 {
-		return false, fmt.Errorf("invalid transaction id length, expected 8 char id, got %s", len(transactionId))
+		return fmt.Errorf("invalid transaction id length, expected 8 char id, got %v", len(transactionId))
 	}
 
 	for year, months := range transactions {
@@ -88,23 +85,23 @@ func deleteTransaction(transactionType, transactionId string) (success bool, err
 					transactions[year][month][txType] = removeTransactionAtIndex(txList, i)
 
 					if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
-						return false, fmt.Errorf("error saving transaction: %w", saveTransactionErr)
+						return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 					}
 					fmt.Printf("successfully removed transaction with id %s\n\n", transactionId)
 
 					fmt.Printf("%s for %s %s\n", txType, month, year)
 					_, err = listTransactionsByMonth(txType, month, year)
 					if err != nil {
-						return false, fmt.Errorf("unable to list remaining transactions: %s", err)
+						return fmt.Errorf("unable to list remaining transactions: %s", err)
 					}
 
-					return true, nil
+					return nil
 				}
 			}
 		}
 	}
 
-	return false, fmt.Errorf("\ndid not match any transaction by id %s, please run list %s or show-total and confirm the transaction id that you want to delete\n", transactionId, txType)
+	return fmt.Errorf("\ndid not match any transaction by id %s, please run list %s or show-total and confirm the transaction id that you want to delete\n", transactionId, txType)
 }
 
 func removeTransactionAtIndex(transactions []Transaction, index int) []Transaction {
