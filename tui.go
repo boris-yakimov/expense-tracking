@@ -3,8 +3,28 @@ package main
 import (
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
+
+var tui *tview.Application
+
+func main() {
+	tui = tview.NewApplication()
+	tui.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
+		screen.Clear()
+		screen.Fill(' ', tcell.StyleDefault.Background(theme.BackgroundColor))
+		return false
+	})
+
+	if err := mainMenu(); err != nil {
+		panic(err)
+	}
+
+	if err := tui.Run(); err != nil {
+		panic(err)
+	}
+}
 
 // TODO: navigate up and down with vim keys as well
 
