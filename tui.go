@@ -59,13 +59,11 @@ func mainMenu() error {
 		switch event.Key() {
 		case tcell.KeyRune:
 			switch event.Rune() {
-			case 'j':
-				// move down
+			case 'j': // move down
 				currentIndex := menu.GetCurrentItem()
 				menu.SetCurrentItem(currentIndex + 1)
 				return nil
-			case 'k':
-				// move up
+			case 'k': // move up
 				currentIndex := menu.GetCurrentItem()
 				if currentIndex > 0 {
 					menu.SetCurrentItem(currentIndex - 1)
