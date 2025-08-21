@@ -59,6 +59,26 @@ func styleGrid(grid *tview.Grid) *tview.Grid {
 	grid.SetBackgroundColor(theme.BackgroundColor)
 	grid.SetBorderColor(theme.BorderColor)
 	grid.SetTitleColor(theme.TitleColor)
+	grid.SetBordersColor(theme.BorderColor)
 
 	return grid
+}
+
+func styleTable(table *tview.Table) *tview.Table {
+	table.SetBackgroundColor(theme.BackgroundColor)
+	table.SetBorderColor(theme.BorderColor)
+	table.SetBordersColor(theme.BorderColor)
+	table.SetTitleColor(theme.TitleColor)
+
+	return table
+}
+
+func styleList(list *tview.List) *tview.List {
+	list.SetBackgroundColor(theme.BackgroundColor)
+	list.SetBorderColor(theme.BorderColor)
+	list.SetTitleColor(theme.TitleColor)
+	list.SetMainTextColor(theme.FieldTextColor)
+	list.SetSecondaryTextColor(theme.LabelColor)
+
+	return list
 }

@@ -7,9 +7,10 @@ import (
 	"github.com/rivo/tview"
 )
 
-// TODO: apply theme to main menu as well
+// TODO: navigate up and down with vim keys as well
+
 func mainMenu() error {
-	menu := tview.NewList().
+	menu := styleList(tview.NewList().
 		AddItem("list", "list transactions", 'l', func() {
 			if err := gridVisualizeTransactions(); err != nil {
 				fmt.Printf("list transactions error: %s", err)
@@ -20,10 +21,19 @@ func mainMenu() error {
 				fmt.Printf("add error: %s", err)
 			}
 		}).
-		// AddItem("help", "display help menu", 'h', nil).
+		AddItem("del", "delete a transaction", 'd', func() {
+			if err := formDeleteTransaction(); err != nil {
+				fmt.Printf("delete error: %s", err)
+			}
+		}).
+		AddItem("update", "update a transaction", 'u', func() {
+			if err := formUpdateTransaction(); err != nil {
+				fmt.Printf("update error: %s", err)
+			}
+		}).
 		AddItem("Quit", "press to exit", 'q', func() {
 			tui.Stop()
-		})
+		}))
 
 	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
@@ -132,6 +142,16 @@ func formAddTransaction() error {
 	return nil
 }
 
+func formDeleteTransaction() error {
+	// TODO: delete function
+	return nil
+}
+
+func formUpdateTransaction() error {
+	// TODO: update function
+	return nil
+}
+
 func gridVisualizeTransactions() error {
 	transactions, err := loadTransactions()
 	if err != nil {
@@ -166,15 +186,23 @@ func gridVisualizeTransactions() error {
 		headerText = fmt.Sprintf("%s %s", capitalize(latestMonth), latestYear)
 	}
 
+	var calculatedPnl PnLResult
+	var footerText string
+	if calculatedPnl, err = calculateMonthPnL(latestMonth, latestYear); err != nil {
+		return fmt.Errorf("unable to calculate pnl %w", err)
+	}
+	if latestYear != "" && latestMonth != "" {
+		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%\n\n", calculatedPnl.Amount, calculatedPnl.Percent)
+	}
+
 	// build tx table for each tx type
-	incomeTable := createTransactionsTable("income", latestMonth, latestYear, transactions)
-	expenseTable := createTransactionsTable("expense", latestMonth, latestYear, transactions)
-	investmentTable := createTransactionsTable("investment", latestMonth, latestYear, transactions)
+	incomeTable := styleTable(createTransactionsTable("income", latestMonth, latestYear, transactions))
+	expenseTable := styleTable(createTransactionsTable("expense", latestMonth, latestYear, transactions))
+	investmentTable := styleTable(createTransactionsTable("investment", latestMonth, latestYear, transactions))
 
 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
-	footer := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText("press ESC or 'q' to go back")
+	footer := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
 
-	// TODO: extend to include the P&L
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3).
 		SetColumns(0, 0, 0).
