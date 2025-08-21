@@ -5,49 +5,51 @@ import (
 	"os"
 )
 
-type cliCommand struct {
-	name        string
-	description string
-	callback    func(args []string) (success bool, err error)
-}
+// TODO: refactoring cli to a TUI approach
 
-var supportedCommands = map[string]cliCommand{
-	"exit": {
-		name:        "exit",
-		description: "Exit the expense-tracking tool",
-		callback:    commandExit,
-	},
-	"help": {
-		name:        "help",
-		description: "Display a help message",
-		callback:    commandHelp,
-	},
-	"list": {
-		name:        "list",
-		description: "Show a list of transactions and p&l",
-		callback:    visualizeTransactions,
-	},
-	"show": {
-		name:        "show",
-		description: "Alias to list - show a list of transactions and p&l",
-		callback:    visualizeTransactions,
-	},
-	"add": {
-		name:        "add",
-		description: "Add a transaction (expense, investment or income)",
-		callback:    addTransaction,
-	},
-	"delete": {
-		name:        "delete",
-		description: "Delete a transaction (expense, investment or income)",
-		callback:    deleteTransaction,
-	},
-	"update": {
-		name:        "update",
-		description: "Update a transaction (expense, investment or income)",
-		callback:    updateTransaction,
-	},
-}
+// type cliCommand struct {
+// 	name        string
+// 	description string
+// 	callback    func(args []string) (success bool, err error)
+// }
+
+// var supportedCommands = map[string]cliCommand{
+// 	"exit": {
+// 		name:        "exit",
+// 		description: "Exit the expense-tracking tool",
+// 		callback:    commandExit,
+// 	},
+// 	"help": {
+// 		name:        "help",
+// 		description: "Display a help message",
+// 		callback:    commandHelp,
+// 	},
+// 	"list": {
+// 		name:        "list",
+// 		description: "Show a list of transactions and p&l",
+// 		callback:    visualizeTransactions,
+// 	},
+// 	"show": {
+// 		name:        "show",
+// 		description: "Alias to list - show a list of transactions and p&l",
+// 		callback:    visualizeTransactions,
+// 	},
+// 	"add": {
+// 		name:        "add",
+// 		description: "Add a transaction (expense, investment or income)",
+// 		callback:    addTransaction,
+// 	},
+// 	"delete": {
+// 		name:        "delete",
+// 		description: "Delete a transaction (expense, investment or income)",
+// 		callback:    deleteTransaction,
+// 	},
+// 	"update": {
+// 		name:        "update",
+// 		description: "Update a transaction (expense, investment or income)",
+// 		callback:    updateTransaction,
+// 	},
+// }
 
 func commandExit(args []string) (success bool, err error) {
 	fmt.Println("Closing the expense-tracking tool... goodbye!")

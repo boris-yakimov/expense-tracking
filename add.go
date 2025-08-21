@@ -18,6 +18,7 @@ const (
 func formAddTransaction() error {
 	var transactionType string
 	var category string
+	var description string
 	var categoryDropdown *tview.DropDown
 
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
@@ -59,16 +60,23 @@ func formAddTransaction() error {
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			fmt.Println(err)
+			return fmt.Errorf("%w", err)
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
 		})
 	}
-
 	categoryDropdown.SetCurrentOption(0)
 
 	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
+	// TODO: can I not just set a limit on the field when users type it ?
+	if len(descriptionField.GetText()) > descriptionMaxLength {
+		return fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxLength, len(description))
+	}
+
+	// TODO: by default this and than provide the option to add for a specific month or year by selecting it from dropdown
+	year := strings.ToLower(strconv.Itoa(time.Now().Year()))
+	month := strings.ToLower(time.Now().Month().String())
 
 	// TODO: display footer that shows ESC or 'q' can be pressed to go back to menu
 	form := styleForm(tview.NewForm().
@@ -78,10 +86,10 @@ func formAddTransaction() error {
 		AddFormItem(descriptionField).
 		AddButton("Add", func() {
 			amount := amountField.GetText()
+
 			description := descriptionField.GetText()
 
-			// TODO: refactor add transactions to no longer expect cli args so we can just pass these cleanly
-			if _, err := addTransaction([]string{transactionType, amount, category, description}); err != nil {
+			if err := addTransaction(transactionType, amount, category, description, month, year); err != nil {
 				// TODO: figure out how to better handle these errors
 				fmt.Printf("failed to add transaction: %s", err)
 				return
@@ -102,8 +110,8 @@ func formAddTransaction() error {
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
-	// back to mainMenu on ESC or q key press
 	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// back to mainMenu on ESC or q key press
 		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
 			mainMenu()
 			return nil
@@ -115,53 +123,32 @@ func formAddTransaction() error {
 	return nil
 }
 
-// TODO: remove these after TUI approach is implemented
-
-// add <transaction_type> <amount> <category> <description>
-func addTransaction(args []string) (success bool, err error) {
-	if len(args) < 4 {
-		return false, fmt.Errorf("usage: add <transcation type> <amount> <category> <description>")
-	}
-
-	transactionType, err := normalizeTransactionType(args[0])
+func addTransaction(transactionType, amount, category, description, month, year string) error {
+	txType, err := normalizeTransactionType(transactionType)
 	if err != nil {
-		return false, fmt.Errorf("transaction type error: %w", err)
+		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	amount, err := strconv.ParseFloat(args[1], 64)
+	txAmount, err := strconv.ParseFloat(amount, 64)
 	if err != nil {
-		return false, fmt.Errorf("\ninvalid amount: %w\n", err)
-	}
-
-	category := args[2]
-	if _, ok := allowedTransactionCategories[transactionType][category]; !ok {
-		fmt.Printf("\ninvalid transaction category: \"%s\"", category)
-		showAllowedCategories(transactionType) // expense, income, investment
-		return false, fmt.Errorf("\n\nPlease pick a valid transaction category from the list above.")
-	}
-
-	description := strings.Join(args[3:], " ")
-	if len(description) > descriptionMaxLength {
-		return false, fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxLength, len(description))
+		return fmt.Errorf("\ninvalid amount: %w\n", err)
 	}
 
 	if !validDescriptionInputFormat(description) {
-		return false, fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
+		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
-	// TODO: extend this to support adding transactions for a specific month and not only the current one
-	year := strings.ToLower(strconv.Itoa(time.Now().Year()))
-	month := strings.ToLower(time.Now().Month().String())
-
-	return handleTransactionAdd(transactionType, amount, category, description, month, year)
-}
-
-func handleTransactionAdd(transactionType string, amount float64, category, description, month, year string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {
-		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
 
+	var transactionId string
+	if transactionId, err = generateTransactionId(); err != nil {
+		return fmt.Errorf("unable to generate transaction id: %w", err)
+	}
+
+	// make sure nested structure exists
 	if _, ok := transactions[year]; !ok {
 		transactions[year] = make(map[string]map[string][]Transaction)
 	}
@@ -170,13 +157,8 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		transactions[year][month] = make(map[string][]Transaction)
 	}
 
-	if _, ok := transactions[year][month][transactionType]; !ok {
-		transactions[year][month][transactionType] = []Transaction{}
-	}
-
-	var transactionId string
-	if transactionId, err = generateTransactionId(); err != nil {
-		return false, fmt.Errorf("unable to generate transaction id: %w", err)
+	if _, ok := transactions[year][month][txType]; !ok {
+		transactions[year][month][txType] = []Transaction{}
 	}
 
 	// make sure only unique IDs are used
@@ -199,26 +181,26 @@ func handleTransactionAdd(transactionType string, amount float64, category, desc
 		}
 
 		if transactionId, err = generateTransactionId(); err != nil {
-			return false, fmt.Errorf("unable to generate transaction id: %w", err)
+			return fmt.Errorf("unable to generate transaction id: %w", err)
 		}
 	}
 
 	if len(transactionId) > 8 {
-		return false, fmt.Errorf("transcation id should have a maximum of 8 chars, current id %s with length of %v", transactionId, len(transactionId))
+		return fmt.Errorf("transcation id should have a maximum of 8 chars, current id %s with length of %v", transactionId, len(transactionId))
 	}
 
 	newTransaction := Transaction{
 		Id:          transactionId,
-		Amount:      amount,
+		Amount:      txAmount,
 		Category:    category,
 		Description: description,
 	}
 
-	transactions[year][month][transactionType] = append(transactions[year][month][transactionType], newTransaction)
+	transactions[year][month][txType] = append(transactions[year][month][txType], newTransaction)
 	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
-		return false, fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
+		return fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 
-	fmt.Printf("\n successfully added %s €%.2f | %s | %s\n", transactionType, amount, category, description)
-	return true, nil
+	fmt.Printf("\n successfully added %s €%.2f | %s | %s\n", txType, amount, category, description)
+	return nil
 }
