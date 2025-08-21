@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
+
+	"github.com/rivo/tview"
 )
 
 var allowedTransactionTypes = map[string]struct{}{
@@ -69,6 +72,37 @@ type Transaction struct {
 	Amount      float64 `json:"amount"`
 	Category    string  `json:"category"`
 	Description string  `json:"description"`
+}
+
+// helper to build a table for a specific transaction type for visualization in the TUI
+func createTransactionsTable(txType, month, year string, transactions TransactionHistory) *tview.Table {
+	table := tview.NewTable()
+	table.SetBorder(false)
+	table.SetTitle(capitalize(txType)).SetBorder(true)
+
+	headers := []string{"ID", "Amount", "Category", "Description"}
+	for c, h := range headers {
+		table.SetCell(0, c, tview.NewTableCell(h).SetSelectable(false))
+	}
+
+	if year == "" || month == "" {
+		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
+		return table
+	}
+
+	txList := transactions[year][month][txType]
+	if len(txList) == 0 {
+		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
+		return table
+	}
+
+	for r, tx := range txList {
+		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)))
+		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
+		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
+		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
+	}
+	return table
 }
 
 // year -> month -> transcation type (expense, income, or investment) -> transaction

@@ -5,11 +5,117 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 const (
 	descriptionMaxLength = 40 // chars
 )
+
+// TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
+func formAddTransaction() error {
+	var transactionType string
+	var category string
+	var categoryDropdown *tview.DropDown
+
+	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	typeDropdown := styleDropdown(tview.NewDropDown().
+		SetLabel("Transaction Type").
+		SetOptions(allowedTransactionTypes, func(selectedOption string, index int) {
+			transactionType = selectedOption
+			if categoryDropdown != nil {
+				opts, err := listOfAllowedCategories(transactionType)
+				if err != nil {
+					fmt.Println(err)
+				}
+				categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
+					category = selectedOption
+				})
+				if len(opts) > 0 {
+					categoryDropdown.SetCurrentOption(0)
+					category = opts[0]
+				} else {
+					category = ""
+				}
+			}
+		}))
+	typeDropdown.SetCurrentOption(0)
+
+	if _, opt := typeDropdown.GetCurrentOption(); opt != "" {
+		transactionType = opt
+	}
+
+	amountField := styleInputField(tview.NewInputField().SetLabel("Amount"))
+
+	categoryDropdown = styleDropdown(tview.NewDropDown().
+		SetLabel("Category"))
+	// scope boundary to isolate opts and err from leaking in the rest of the function
+	{
+		opts, err := listOfAllowedCategories(transactionType)
+		if err != nil {
+			fmt.Println(err)
+		}
+		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
+			category = selectedOption
+		})
+	}
+
+	categoryDropdown.SetCurrentOption(0)
+
+	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
+
+	// TODO: display footer that shows ESC or 'q' can be pressed to go back to menu
+	form := styleForm(tview.NewForm().
+		AddFormItem(typeDropdown).
+		AddFormItem(amountField).
+		AddFormItem(categoryDropdown).
+		AddFormItem(descriptionField).
+		AddButton("Add", func() {
+			amount := amountField.GetText()
+			description := descriptionField.GetText()
+
+			// TODO: refactor add transactions to no longer expect cli args so we can just pass these cleanly
+			if _, err := addTransaction([]string{transactionType, amount, category, description}); err != nil {
+				// TODO: figure out how to better handle these errors
+				fmt.Printf("failed to add transaction: %s", err)
+				return
+			}
+
+			mainMenu() // go back to menu
+		}).
+		AddButton("Clear", func() {
+			typeDropdown.SetCurrentOption(0)
+			amountField.SetText("")
+			categoryDropdown.SetCurrentOption(0)
+			descriptionField.SetText("")
+			transactionType = "expense"
+		}).
+		AddButton("Cancel", func() {
+			mainMenu()
+		}))
+
+	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+
+	// back to mainMenu on ESC or q key press
+	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+			mainMenu()
+			return nil
+		}
+		return event
+	})
+
+	tui.SetRoot(form, true).SetFocus(form)
+	return nil
+}
+
+// TODO: remove these after TUI approach is implemented
 
 // add <transaction_type> <amount> <category> <description>
 func addTransaction(args []string) (success bool, err error) {

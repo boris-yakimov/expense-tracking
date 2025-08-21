@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+func formUpdateTransaction() error {
+	// TODO: update function
+	return nil
+}
+
+// TODO: remove these after TUI approach is implemented
+
 // update <transaction_type> <transaction_id> <amount> <category> <description>
 func updateTransaction(args []string) (success bool, err error) {
 	if len(args) < 5 {

@@ -4,6 +4,13 @@ import (
 	"fmt"
 )
 
+func formDeleteTransaction() error {
+	// TODO: delete function
+	return nil
+}
+
+// TODO: remove these after TUI approach is implemented
+
 // delete <transaction_type> <transaction_id>
 func deleteTransaction(args []string) (success bool, err error) {
 	transactions, loadFileErr := loadTransactions()
