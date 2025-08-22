@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -34,18 +33,7 @@ func formDeleteTransaction() error {
 		})
 
 		// j/k navigation inside dropdown
-		idDropDown.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-			switch event.Key() {
-			case tcell.KeyRune:
-				switch event.Rune() {
-				case 'j': // move down
-					return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
-				case 'k': // move up
-					return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
-				}
-			}
-			return event
-		})
+		idDropDown.SetInputCapture(vimNavigation)
 	}
 
 	form := styleForm(tview.NewForm().
@@ -63,13 +51,7 @@ func formDeleteTransaction() error {
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// back to mainMenu on ESC or q key press
-	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-			mainMenu()
-			return nil
-		}
-		return event
-	})
+	form.SetInputCapture(exitShortcuts)
 
 	tui.SetRoot(form, true).SetFocus(form)
 	return nil

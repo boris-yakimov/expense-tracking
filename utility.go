@@ -7,6 +7,8 @@ import (
 	"regexp"
 	"strings"
 	"unicode"
+
+	"github.com/gdamore/tcell/v2"
 )
 
 var monthOrder = map[string]int{
@@ -155,4 +157,25 @@ func getTransactionTypeById(txId string) (txType string, err error) {
 		}
 	}
 	return "", fmt.Errorf("transaction ID %s could not be found in transaction list", txId)
+}
+
+func vimNavigation(event *tcell.EventKey) *tcell.EventKey {
+	switch event.Key() {
+	case tcell.KeyRune:
+		switch event.Rune() {
+		case 'j': // move down
+			return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
+		case 'k': // move up
+			return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
+		}
+	}
+	return event
+}
+
+func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
+	if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+		mainMenu()
+		return nil
+	}
+	return event
 }

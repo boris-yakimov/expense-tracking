@@ -8,7 +8,6 @@ import (
 	"strings"
 	"text/tabwriter"
 
-	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -88,13 +87,7 @@ func gridVisualizeTransactions() error {
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// back to mainMenu on ESC or q key press
-	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-			mainMenu()
-			return nil
-		}
-		return event
-	})
+	grid.SetInputCapture(exitShortcuts)
 
 	tui.SetRoot(grid, true).SetFocus(grid)
 
