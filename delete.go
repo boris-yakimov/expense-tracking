@@ -75,7 +75,6 @@ func formDeleteTransaction() error {
 	return nil
 }
 
-// delete <transaction_type> <transaction_id>
 func handleDeleteTransaction(transactionType, transactionId string) error {
 	transactions, loadFileErr := loadTransactions()
 	if loadFileErr != nil {

@@ -161,6 +161,12 @@ func handleAddTransaction(transactionType, amount, category, description, month,
 		return fmt.Errorf("\ninvalid amount: %w\n", err)
 	}
 
+	updatedCategory := category
+	if _, ok := allowedTransactionCategories[txType][updatedCategory]; !ok {
+		fmt.Printf("\ninvalid transaction category: \"%s\"", updatedCategory)
+		return fmt.Errorf("\n\nplease pick a valid transaction category from the list above.")
+	}
+
 	if !validDescriptionInputFormat(description) {
 		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
