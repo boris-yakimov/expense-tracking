@@ -66,6 +66,86 @@ func TestValidDescriptionInputFormat(t *testing.T) {
 	}
 }
 
-// TODO: tests for normalizeTransactionType()
-// TODO: tests for generateTransactionId() - check for errors; check for exact length of id
-// TODO: tests for capitalize()
+func TestNormalizeTransactionType(t *testing.T) {
+	cases := []struct {
+		input    string
+		expected string
+		hasError bool
+	}{
+		{"expense", "expense", false},
+		{"expenses", "expense", false},
+		{"Expense", "expense", false},
+		{"Expenses", "expense", false},
+		{"income", "income", false},
+		{"Income", "income", false},
+		{"investment", "investment", false},
+		{"investments", "investment", false},
+		{"Investment", "investment", false},
+		{"Investments", "investment", false},
+		{"invalid", "", true},
+		{"", "", true},
+		{"random", "", true},
+		{"EXPENSE", "", true},    // uppercase not supported
+		{"INCOME", "", true},     // uppercase not supported
+		{"INVESTMENT", "", true}, // uppercase not supported
+	}
+
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			result, err := normalizeTransactionType(c.input)
+
+			if (err != nil) != c.hasError {
+				t.Errorf("normalizeTransactionType(%q) error = %v; expected error = %v", c.input, err, c.hasError)
+			}
+
+			if !c.hasError && result != c.expected {
+				t.Errorf("normalizeTransactionType(%q) = %q; expected %q", c.input, result, c.expected)
+			}
+		})
+	}
+}
+
+func TestGenerateTransactionId(t *testing.T) {
+	// Test that IDs are generated and have correct length
+	for i := 0; i < 10; i++ {
+		id, err := generateTransactionId()
+		if err != nil {
+			t.Errorf("generateTransactionId() returned error: %v", err)
+		}
+		if len(id) != 8 {
+			t.Errorf("generateTransactionId() returned ID of length %d; expected 8", len(id))
+		}
+		// Check that ID contains only alphanumeric characters
+		for _, char := range id {
+			if !((char >= '0' && char <= '9') || (char >= 'A' && char <= 'Z') || (char >= 'a' && char <= 'z')) {
+				t.Errorf("generateTransactionId() returned ID with invalid character: %c", char)
+			}
+		}
+	}
+}
+
+func TestCapitalize(t *testing.T) {
+	cases := []struct {
+		input    string
+		expected string
+	}{
+		{"hello", "Hello"},
+		{"world", "World"},
+		{"test", "Test"},
+		{"a", "A"},
+		{"", ""},
+		{"already Capitalized", "Already capitalized"}, // function converts to lowercase after first char
+		{"MIXED case", "Mixed case"},                   // function converts to lowercase after first char
+		{"123", "123"},
+		{"hello world", "Hello world"},
+	}
+
+	for _, c := range cases {
+		t.Run(c.input, func(t *testing.T) {
+			result := capitalize(c.input)
+			if result != c.expected {
+				t.Errorf("capitalize(%q) = %q; expected %q", c.input, result, c.expected)
+			}
+		})
+	}
+}
