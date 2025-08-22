@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -31,9 +32,22 @@ func formDeleteTransaction() error {
 				fmt.Printf("Error getting transaction type: %s\n", err)
 			}
 		})
+
+		// j/k navigation inside dropdown
+		idDropDown.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			switch event.Key() {
+			case tcell.KeyRune:
+				switch event.Rune() {
+				case 'j': // move down
+					return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
+				case 'k': // move up
+					return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
+				}
+			}
+			return event
+		})
 	}
 
-	// TODO: build out form
 	form := styleForm(tview.NewForm().
 		AddFormItem(idDropDown).
 		AddButton("Delete", func() {
@@ -48,28 +62,14 @@ func formDeleteTransaction() error {
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
-	// TODO: can we navigate with vim motions
-	// form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-	// 	switch event.Key() {
-	// 	case tcell.KeyRune:
-	// 		switch event.Rune() {
-	// 		case 'j': // move down
-	// 			currentIndex := form.GetCurrentItem()
-	// 			form.SetCurrentItem(currentIndex + 1)
-	// 			return nil
-	// 		case 'k': // move up
-	// 			currentIndex := form.GetCurrentItem()
-	// 			if currentIndex > 0 {
-	// 				form.SetCurrentItem(currentIndex - 1)
-	// 			}
-	// 			return nil
-	// 		case 'q', 'Q':
-	// 			mainMenu()
-	// 			return nil
-	// 		}
-	// 	}
-	// 	return event
-	// })
+	// back to mainMenu on ESC or q key press
+	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+			mainMenu()
+			return nil
+		}
+		return event
+	})
 
 	tui.SetRoot(form, true).SetFocus(form)
 	return nil

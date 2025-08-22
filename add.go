@@ -47,6 +47,19 @@ func formAddTransaction() error {
 			}
 		}))
 	typeDropdown.SetCurrentOption(0)
+	// j/k navigation inside dropdown
+	typeDropdown.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		switch event.Key() {
+		case tcell.KeyRune:
+			switch event.Rune() {
+			case 'j': // move down
+				return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
+			case 'k': // move up
+				return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
+			}
+		}
+		return event
+	})
 
 	if _, opt := typeDropdown.GetCurrentOption(); opt != "" {
 		transactionType = opt
@@ -64,6 +77,20 @@ func formAddTransaction() error {
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
+		})
+
+		// j/k navigation inside dropdown
+		categoryDropdown.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+			switch event.Key() {
+			case tcell.KeyRune:
+				switch event.Rune() {
+				case 'j': // move down
+					return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
+				case 'k': // move up
+					return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
+				}
+			}
+			return event
 		})
 	}
 	categoryDropdown.SetCurrentOption(0)
@@ -110,8 +137,8 @@ func formAddTransaction() error {
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
+	// back to mainMenu on ESC or q key press
 	form.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		// back to mainMenu on ESC or q key press
 		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
 			mainMenu()
 			return nil

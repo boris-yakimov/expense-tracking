@@ -48,7 +48,7 @@ func mainMenu() error {
 				fmt.Printf("update error: %s", err)
 			}
 		}).
-		AddItem("Quit", "press to exit", 'q', func() {
+		AddItem("quit", "press to exit", 'q', func() {
 			tui.Stop()
 		}))
 
