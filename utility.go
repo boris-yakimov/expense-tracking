@@ -179,3 +179,7 @@ func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 	}
 	return event
 }
+
+func enforceCharLimit(textToCheck string, lastChar rune) bool {
+	return len(textToCheck) <= descriptionMaxCharLength
+}

@@ -92,13 +92,10 @@ func formUpdateTransaction() error {
 	}
 	categoryDropdown.SetCurrentOption(0)
 
-	var description string
-
-	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
-	// TODO: can I not just set a limit on the field when users type it ?
-	if len(descriptionField.GetText()) > descriptionMaxCharLength {
-		return fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxCharLength, len(description))
-	}
+	descriptionField := styleInputField(tview.NewInputField().
+		SetLabel("Description").
+		SetAcceptanceFunc(enforceCharLimit),
+	)
 
 	form := styleForm(tview.NewForm().
 		AddFormItem(idDropDown).
@@ -160,9 +157,6 @@ func handleUpdateTransaction(transactionType, transactionId, amount, category, d
 
 	if !validDescriptionInputFormat(description) {
 		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
-	}
-	if len(description) > descriptionMaxCharLength {
-		return fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxCharLength, len(description))
 	}
 
 	transactions, loadFileErr := loadTransactions()

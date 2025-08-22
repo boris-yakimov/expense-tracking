@@ -17,7 +17,6 @@ const (
 func formAddTransaction() error {
 	var transactionType string
 	var category string
-	var description string
 	var categoryDropdown *tview.DropDown
 
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
@@ -72,11 +71,10 @@ func formAddTransaction() error {
 	}
 	categoryDropdown.SetCurrentOption(0)
 
-	descriptionField := styleInputField(tview.NewInputField().SetLabel("Description"))
-	// TODO: can I not just set a limit on the field when users type it ?
-	if len(descriptionField.GetText()) > descriptionMaxCharLength {
-		return fmt.Errorf("\ndescription should be a maximum of %v characters, provided %v", descriptionMaxCharLength, len(description))
-	}
+	descriptionField := styleInputField(tview.NewInputField().
+		SetLabel("Description").
+		SetAcceptanceFunc(enforceCharLimit),
+	)
 
 	// TODO: by default this and than provide the option to add for a specific month or year by selecting it from dropdown
 	year := strings.ToLower(strconv.Itoa(time.Now().Year()))

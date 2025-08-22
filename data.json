@@ -43,6 +43,12 @@
           "amount": 12.35,
           "category": "food",
           "description": "updated lunch"
+        },
+        {
+          "id": "66f379d5",
+          "amount": 200,
+          "category": "food",
+          "description": "super long description to test if we are"
         }
       ],
       "income": [
