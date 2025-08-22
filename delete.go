@@ -12,7 +12,7 @@ func formDeleteTransaction() error {
 	var transactionType string
 
 	idDropDown := styleDropdown(tview.NewDropDown().
-		SetLabel("Transaction ID"))
+		SetLabel("Transaction List"))
 
 	{
 		// show detailed transaction information so user knows what they are deleting
