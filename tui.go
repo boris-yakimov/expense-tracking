@@ -55,9 +55,12 @@ func mainMenu() error {
 
 	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
+	frame := tview.NewFrame(menu).
+		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+
 	// Add vim-like navigation with j and k keys
 	menu.SetInputCapture(vimNavigation)
 
-	tui.SetRoot(menu, true).SetFocus(menu)
+	tui.SetRoot(frame, true).SetFocus(menu)
 	return nil
 }
