@@ -50,10 +50,13 @@ func formDeleteTransaction() error {
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
+	frame := tview.NewFrame(form).
+		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+
 	// back to mainMenu on ESC or q key press
 	form.SetInputCapture(exitShortcuts)
 
-	tui.SetRoot(form, true).SetFocus(form)
+	tui.SetRoot(frame, true).SetFocus(form)
 	return nil
 }
 

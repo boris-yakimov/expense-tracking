@@ -17,6 +17,7 @@ func main() {
 		return false
 	})
 
+	// TODO: should these be panics ?
 	if err := mainMenu(); err != nil {
 		panic(err)
 	}

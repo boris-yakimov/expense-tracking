@@ -183,3 +183,7 @@ func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 func enforceCharLimit(textToCheck string, lastChar rune) bool {
 	return len(textToCheck) <= descriptionMaxCharLength
 }
+
+func generateControlsFooter() string {
+	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
+}

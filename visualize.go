@@ -63,7 +63,7 @@ func gridVisualizeTransactions() error {
 		return fmt.Errorf("unable to calculate pnl %w", err)
 	}
 	if latestYear != "" && latestMonth != "" {
-		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%\n\n", calculatedPnl.Amount, calculatedPnl.Percent)
+		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%", calculatedPnl.Amount, calculatedPnl.Percent)
 	}
 
 	// build tx table for each tx type
@@ -72,18 +72,23 @@ func gridVisualizeTransactions() error {
 	investmentTable := styleTable(createTransactionsTable("investment", latestMonth, latestYear, transactions))
 
 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
-	footer := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
+	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
+	helpFooter := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignCenter).
+		SetText(generateControlsFooter())
 
+	// TODO: explore options to redesign grid into a flex
 	grid := styleGrid(tview.NewGrid().
-		SetRows(3, 0, 3).
+		SetRows(3, 0, 3, 2).
 		SetColumns(0, 0, 0).
 		SetBorders(true).
 		AddItem(header, 0, 0, 1, 3, 0, 0, false).
-		AddItem(footer, 2, 0, 1, 3, 0, 0, false).
 		AddItem(incomeTable, 1, 0, 1, 1, 0, 0, false).
 		AddItem(expenseTable, 1, 1, 1, 1, 0, 0, false).
-		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false))
-
+		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false)).
+		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
+		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// back to mainMenu on ESC or q key press
