@@ -1,12 +1,15 @@
 package main
 
 import (
-	"crypto/rand"
-	"encoding/hex"
 	"fmt"
+	"os"
 	"regexp"
 	"strings"
 	"unicode"
+
+	"crypto/rand"
+	"encoding/hex"
+	"text/tabwriter"
 
 	"github.com/gdamore/tcell/v2"
 )
@@ -24,13 +27,6 @@ var monthOrder = map[string]int{
 	"october":   10,
 	"november":  11,
 	"december":  12,
-}
-
-var transactionTypeOrder = map[string]int{
-	// descending
-	"income":     1,
-	"expense":    2,
-	"investment": 3,
 }
 
 func cleanTerminalInput(cmdArgs string) []string {
@@ -186,4 +182,59 @@ func enforceCharLimit(textToCheck string, lastChar rune) bool {
 
 func generateControlsFooter() string {
 	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
+}
+
+func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {
+	transactions, loadFileErr := loadTransactions()
+	if loadFileErr != nil {
+		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+	}
+
+	if len(transactions) == 0 {
+		fmt.Println("\nno transactions found")
+		return true, nil
+	}
+
+	transactionType, err = normalizeTransactionType(transactionType)
+	if err != nil {
+		return false, fmt.Errorf("transaction type error: %w", err)
+	}
+
+	// transaction type header
+	fmt.Println()
+	fmt.Printf("  %s\n", capitalize(transactionType))
+	fmt.Printf("  %s\n", strings.Repeat("-", len(transactionType)))
+
+	// transaction table format
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
+	fmt.Fprintln(w, "    ID\tAmount\tCategory\tDescription")
+	fmt.Fprintln(w, "    --\t------\t--------\t-----------")
+
+	for _, t := range transactions[year][month][transactionType] {
+		fmt.Fprintf(w, "    %s\t€%.2f\t%s\t%s\n", t.Id, t.Amount, t.Category, t.Description)
+	}
+
+	w.Flush()
+	fmt.Println()
+
+	return true, nil
+}
+
+func showAllowedCategories(transactionType string) error {
+	fmt.Println("\nallowed categories are: ")
+
+	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(w, "\nCategory\tDescription")
+	fmt.Fprintln(w, "--------\t-----------")
+
+	txType, err := normalizeTransactionType(transactionType)
+	if err != nil {
+		return fmt.Errorf("%w", err)
+	}
+
+	for key, val := range allowedTransactionCategories[txType] {
+		fmt.Fprintf(w, "%s\t%s\n", key, val)
+	}
+	w.Flush()
+	return nil
 }
