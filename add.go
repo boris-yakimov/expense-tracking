@@ -112,6 +112,7 @@ func formAddTransaction() error {
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
+	// navigation help
 	frame := tview.NewFrame(form).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 

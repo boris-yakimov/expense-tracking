@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -17,13 +18,14 @@ func main() {
 		return false
 	})
 
-	// TODO: should these be panics ?
 	if err := mainMenu(); err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
+		os.Exit(1)
 	}
 
 	if err := tui.Run(); err != nil {
-		panic(err)
+		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
+		os.Exit(1)
 	}
 }
 
@@ -55,6 +57,7 @@ func mainMenu() error {
 
 	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
+	// navigation help
 	frame := tview.NewFrame(menu).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
@@ -64,3 +67,5 @@ func mainMenu() error {
 	tui.SetRoot(frame, true).SetFocus(menu)
 	return nil
 }
+
+// TODO: implement show error modal window

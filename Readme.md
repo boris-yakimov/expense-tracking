@@ -3,6 +3,7 @@
 v1.2.0 - refactor to SQLite for data - To Do
 
 v1.1.0 - refactoring with a TUI - In Progress
+TODO: add a GIF with browsing menus
 
 v1.0.0 - mvp with base functionality and storing transactions in JSON file - DONE
 ```
