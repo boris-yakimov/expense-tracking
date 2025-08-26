@@ -96,6 +96,7 @@ func formAddTransaction() error {
 	}
 	periodDropdown.SetCurrentOption(0)
 
+	// parse the selected month and year
 	parts := strings.SplitN(monthAndYear, " ", 2)
 	if len(parts) != 2 {
 		return fmt.Errorf("invalid period format: %s", monthAndYear)

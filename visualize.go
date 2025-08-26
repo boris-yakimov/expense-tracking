@@ -2,14 +2,143 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
-// TODO: ability to pick a specific month or year
-// the default shows the current one
-// key press shows a list of months or years that have transactions
-// selecting one shows a table of transactions in that specific month and year
+func showMonthSelector() error {
+	months, err := getMonthsWithTransactions()
+	if err != nil {
+		return fmt.Errorf("unable to get months with transactions: %w", err)
+	}
+
+	if len(months) == 0 {
+		return fmt.Errorf("no transactions found")
+	}
+
+	list := styleList(tview.NewList())
+
+	for _, monthYear := range months {
+		list.AddItem(monthYear, "", 0, func() {
+			// parse the selected month and year
+			parts := strings.Split(monthYear, " ")
+			if len(parts) == 2 {
+				selectedMonth := parts[0]
+				selectedYear := parts[1]
+				if err := showTransactionsForMonth(selectedMonth, selectedYear); err != nil {
+					showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), nil, list)
+					return
+				}
+			}
+		})
+	}
+
+	// go back to previous month
+	list.AddItem("back to current month", "", 'b', func() {
+		if err := gridVisualizeTransactions(); err != nil {
+			showErrorModal(fmt.Sprintf("error showing current transactions:\n\n%s", err), nil, list)
+			return
+		}
+	})
+
+	list.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+
+	// navigation help
+	frame := tview.NewFrame(list).
+		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+
+	// Handle input capture for month selection and exit
+	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// handle exit events
+		if ev := exitShortcuts(event); ev == nil {
+			return nil // key event consumed
+		}
+
+		// handle list months event
+		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
+			if err := showMonthSelector(); err != nil {
+				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, list)
+				return nil
+			}
+			return nil // key event consumed
+		}
+		// handle j/k events to navigate up or down
+		return vimNavigation(event)
+	})
+
+	tui.SetRoot(frame, true).SetFocus(list)
+	return nil
+}
+
+func showTransactionsForMonth(month, year string) error {
+	transactions, err := loadTransactions()
+	if err != nil {
+		return fmt.Errorf("unable to load transactions file: %w", err)
+	}
+
+	var headerText string
+	if year != "" && month != "" {
+		headerText = fmt.Sprintf("%s %s", capitalize(month), year)
+	}
+
+	var calculatedPnl PnLResult
+	var footerText string
+	if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
+		return fmt.Errorf("unable to calculate pnl: %w", err)
+	}
+	if year != "" && month != "" {
+		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%", calculatedPnl.Amount, calculatedPnl.Percent)
+	}
+
+	// build tx table for each tx type
+	incomeTable := styleTable(createTransactionsTable("income", month, year, transactions))
+	expenseTable := styleTable(createTransactionsTable("expense", month, year, transactions))
+	investmentTable := styleTable(createTransactionsTable("investment", month, year, transactions))
+
+	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
+	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
+	helpFooter := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignCenter).
+		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate")
+
+	// TODO: explore options to redesign grid into a flex
+	grid := styleGrid(tview.NewGrid().
+		SetRows(3, 0, 3, 2).
+		SetColumns(0, 0, 0).
+		SetBorders(true).
+		AddItem(header, 0, 0, 1, 3, 0, 0, false).
+		AddItem(incomeTable, 1, 0, 1, 1, 0, 0, false).
+		AddItem(expenseTable, 1, 1, 1, 1, 0, 0, false).
+		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false)).
+		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
+		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
+	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+
+	// Handle input capture for month selection and exit
+	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// handle exit events
+		if ev := exitShortcuts(event); ev == nil {
+			return nil // key event consumed
+		}
+
+		// handle list months event
+		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
+			if err := showMonthSelector(); err != nil {
+				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, grid)
+				return nil
+			}
+			return nil // key event consumed
+		}
+		// handle j/k events to navigate up or down
+		return vimNavigation(event)
+	})
+
+	tui.SetRoot(grid, true).SetFocus(grid)
+	return nil
+}
 
 func gridVisualizeTransactions() error {
 	transactions, err := loadTransactions()
@@ -46,7 +175,7 @@ func gridVisualizeTransactions() error {
 	helpFooter := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
-		SetText(generateControlsFooter())
+		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate")
 
 	// TODO: explore options to redesign grid into a flex
 	grid := styleGrid(tview.NewGrid().
@@ -61,10 +190,25 @@ func gridVisualizeTransactions() error {
 		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
-	// back to mainMenu on ESC or q key press
-	grid.SetInputCapture(exitShortcuts)
+	// Handle input capture for month selection and exit
+	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// handle exit events
+		if ev := exitShortcuts(event); ev == nil {
+			return nil // key event consumed
+		}
+
+		// handle list months event
+		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
+			if err := showMonthSelector(); err != nil {
+				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, grid)
+				return nil
+			}
+			return nil // key event consumed
+		}
+		// handle j/k events to navigate up or down
+		return vimNavigation(event)
+	})
 
 	tui.SetRoot(grid, true).SetFocus(grid)
-
 	return nil
 }
