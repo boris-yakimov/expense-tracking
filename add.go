@@ -32,7 +32,9 @@ func formAddTransaction() error {
 			if categoryDropdown != nil {
 				opts, err := listOfAllowedCategories(transactionType)
 				if err != nil {
-					fmt.Println(err)
+					// Set empty options on error to prevent crashes
+					showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
+					return
 				}
 				categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 					category = selectedOption

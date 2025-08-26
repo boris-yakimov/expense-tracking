@@ -86,7 +86,7 @@ func formUpdateTransaction() error {
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), frame, form)
+			return fmt.Errorf("failed to list categories: %w", err)
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
@@ -174,6 +174,7 @@ func handleUpdateTransaction(transactionType, transactionId, amount, category, d
 	}
 
 	// years
+	var transactionFound bool
 	for year, months := range transactions {
 
 		// months
@@ -186,9 +187,14 @@ func handleUpdateTransaction(transactionType, transactionId, amount, category, d
 					tx.Category = category
 
 					transactions[year][month][txType][i] = tx
+					transactionFound = true
 				}
 			}
 		}
+	}
+
+	if !transactionFound {
+		return fmt.Errorf("transaction with id %s not found", transactionId)
 	}
 
 	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
