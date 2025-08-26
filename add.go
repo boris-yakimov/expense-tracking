@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
-	"time"
 
 	"github.com/rivo/tview"
 )
@@ -13,16 +11,15 @@ const (
 	descriptionMaxCharLength = 40
 )
 
-// TODO: add option for month year - default shows current, but if you start typing a previous month or year it is available based on the data you have
 func formAddTransaction() error {
-	var transactionType string
-	var category string
-	var categoryDropdown *tview.DropDown
-
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
 		return fmt.Errorf("%w", err)
 	}
+
+	var transactionType string
+	var category string
+	var categoryDropdown *tview.DropDown
 
 	typeDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction Type").
@@ -76,16 +73,33 @@ func formAddTransaction() error {
 		SetAcceptanceFunc(enforceCharLimit),
 	)
 
-	// TODO: by default this and than provide the option to add for a specific month or year by selecting it from dropdown
-	year := strings.ToLower(strconv.Itoa(time.Now().Year()))
-	month := strings.ToLower(time.Now().Month().String())
+	var period string
+	periodDropdown := styleDropdown(tview.NewDropDown().
+		SetLabel("Month/Year"))
+	{
+		opts, err := getMonthsWithTransactions()
+		if err != nil {
+			return fmt.Errorf("%w", err)
+		}
+		periodDropdown.SetOptions(opts, func(selectedOption string, index int) {
+			period = selectedOption
+		})
 
-	// TODO: display footer that shows ESC or 'q' can be pressed to go back to menu
+		// j/k navigation inside dropdown
+		periodDropdown.SetInputCapture(vimNavigation)
+	}
+	periodDropdown.SetCurrentOption(0)
+
+	// TODO: this seems like a messy approach to get month & year from what was selected in the dropdown, there should be a better way
+	month := period[:len(period)-5]
+	year := period[len(period)-4:]
+
 	form := styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
 		AddFormItem(categoryDropdown).
 		AddFormItem(descriptionField).
+		AddFormItem(periodDropdown).
 		AddButton("Add", func() {
 			amount := amountField.GetText()
 

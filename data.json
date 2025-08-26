@@ -49,6 +49,12 @@
           "amount": 200,
           "category": "food",
           "description": "super long description to test if we are"
+        },
+        {
+          "id": "726e2d48",
+          "amount": 20,
+          "category": "food",
+          "description": "brownies"
         }
       ],
       "income": [

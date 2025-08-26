@@ -17,6 +17,7 @@ func gridVisualizeTransactions() error {
 	// key press shows a list of months or years that have transactions
 	// selecting one shows a table of transactions in that specific month and year
 
+	// TODO: can I move those into a separate function
 	// determine latest year
 	var latestYear string
 	for y := range transactions {

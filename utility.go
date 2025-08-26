@@ -238,3 +238,19 @@ func showAllowedCategories(transactionType string) error {
 	w.Flush()
 	return nil
 }
+
+// make sure these are sorted with newest to oldest month/year
+func getMonthsWithTransactions() (months []string, err error) {
+	transactions, loadFileErr := loadTransactions()
+	if loadFileErr != nil {
+		return months, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+	}
+
+	for y := range transactions {
+		for m := range transactions[y] {
+			months = append(months, fmt.Sprintf("%s %s", m, y))
+		}
+	}
+
+	return months, nil
+}
