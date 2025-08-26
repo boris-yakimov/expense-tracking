@@ -269,3 +269,30 @@ func showErrorModal(msg string, frame *tview.Frame, focus tview.Primitive) {
 	// set focus to the error
 	tui.SetRoot(modal, true).SetFocus(modal)
 }
+
+func determineLatestMonthAndYear() (month, year string, err error) {
+	transactions, err := loadTransactions()
+	if err != nil {
+		return "", "", fmt.Errorf("unable to load transactions file: %w", err)
+	}
+
+	// determine latest year
+	var latestYear string
+	for y := range transactions {
+		if latestYear == "" || y > latestYear {
+			latestYear = y
+		}
+	}
+
+	// determine latest month for the year
+	var latestMonth string
+	if latestYear != "" {
+		for m := range transactions[latestYear] {
+			if latestMonth == "" || monthOrder[m] > monthOrder[latestMonth] {
+				latestMonth = m
+			}
+		}
+	}
+
+	return latestMonth, latestYear, nil
+}

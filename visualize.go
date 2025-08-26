@@ -6,34 +6,20 @@ import (
 	"github.com/rivo/tview"
 )
 
+// TODO: ability to pick a specific month or year
+// the default shows the current one
+// key press shows a list of months or years that have transactions
+// selecting one shows a table of transactions in that specific month and year
+
 func gridVisualizeTransactions() error {
 	transactions, err := loadTransactions()
 	if err != nil {
 		return fmt.Errorf("unable to load transactions file: %w", err)
 	}
 
-	// TODO: ability to pick a specific month or year
-	// the default shows the current one
-	// key press shows a list of months or years that have transactions
-	// selecting one shows a table of transactions in that specific month and year
-
-	// TODO: can I move those into a separate function
-	// determine latest year
-	var latestYear string
-	for y := range transactions {
-		if latestYear == "" || y > latestYear {
-			latestYear = y
-		}
-	}
-
-	// determine latest month for the year
-	var latestMonth string
-	if latestYear != "" {
-		for m := range transactions[latestYear] {
-			if latestMonth == "" || monthOrder[m] > monthOrder[latestMonth] {
-				latestMonth = m
-			}
-		}
+	latestMonth, latestYear, err := determineLatestMonthAndYear()
+	if err != nil {
+		return fmt.Errorf("unable to determine last month or year: %w", err)
 	}
 
 	var headerText string
@@ -44,7 +30,7 @@ func gridVisualizeTransactions() error {
 	var calculatedPnl PnLResult
 	var footerText string
 	if calculatedPnl, err = calculateMonthPnL(latestMonth, latestYear); err != nil {
-		return fmt.Errorf("unable to calculate pnl %w", err)
+		return fmt.Errorf("unable to calculate pnl: %w", err)
 	}
 	if latestYear != "" && latestMonth != "" {
 		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%", calculatedPnl.Amount, calculatedPnl.Percent)

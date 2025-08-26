@@ -97,7 +97,7 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 					fmt.Printf("%s for %s %s\n", txType, month, year)
 					_, err = listTransactionsByMonth(txType, month, year)
 					if err != nil {
-						return fmt.Errorf("unable to list remaining transactions: %s", err)
+						return fmt.Errorf("unable to list remaining transactions: %w", err)
 					}
 
 					return nil
