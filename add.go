@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/rivo/tview"
 )
@@ -73,7 +74,7 @@ func formAddTransaction() error {
 		SetAcceptanceFunc(enforceCharLimit),
 	)
 
-	var period string
+	var monthAndYear string
 	periodDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Month/Year"))
 	{
@@ -82,7 +83,7 @@ func formAddTransaction() error {
 			return fmt.Errorf("%w", err)
 		}
 		periodDropdown.SetOptions(opts, func(selectedOption string, index int) {
-			period = selectedOption
+			monthAndYear = selectedOption
 		})
 
 		// j/k navigation inside dropdown
@@ -90,9 +91,12 @@ func formAddTransaction() error {
 	}
 	periodDropdown.SetCurrentOption(0)
 
-	// TODO: this seems like a messy approach to get month & year from what was selected in the dropdown, there should be a better way
-	month := period[:len(period)-5]
-	year := period[len(period)-4:]
+	parts := strings.SplitN(monthAndYear, " ", 2)
+	if len(parts) != 2 {
+		return fmt.Errorf("invalid period format: %s", monthAndYear)
+	}
+	month := parts[0]
+	year := parts[1]
 
 	form := styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).
