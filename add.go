@@ -22,6 +22,9 @@ func formAddTransaction() error {
 	var category string
 	var categoryDropdown *tview.DropDown
 
+	var form *tview.Form
+	var frame *tview.Frame
+
 	typeDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction Type").
 		SetOptions(allowedTransactionTypes, func(selectedOption string, index int) {
@@ -98,7 +101,7 @@ func formAddTransaction() error {
 	month := parts[0]
 	year := parts[1]
 
-	form := styleForm(tview.NewForm().
+	form = styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
 		AddFormItem(categoryDropdown).
@@ -110,8 +113,7 @@ func formAddTransaction() error {
 			description := descriptionField.GetText()
 
 			if err := handleAddTransaction(transactionType, amount, category, description, month, year); err != nil {
-				// TODO: figure out how to better handle these errors
-				fmt.Printf("failed to add transaction: %s", err)
+				showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), frame, form)
 				return
 			}
 
@@ -131,7 +133,7 @@ func formAddTransaction() error {
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// navigation help
-	frame := tview.NewFrame(form).
+	frame = tview.NewFrame(form).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to mainMenu on ESC or q key press
@@ -225,6 +227,6 @@ func handleAddTransaction(transactionType, amount, category, description, month,
 		return fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 
-	fmt.Printf("\n successfully added %s €%.2f | %s | %s\n", txType, txAmount, category, description)
+	fmt.Printf(" successfully added %s €%.2f | %s | %s\n", txType, txAmount, category, description)
 	return nil
 }

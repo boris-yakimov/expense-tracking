@@ -12,6 +12,7 @@ import (
 	"text/tabwriter"
 
 	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 var monthOrder = map[string]int{
@@ -253,4 +254,18 @@ func getMonthsWithTransactions() (months []string, err error) {
 	}
 
 	return months, nil
+}
+
+func showErrorModal(msg string, frame *tview.Frame, focus tview.Primitive) {
+	modal := tview.NewModal().
+		SetText(msg).
+		AddButtons([]string{"OK"}).
+		SetDoneFunc(func(_ int, _ string) {
+			// on presssing OK -  set focus back to the previous screen (menu, form, etc)
+			tui.SetRoot(frame, true).SetFocus(focus)
+		})
+	// back to mainMenu on ESC or q key press
+	modal.SetInputCapture(exitShortcuts)
+	// set focus to the error
+	tui.SetRoot(modal, true).SetFocus(modal)
 }

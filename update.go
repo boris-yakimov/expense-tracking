@@ -11,6 +11,9 @@ func formUpdateTransaction() error {
 	var transactionId string
 	var transactionType string
 
+	var form *tview.Form
+	var frame *tview.Frame
+
 	idDropDown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction To Update"))
 
@@ -29,7 +32,8 @@ func formUpdateTransaction() error {
 			var err error
 			transactionType, err = getTransactionTypeById(transactionId)
 			if err != nil {
-				fmt.Printf("Error getting transaction type: %s\n", err)
+				showErrorModal(fmt.Sprintf("error getting transaction type by id: %s, err:\n\n%s", transactionId, err), frame, form)
+				return
 			}
 		})
 		// j/k navigation inside dropdown
@@ -51,7 +55,8 @@ func formUpdateTransaction() error {
 			if categoryDropdown != nil {
 				opts, err := listOfAllowedCategories(transactionType)
 				if err != nil {
-					fmt.Println(err)
+					showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
+					return
 				}
 				categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 					category = selectedOption
@@ -81,7 +86,7 @@ func formUpdateTransaction() error {
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			return fmt.Errorf("%w", err)
+			showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), frame, form)
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
@@ -97,7 +102,7 @@ func formUpdateTransaction() error {
 		SetAcceptanceFunc(enforceCharLimit),
 	)
 
-	form := styleForm(tview.NewForm().
+	form = styleForm(tview.NewForm().
 		AddFormItem(idDropDown).
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
@@ -109,8 +114,7 @@ func formUpdateTransaction() error {
 			description := descriptionField.GetText()
 
 			if err := handleUpdateTransaction(transactionType, transactionId, amount, category, description); err != nil {
-				// TODO: figure out how to better handle these errors
-				fmt.Printf("failed to add transaction: %s", err)
+				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), frame, form)
 				return
 			}
 
@@ -130,7 +134,7 @@ func formUpdateTransaction() error {
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// navigation help
-	frame := tview.NewFrame(form).
+	frame = tview.NewFrame(form).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to mainMenu on ESC or q key press
@@ -157,8 +161,7 @@ func handleUpdateTransaction(transactionType, transactionId, amount, category, d
 	}
 
 	if _, ok := allowedTransactionCategories[txType][category]; !ok {
-		fmt.Printf("\ninvalid transaction category: \"%s\"", category)
-		return fmt.Errorf("\n\nplease pick a valid transaction category from the list above.")
+		return fmt.Errorf("\n\ninvalid transaction category: %s", category)
 	}
 
 	if !validDescriptionInputFormat(description) {

@@ -30,25 +30,32 @@ func main() {
 }
 
 func mainMenu() error {
-	menu := styleList(tview.NewList().
+	var frame *tview.Frame
+	var menu *tview.List
+
+	menu = styleList(tview.NewList().
 		AddItem("list transactions", "", 'l', func() {
 			if err := gridVisualizeTransactions(); err != nil {
-				fmt.Printf("list transactions error: %s", err)
+				showErrorModal(fmt.Sprintf("list error:\n\n%s", err), frame, menu)
+				return
 			}
 		}).
 		AddItem("add a new transaction", "", 'a', func() {
 			if err := formAddTransaction(); err != nil {
-				fmt.Printf("add error: %s", err)
+				showErrorModal(fmt.Sprintf("add error:\n\n%s", err), frame, menu)
+				return
 			}
 		}).
 		AddItem("delete a transaction", "", 'd', func() {
 			if err := formDeleteTransaction(); err != nil {
-				fmt.Printf("delete error: %s", err)
+				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), frame, menu)
+				return
 			}
 		}).
 		AddItem("update a transaction", "", 'u', func() {
 			if err := formUpdateTransaction(); err != nil {
-				fmt.Printf("update error: %s", err)
+				showErrorModal(fmt.Sprintf("update error:\n\n%s", err), frame, menu)
+				return
 			}
 		}).
 		AddItem("quit", "", 'q', func() {
@@ -58,7 +65,7 @@ func mainMenu() error {
 	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// navigation help
-	frame := tview.NewFrame(menu).
+	frame = tview.NewFrame(menu).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// Add vim-like navigation with j and k keys
@@ -67,5 +74,3 @@ func mainMenu() error {
 	tui.SetRoot(frame, true).SetFocus(menu)
 	return nil
 }
-
-// TODO: implement show error modal window

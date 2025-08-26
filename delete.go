@@ -10,6 +10,9 @@ func formDeleteTransaction() error {
 	var transactionId string
 	var transactionType string
 
+	var frame *tview.Frame
+	var form *tview.Form
+
 	idDropDown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction List"))
 
@@ -28,7 +31,8 @@ func formDeleteTransaction() error {
 			var err error
 			transactionType, err = getTransactionTypeById(transactionId)
 			if err != nil {
-				fmt.Printf("Error getting transaction type: %s\n", err)
+				showErrorModal(fmt.Sprintf("Error getting transaction type:\n\n%s", err), frame, form)
+				return
 			}
 		})
 
@@ -36,11 +40,11 @@ func formDeleteTransaction() error {
 		idDropDown.SetInputCapture(vimNavigation)
 	}
 
-	form := styleForm(tview.NewForm().
+	form = styleForm(tview.NewForm().
 		AddFormItem(idDropDown).
 		AddButton("Delete", func() {
 			if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
-				fmt.Printf("failed to delete transaction: %s", err)
+				showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, form)
 				return
 			}
 		}).
@@ -51,7 +55,7 @@ func formDeleteTransaction() error {
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// navigation help
-	frame := tview.NewFrame(form).
+	frame = tview.NewFrame(form).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to mainMenu on ESC or q key press
