@@ -12,6 +12,15 @@ const (
 	descriptionMaxCharLength = 40
 )
 
+type AddTransactionRequest struct {
+	Type        string
+	Amount      string
+	Category    string
+	Description string
+	Month       string
+	Year        string
+}
+
 func formAddTransaction() error {
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
@@ -115,7 +124,16 @@ func formAddTransaction() error {
 
 			description := descriptionField.GetText()
 
-			if err := handleAddTransaction(transactionType, amount, category, description, month, year); err != nil {
+			req := AddTransactionRequest{
+				Type:        transactionType,
+				Amount:      amount,
+				Category:    category,
+				Description: description,
+				Month:       month,
+				Year:        year,
+			}
+
+			if err := handleAddTransaction(req); err != nil {
 				showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), frame, form)
 				return
 			}
@@ -146,24 +164,24 @@ func formAddTransaction() error {
 	return nil
 }
 
-func handleAddTransaction(transactionType, amount, category, description, month, year string) error {
-	txType, err := normalizeTransactionType(transactionType)
+func handleAddTransaction(req AddTransactionRequest) error {
+	txType, err := normalizeTransactionType(req.Type)
 	if err != nil {
 		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	txAmount, err := strconv.ParseFloat(amount, 64)
+	txAmount, err := strconv.ParseFloat(req.Amount, 64)
 	if err != nil {
 		return fmt.Errorf("\ninvalid amount: %w\n", err)
 	}
 
-	updatedCategory := category
+	updatedCategory := req.Category
 	if _, ok := allowedTransactionCategories[txType][updatedCategory]; !ok {
 		fmt.Printf("\ninvalid transaction category: \"%s\"", updatedCategory)
 		return fmt.Errorf("\n\nplease pick a valid transaction category from the list above.")
 	}
 
-	if !validDescriptionInputFormat(description) {
+	if !validDescriptionInputFormat(req.Description) {
 		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
@@ -178,23 +196,23 @@ func handleAddTransaction(transactionType, amount, category, description, month,
 	}
 
 	// make sure nested structure exists
-	if _, ok := transactions[year]; !ok {
-		transactions[year] = make(map[string]map[string][]Transaction)
+	if _, ok := transactions[req.Year]; !ok {
+		transactions[req.Year] = make(map[string]map[string][]Transaction)
 	}
 
-	if _, ok := transactions[year][month]; !ok {
-		transactions[year][month] = make(map[string][]Transaction)
+	if _, ok := transactions[req.Year][req.Month]; !ok {
+		transactions[req.Year][req.Month] = make(map[string][]Transaction)
 	}
 
-	if _, ok := transactions[year][month][txType]; !ok {
-		transactions[year][month][txType] = []Transaction{}
+	if _, ok := transactions[req.Year][req.Month][txType]; !ok {
+		transactions[req.Year][req.Month][txType] = []Transaction{}
 	}
 
 	// make sure only unique IDs are used
 	for {
 		var duplicateIdFound bool
-		for txType := range transactions[year][month] {
-			for _, t := range transactions[year][month][txType] {
+		for txType := range transactions[req.Year][req.Month] {
+			for _, t := range transactions[req.Year][req.Month][txType] {
 				if transactionId == t.Id {
 					duplicateIdFound = true
 					break
@@ -221,15 +239,15 @@ func handleAddTransaction(transactionType, amount, category, description, month,
 	newTransaction := Transaction{
 		Id:          transactionId,
 		Amount:      txAmount,
-		Category:    category,
-		Description: description,
+		Category:    req.Category,
+		Description: req.Description,
 	}
 
-	transactions[year][month][txType] = append(transactions[year][month][txType], newTransaction)
+	transactions[req.Year][req.Month][txType] = append(transactions[req.Year][req.Month][txType], newTransaction)
 	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
 		return fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 
-	fmt.Printf(" successfully added %s €%.2f | %s | %s\n", txType, txAmount, category, description)
+	fmt.Printf(" successfully added %s €%.2f | %s | %s\n", txType, txAmount, req.Category, req.Description)
 	return nil
 }

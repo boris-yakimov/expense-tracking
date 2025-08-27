@@ -100,7 +100,15 @@ func TestHandleAddTransaction(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			err := handleAddTransaction(c.transactionType, c.amount, c.category, c.description, c.month, c.year)
+			req := AddTransactionRequest{
+				Type:        c.transactionType,
+				Amount:      c.amount,
+				Category:    c.category,
+				Description: c.description,
+				Month:       c.month,
+				Year:        c.year,
+			}
+			err := handleAddTransaction(req)
 
 			if (err != nil) != c.expectedError {
 				t.Errorf("handleAddTransaction(%q, %q, %q, %q, %q, %q) error = %v; expected error = %v",
