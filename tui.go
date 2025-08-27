@@ -74,3 +74,21 @@ func mainMenu() error {
 	tui.SetRoot(frame, true).SetFocus(menu)
 	return nil
 }
+
+func generateControlsFooter() string {
+	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
+}
+
+func showErrorModal(msg string, frame *tview.Frame, focus tview.Primitive) {
+	modal := tview.NewModal().
+		SetText(msg).
+		AddButtons([]string{"OK"}).
+		SetDoneFunc(func(_ int, _ string) {
+			// on presssing OK -  set focus back to the previous screen (menu, form, etc)
+			tui.SetRoot(frame, true).SetFocus(focus)
+		})
+	// back to mainMenu on ESC or q key press
+	modal.SetInputCapture(exitShortcuts)
+	// set focus to the error
+	tui.SetRoot(modal, true).SetFocus(modal)
+}

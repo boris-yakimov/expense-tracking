@@ -7,12 +7,7 @@ import (
 	"strings"
 	"unicode"
 
-	"crypto/rand"
-	"encoding/hex"
 	"text/tabwriter"
-
-	"github.com/gdamore/tcell/v2"
-	"github.com/rivo/tview"
 )
 
 var monthOrder = map[string]int{
@@ -28,11 +23,6 @@ var monthOrder = map[string]int{
 	"october":   10,
 	"november":  11,
 	"december":  12,
-}
-
-func cleanTerminalInput(cmdArgs string) []string {
-	var sanitizedText = strings.Trim(strings.ToLower(cmdArgs), " ")
-	return strings.Split(sanitizedText, " ")
 }
 
 func validDescriptionInputFormat(description string) bool {
@@ -61,16 +51,6 @@ func normalizeTransactionType(t string) (string, error) {
 	default:
 		return "", fmt.Errorf("\ninvalid transaction type %s - supported transactions types are income, expense, and investment", t)
 	}
-}
-
-func generateTransactionId() (id string, err error) {
-	bytes := make([]byte, 4) // 4 bytes = 8 hex characters
-	_, err = rand.Read(bytes)
-	if err != nil {
-		return "", fmt.Errorf("error generating transaction id: %w", err)
-	}
-
-	return hex.EncodeToString(bytes), nil
 }
 
 func capitalize(word string) string {
@@ -156,34 +136,8 @@ func getTransactionTypeById(txId string) (txType string, err error) {
 	return "", fmt.Errorf("transaction ID %s could not be found in transaction list", txId)
 }
 
-func vimNavigation(event *tcell.EventKey) *tcell.EventKey {
-	// rewrite the j/k call to a up or down arrow call instead to simulate vim motions
-	switch event.Key() {
-	case tcell.KeyRune:
-		switch event.Rune() {
-		case 'j': // move down
-			return tcell.NewEventKey(tcell.KeyDown, 0, tcell.ModNone)
-		case 'k': // move up
-			return tcell.NewEventKey(tcell.KeyUp, 0, tcell.ModNone)
-		}
-	}
-	return event
-}
-
-func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
-	if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-		mainMenu()
-		return nil // key event consumed
-	}
-	return event
-}
-
 func enforceCharLimit(textToCheck string, lastChar rune) bool {
 	return len(textToCheck) <= descriptionMaxCharLength
-}
-
-func generateControlsFooter() string {
-	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
 }
 
 func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {
@@ -255,20 +209,6 @@ func getMonthsWithTransactions() (months []string, err error) {
 	}
 
 	return months, nil
-}
-
-func showErrorModal(msg string, frame *tview.Frame, focus tview.Primitive) {
-	modal := tview.NewModal().
-		SetText(msg).
-		AddButtons([]string{"OK"}).
-		SetDoneFunc(func(_ int, _ string) {
-			// on presssing OK -  set focus back to the previous screen (menu, form, etc)
-			tui.SetRoot(frame, true).SetFocus(focus)
-		})
-	// back to mainMenu on ESC or q key press
-	modal.SetInputCapture(exitShortcuts)
-	// set focus to the error
-	tui.SetRoot(modal, true).SetFocus(modal)
 }
 
 func determineLatestMonthAndYear() (month, year string, err error) {
