@@ -20,7 +20,7 @@ func formDeleteTransaction() error {
 		// show detailed transaction information so user knows what they are deleting
 		opts, err := getListOfDetailedTransactions()
 		if err != nil {
-			return fmt.Errorf("%w", err)
+			showErrorModal(fmt.Sprintf("get detailed transactions err: \n\n%s", err), frame, form)
 		}
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
 			// extract ID from the selected option (format: "ID: 12345678 | ...")
@@ -31,7 +31,7 @@ func formDeleteTransaction() error {
 			var err error
 			transactionType, err = getTransactionTypeById(transactionId)
 			if err != nil {
-				showErrorModal(fmt.Sprintf("Error getting transaction type:\n\n%s", err), frame, form)
+				showErrorModal(fmt.Sprintf("error getting transaction type:\n\n%s", err), frame, form)
 				return
 			}
 		})

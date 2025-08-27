@@ -24,17 +24,17 @@ type AddTransactionRequest struct {
 }
 
 func formAddTransaction() error {
-	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
-	if err != nil {
-		return fmt.Errorf("%w", err)
-	}
-
 	var transactionType string
 	var category string
 	var categoryDropdown *tview.DropDown
 
 	var form *tview.Form
 	var frame *tview.Frame
+
+	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
+	if err != nil {
+		showErrorModal(fmt.Sprintf("list allowed transaction types: %s, err:\n\n%s", transactionType, err), frame, form)
+	}
 
 	typeDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction Type").
@@ -74,7 +74,7 @@ func formAddTransaction() error {
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			return fmt.Errorf("%w", err)
+			showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
@@ -96,7 +96,7 @@ func formAddTransaction() error {
 	{
 		opts, err := getMonthsWithTransactions()
 		if err != nil {
-			return fmt.Errorf("%w", err)
+			showErrorModal(fmt.Sprintf("unable to get months with transactions: err:\n\n%s", err), frame, form)
 		}
 		periodDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			monthAndYear = selectedOption
@@ -110,7 +110,7 @@ func formAddTransaction() error {
 	// parse the selected month and year
 	parts := strings.SplitN(monthAndYear, " ", 2)
 	if len(parts) != 2 {
-		return fmt.Errorf("invalid period format: %s", monthAndYear)
+		showErrorModal(fmt.Sprintf("invalid period format: %s, err:\n\n%s", monthAndYear, err), frame, form)
 	}
 	month := parts[0]
 	year := parts[1]
@@ -179,12 +179,11 @@ func handleAddTransaction(req AddTransactionRequest) error {
 
 	updatedCategory := req.Category
 	if _, ok := allowedTransactionCategories[txType][updatedCategory]; !ok {
-		fmt.Printf("\ninvalid transaction category: \"%s\"", updatedCategory)
-		return fmt.Errorf("\n\nplease pick a valid transaction category from the list above.")
+		return fmt.Errorf("invalid transaction category: %s", updatedCategory)
 	}
 
 	if !validDescriptionInputFormat(req.Description) {
-		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
+		return fmt.Errorf("invalid character in description, should contain only letters, numbers, spaces, commas, or dashes: %s", req.Description)
 	}
 
 	transactions, loadFileErr := loadTransactions()

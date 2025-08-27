@@ -53,7 +53,7 @@ func normalizeTransactionType(t string) (string, error) {
 		return "income", nil
 
 	default:
-		return "", fmt.Errorf("\ninvalid transaction type %s - supported transactions types are income, expense, and investment", t)
+		return "", fmt.Errorf("invalid transaction type %s, supported transactions types are income, expense, and investment", t)
 	}
 }
 
@@ -189,7 +189,7 @@ func showAllowedCategories(transactionType string) error {
 
 	txType, err := normalizeTransactionType(transactionType)
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		return fmt.Errorf(" show allowed categories err: %w", err)
 	}
 
 	for key, val := range allowedTransactionCategories[txType] {

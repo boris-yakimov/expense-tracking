@@ -29,7 +29,7 @@ func formUpdateTransaction() error {
 		// show detailed transaction information so user knows what they are deleting
 		opts, err := getListOfDetailedTransactions()
 		if err != nil {
-			return fmt.Errorf("%w", err)
+			showErrorModal(fmt.Sprintf("get a list of detailed transactions err:\n\n%s", err), frame, form)
 		}
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
 			// extract ID from the selected option (format: "ID: 12345678 | ...")
@@ -95,7 +95,7 @@ func formUpdateTransaction() error {
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			return fmt.Errorf("failed to list categories: %w", err)
+			showErrorModal(fmt.Sprintf("failed to list categories err:\n\n%s", err), frame, form)
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
