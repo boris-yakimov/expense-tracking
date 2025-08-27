@@ -98,6 +98,7 @@ func formUpdateTransaction() error {
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
 			showErrorModal(fmt.Sprintf("failed to list categories err:\n\n%s", err), frame, form)
+			return err
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption

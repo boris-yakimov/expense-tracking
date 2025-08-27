@@ -113,8 +113,8 @@ func formAddTransaction() error {
 	// parse the selected month and year
 	parts := strings.SplitN(monthAndYear, " ", 2)
 	if len(parts) != 2 {
-		showErrorModal(fmt.Sprintf("invalid period format: %s, err:\n\n%s", monthAndYear, err), frame, form)
-		return err
+		showErrorModal(fmt.Sprintf("invalid period format: %s", monthAndYear), frame, form)
+		return fmt.Errorf("invalid month or year %s", monthAndYear)
 	}
 	month := parts[0]
 	year := parts[1]
