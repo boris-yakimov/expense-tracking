@@ -71,13 +71,13 @@ func TestNormalizeTransactionType(t *testing.T) {
 
 func TestGenerateTransactionId(t *testing.T) {
 	// Test that IDs are generated and have correct length
-	for i := 0; i < 10; i++ {
+	for range 10 {
 		id, err := generateTransactionId()
 		if err != nil {
 			t.Errorf("generateTransactionId() returned error: %v", err)
 		}
-		if len(id) != 8 {
-			t.Errorf("generateTransactionId() returned ID of length %d; expected 8", len(id))
+		if len(id) != TransactionIDLength {
+			t.Errorf("generateTransactionId() returned ID of length %d; expected %v", len(id), TransactionIDLength)
 		}
 		// Check that ID contains only alphanumeric characters
 		for _, char := range id {

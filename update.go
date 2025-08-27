@@ -34,6 +34,7 @@ func formUpdateTransaction() error {
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
 			// extract ID from the selected option (format: "ID: 12345678 | ...")
 			if len(selectedOption) > 4 {
+				// TODO: this should be done better
 				transactionId = selectedOption[4:12] // extract ID from position 4-12
 			}
 			// get transaction type after user selects an ID
@@ -167,8 +168,8 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	if len(req.Id) != 8 {
-		return fmt.Errorf("invalid transaction id length, expected 8 char id, got %v", len(req.Id))
+	if len(req.Id) != TransactionIDLength {
+		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", TransactionIDLength, len(req.Id))
 	}
 
 	updatedAmount, err := strconv.ParseFloat(req.Amount, 64)

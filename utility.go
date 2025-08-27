@@ -10,6 +10,10 @@ import (
 	"text/tabwriter"
 )
 
+const (
+	TransactionIDLength = 8
+)
+
 var monthOrder = map[string]int{
 	"january":   1,
 	"february":  2,
