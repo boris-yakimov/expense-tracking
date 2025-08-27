@@ -34,6 +34,7 @@ func formAddTransaction() error {
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
 		showErrorModal(fmt.Sprintf("list allowed transaction types: %s, err:\n\n%s", transactionType, err), frame, form)
+		return err
 	}
 
 	typeDropdown := styleDropdown(tview.NewDropDown().
@@ -75,6 +76,7 @@ func formAddTransaction() error {
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
 			showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
+			return err
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
@@ -97,6 +99,7 @@ func formAddTransaction() error {
 		opts, err := getMonthsWithTransactions()
 		if err != nil {
 			showErrorModal(fmt.Sprintf("unable to get months with transactions: err:\n\n%s", err), frame, form)
+			return err
 		}
 		periodDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			monthAndYear = selectedOption
@@ -111,6 +114,7 @@ func formAddTransaction() error {
 	parts := strings.SplitN(monthAndYear, " ", 2)
 	if len(parts) != 2 {
 		showErrorModal(fmt.Sprintf("invalid period format: %s, err:\n\n%s", monthAndYear, err), frame, form)
+		return err
 	}
 	month := parts[0]
 	year := parts[1]

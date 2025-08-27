@@ -21,6 +21,7 @@ func formDeleteTransaction() error {
 		opts, err := getListOfDetailedTransactions()
 		if err != nil {
 			showErrorModal(fmt.Sprintf("get detailed transactions err: \n\n%s", err), frame, form)
+			return err
 		}
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
 			// extract ID from the selected option (format: "ID: 12345678 | ...")

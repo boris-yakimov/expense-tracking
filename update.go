@@ -30,6 +30,7 @@ func formUpdateTransaction() error {
 		opts, err := getListOfDetailedTransactions()
 		if err != nil {
 			showErrorModal(fmt.Sprintf("get a list of detailed transactions err:\n\n%s", err), frame, form)
+			return err
 		}
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
 			// extract ID from the selected option (format: "ID: 12345678 | ...")
@@ -54,7 +55,8 @@ func formUpdateTransaction() error {
 
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
-		return fmt.Errorf("%w", err)
+		showErrorModal(fmt.Sprintf("get a list of allowed transaction types err:\n\n%s", err), frame, form)
+		return err
 	}
 
 	typeDropdown := styleDropdown(tview.NewDropDown().
