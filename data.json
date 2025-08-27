@@ -55,6 +55,12 @@
           "amount": 20,
           "category": "food",
           "description": "brownies"
+        },
+        {
+          "id": "c4d4c44d",
+          "amount": 200,
+          "category": "shopping",
+          "description": "groceries"
         }
       ],
       "income": [
