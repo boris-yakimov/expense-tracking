@@ -7,6 +7,14 @@ import (
 	"github.com/rivo/tview"
 )
 
+type UpdateTransactionRequest struct {
+	Type        string
+	Id          string
+	Amount      string
+	Category    string
+	Description string
+}
+
 func formUpdateTransaction() error {
 	var transactionId string
 	var transactionType string
@@ -113,7 +121,15 @@ func formUpdateTransaction() error {
 
 			description := descriptionField.GetText()
 
-			if err := handleUpdateTransaction(transactionType, transactionId, amount, category, description); err != nil {
+			var updateReq = UpdateTransactionRequest{
+				Type:        transactionType,
+				Id:          transactionId,
+				Amount:      amount,
+				Category:    category,
+				Description: description,
+			}
+
+			if err := handleUpdateTransaction(updateReq); err != nil {
 				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), frame, form)
 				return
 			}
@@ -145,26 +161,26 @@ func formUpdateTransaction() error {
 	return nil
 }
 
-func handleUpdateTransaction(transactionType, transactionId, amount, category, description string) error {
-	txType, err := normalizeTransactionType(transactionType)
+func handleUpdateTransaction(req UpdateTransactionRequest) error {
+	txType, err := normalizeTransactionType(req.Type)
 	if err != nil {
 		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	if len(transactionId) != 8 {
-		return fmt.Errorf("invalid transaction id length, expected 8 char id, got %v", len(transactionId))
+	if len(req.Id) != 8 {
+		return fmt.Errorf("invalid transaction id length, expected 8 char id, got %v", len(req.Id))
 	}
 
-	updatedAmount, err := strconv.ParseFloat(amount, 64)
+	updatedAmount, err := strconv.ParseFloat(req.Amount, 64)
 	if err != nil {
 		return fmt.Errorf("\ninvalid amount: %w\n", err)
 	}
 
-	if _, ok := allowedTransactionCategories[txType][category]; !ok {
-		return fmt.Errorf("\n\ninvalid transaction category: %s", category)
+	if _, ok := allowedTransactionCategories[txType][req.Category]; !ok {
+		return fmt.Errorf("\n\ninvalid transaction category: %s", req.Category)
 	}
 
-	if !validDescriptionInputFormat(description) {
+	if !validDescriptionInputFormat(req.Description) {
 		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
@@ -181,10 +197,10 @@ func handleUpdateTransaction(transactionType, transactionId, amount, category, d
 		for month := range months {
 
 			for i, tx := range transactions[year][month][txType] {
-				if tx.Id == transactionId {
+				if tx.Id == req.Id {
 					tx.Amount = updatedAmount
-					tx.Description = description
-					tx.Category = category
+					tx.Description = req.Description
+					tx.Category = req.Category
 
 					transactions[year][month][txType][i] = tx
 					transactionFound = true
@@ -194,7 +210,7 @@ func handleUpdateTransaction(transactionType, transactionId, amount, category, d
 	}
 
 	if !transactionFound {
-		return fmt.Errorf("transaction with id %s not found", transactionId)
+		return fmt.Errorf("transaction with id %s not found", req.Id)
 	}
 
 	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {

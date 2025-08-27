@@ -125,7 +125,15 @@ func TestHandleUpdateTransaction(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			err := handleUpdateTransaction(c.transactionType, c.transactionId, c.amount, c.category, c.description)
+			updateReq := UpdateTransactionRequest{
+				Type:        c.transactionType,
+				Id:          c.transactionId,
+				Amount:      c.amount,
+				Category:    c.category,
+				Description: c.description,
+			}
+
+			err := handleUpdateTransaction(updateReq)
 
 			if (err != nil) != c.expectedError {
 				t.Errorf("handleUpdateTransaction(%q, %q, %q, %q, %q) error = %v; expected error = %v",

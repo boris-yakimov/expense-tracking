@@ -124,7 +124,7 @@ func formAddTransaction() error {
 
 			description := descriptionField.GetText()
 
-			req := AddTransactionRequest{
+			var addReq = AddTransactionRequest{
 				Type:        transactionType,
 				Amount:      amount,
 				Category:    category,
@@ -133,7 +133,7 @@ func formAddTransaction() error {
 				Year:        year,
 			}
 
-			if err := handleAddTransaction(req); err != nil {
+			if err := handleAddTransaction(addReq); err != nil {
 				showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), frame, form)
 				return
 			}
