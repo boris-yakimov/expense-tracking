@@ -47,6 +47,5 @@ func closeDb() {
 	}
 }
 
-// TODO: figure out how to import the data from json to sql
 // TODO: fetch transactions from database and convert them to my transactions struct/nested object
 // TODO: update sql connection to expect _auth_user / _auth_pass
