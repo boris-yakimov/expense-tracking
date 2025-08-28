@@ -6,10 +6,10 @@ v1.3.0 - password protection and encryption - TODO
 
 v1.2.0 - refactor to SQLite for data persistence - In Progress
 
-v1.1.0 - refactoring with a TUI - DONE
+v1.1.0 - refactoring with a TUI
 ![Recording](assets/recording.gif)
 
-v1.0.0 - cli mvp with base functionality and storing transactions in JSON file - DONE
+v1.0.0 - cli mvp with base functionality and storing transactions in JSON file
 ```
 Expense Tracking Tool
 
