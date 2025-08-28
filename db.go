@@ -20,8 +20,7 @@ func initDb(dbFilePath string) error {
 		return fmt.Errorf("unable to open db connection, err: %w", err)
 	}
 
-	// TODO: to be updated
-	prepSchema := `
+	prepTransactionSchema := `
 		CREATE TABLE IF NOT EXISTS transactions (
 			id				  TEXT PRIMARY KEY,
 			amount 			NUMERIC(12, 2) NOT NULL,
@@ -33,12 +32,12 @@ func initDb(dbFilePath string) error {
 		);
 	`
 
-	_, err = db.Exec(prepSchema)
+	_, err = db.Exec(prepTransactionSchema)
 	if err != nil {
 		return fmt.Errorf("prep db schema err: %w", err)
 	}
 
-	fmt.Printf("db schema initialized successfully")
+	fmt.Printf("db schema initialized successfully\n\n")
 	return nil
 }
 
