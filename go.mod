@@ -4,6 +4,7 @@ go 1.24.3
 
 require (
 	github.com/gdamore/tcell/v2 v2.8.1
+	github.com/mattn/go-sqlite3 v1.14.32
 	github.com/rivo/tview v0.0.0-20250625164341-a4a78f1e05cb
 )
 
