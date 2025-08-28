@@ -10,7 +10,24 @@ import (
 
 var tui *tview.Application
 
+const (
+	sqliteDbFilePath = "db/transactions.db"
+)
+
 func main() {
+	if err := initDb(sqliteDbFilePath); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to initialize DB with err: %v", err)
+		os.Exit(1)
+	}
+	defer closeDb()
+
+	if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
+		if err := migrateJsonToDb(); err != nil {
+			fmt.Fprintf(os.Stderr, "executed migration from json to db because MIGRATE_TRANSACTION_DATA=true was set, however migration failed with err: %v", err)
+			os.Exit(1)
+		}
+	}
+
 	tui = tview.NewApplication()
 	tui.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
 		screen.Clear()
