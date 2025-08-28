@@ -1,6 +1,8 @@
-## expense tracking cli tool - EARLY DEVELOPMENT AND EXPERIMENTATION
+## expense tracking cli tool
 
-v1.3.0 - password protection and encryption
+v1.4.0 - ui/ux improvements - TODO
+
+v1.3.0 - password protection and encryption - TODO
 
 v1.2.0 - refactor to SQLite for data persistence - In Progress
 
