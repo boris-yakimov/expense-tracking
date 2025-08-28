@@ -2,9 +2,10 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 )
 
-// migrate date from json file to sqlite
+// migrate data from json file to sqlite
 func migrateJsonToDb() error {
 	history, err := loadTransactions()
 	if err != nil {
@@ -37,7 +38,17 @@ func migrateJsonToDb() error {
 	defer stmt.Close()
 
 	for year, months := range history {
+		y, err := strconv.Atoi(year)
+		if err != nil {
+			return fmt.Errorf("invalid year key %q: %w", year, err)
+		}
+
 		for month, types := range months {
+			m, ok := monthOrder[month]
+			if !ok {
+				return fmt.Errorf("invalid month key %s: %w", month, err)
+			}
+
 			for txType, list := range types {
 				for _, tr := range list {
 					_, err = stmt.Exec(
@@ -46,8 +57,8 @@ func migrateJsonToDb() error {
 						txType,
 						tr.Category,
 						tr.Description,
-						year,
-						month,
+						y, // integer year
+						m, // integer month
 					)
 					if err != nil {
 						return fmt.Errorf("failed to insert transaction %s: %w", tr.Id, err)
