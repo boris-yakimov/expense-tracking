@@ -1,11 +1,13 @@
 ## expense tracking cli tool - EARLY DEVELOPMENT AND EXPERIMENTATION
 
-v1.2.0 - refactor to SQLite for data - To Do
+v1.3.0 - password protection and encryption
+
+v1.2.0 - refactor to SQLite for data persistence - In Progress
 
 v1.1.0 - refactoring with a TUI - DONE
 ![Recording](assets/recording.gif)
 
-v1.0.0 - mvp with base functionality and storing transactions in JSON file - DONE
+v1.0.0 - cli mvp with base functionality and storing transactions in JSON file - DONE
 ```
 Expense Tracking Tool
 
