@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"strconv"
 
 	"github.com/rivo/tview"
 )
@@ -110,7 +111,7 @@ type TransactionHistory map[string]map[string]map[string][]Transaction
 
 var transactionsFilePath = "data.json"
 
-func loadTransactions() (TransactionHistory, error) {
+func loadTransactionsFromJsonFile() (TransactionHistory, error) {
 	file, err := os.Open(transactionsFilePath)
 	if os.IsNotExist(err) {
 		return make(TransactionHistory), nil
@@ -127,7 +128,7 @@ func loadTransactions() (TransactionHistory, error) {
 	return transactions, err
 }
 
-func saveTransactions(transactions TransactionHistory) error {
+func saveTransactionsToJsonFile(transactions TransactionHistory) error {
 	file, err := os.Create(transactionsFilePath)
 	if err != nil {
 		return err
@@ -137,4 +138,110 @@ func saveTransactions(transactions TransactionHistory) error {
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(transactions)
+}
+
+func loadTransactionsFromDb() (TransactionHistory, error) {
+	rows, err := db.Query(`
+			SELECT id, amount, type, category, description, year, month
+			FROM transactions
+		`)
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute load transactions sql query: %w", err)
+	}
+	defer rows.Close()
+
+	transactions := make(TransactionHistory)
+
+	for rows.Next() {
+		var (
+			id, txType, category, description string
+			amount                            float64
+			year, month                       int
+		)
+
+		if err := rows.Scan(&id, &amount, &txType, &category, &description, &year, &month); err != nil {
+			return nil, fmt.Errorf("scan failed: %w", err)
+		}
+
+		y := fmt.Sprintf("%d", year)
+		m := fmt.Sprintf("%02d", month)
+
+		if _, ok := transactions[y]; !ok {
+			transactions[y] = make(map[string]map[string][]Transaction)
+		}
+		if _, ok := transactions[y][m]; !ok {
+			transactions[y][m] = make(map[string][]Transaction)
+		}
+
+		transactions[y][m][txType] = append(transactions[y][m][txType], Transaction{
+			Id:          id,
+			Amount:      amount,
+			Category:    category,
+			Description: description,
+		})
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows iteration failed during transaction loading: %w", err)
+	}
+
+	return transactions, nil
+}
+
+func saveTransactionsToDb(transactions TransactionHistory) error {
+	tx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("begin save transaction failed: %w", err)
+	}
+
+	sqlStatement, err := tx.Prepare(`
+			INSERT OR REPLACE INTO transactions
+			(id, amount, type, category, description, year, month)
+			VALUES (?, ?, ?, ?, ?, ?, ?)
+		`)
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("prepare insert during save transaction failed: %w", err)
+	}
+	defer sqlStatement.Close()
+
+	for year, months := range transactions {
+		y, err := strconv.Atoi(year)
+		if err != nil {
+			tx.Rollback()
+			return fmt.Errorf("invalid year key %q: %w", year, err)
+		}
+
+		for month, types := range months {
+			m, err := strconv.Atoi(month)
+			if err != nil {
+				tx.Rollback()
+				return fmt.Errorf("invalid month key %q: %w", month, err)
+			}
+
+			for txType, list := range types {
+				for _, tr := range list {
+					_, err = sqlStatement.Exec(
+						tr.Id,
+						tr.Amount,
+						txType,
+						tr.Category,
+						tr.Description,
+						y,
+						m,
+					)
+					if err != nil {
+						tx.Rollback()
+						return fmt.Errorf("insert failed for transaction %s: %w", tr.Id, err)
+					}
+				}
+			}
+		}
+	}
+
+	if err := tx.Commit(); err != nil {
+		return fmt.Errorf("commit failed: %w", err)
+	}
+
+	return nil
 }
