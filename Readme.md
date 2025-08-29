@@ -3,8 +3,6 @@ Track your expenses in the terminal
 
 ![Recording](assets/recording.gif)
 
-```
-
 ## Storage Configuration
 
 The expense tracking tool now supports configurable storage backends. You can choose between SQLite (default) or JSON file storage using environment variables.
