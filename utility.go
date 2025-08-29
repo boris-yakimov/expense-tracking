@@ -98,7 +98,7 @@ func listOfAllowedTransactionTypes() (categories []string, err error) {
 }
 
 func getListOfDetailedTransactions() (listOfTransactions []string, err error) {
-	transactions, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactionsFromDb()
 	if loadFileErr != nil {
 		return listOfTransactions, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -120,7 +120,7 @@ func getListOfDetailedTransactions() (listOfTransactions []string, err error) {
 }
 
 func getTransactionTypeById(txId string) (txType string, err error) {
-	transactions, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactionsFromDb()
 	if loadFileErr != nil {
 		return "", fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -145,7 +145,7 @@ func enforceCharLimit(textToCheck string, lastChar rune) bool {
 }
 
 func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {
-	transactions, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactionsFromDb()
 	if loadFileErr != nil {
 		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -201,7 +201,7 @@ func showAllowedCategories(transactionType string) error {
 
 // make sure these are sorted with newest to oldest month/year
 func getMonthsWithTransactions() (months []string, err error) {
-	transactions, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactionsFromDb()
 	if loadFileErr != nil {
 		return months, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -216,7 +216,7 @@ func getMonthsWithTransactions() (months []string, err error) {
 }
 
 func determineLatestMonthAndYear() (month, year string, err error) {
-	transactions, err := loadTransactions()
+	transactions, err := loadTransactionsFromDb()
 	if err != nil {
 		return "", "", fmt.Errorf("unable to load transactions file: %w", err)
 	}

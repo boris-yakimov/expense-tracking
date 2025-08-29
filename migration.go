@@ -7,7 +7,7 @@ import (
 
 // migrate data from json file to sqlite
 func migrateJsonToDb() error {
-	history, err := loadTransactions()
+	history, err := loadTransactionsFromDb()
 	if err != nil {
 		return fmt.Errorf("failed to load JSON transactions: %w", err)
 	}

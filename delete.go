@@ -67,7 +67,7 @@ func formDeleteTransaction() error {
 }
 
 func handleDeleteTransaction(transactionType, transactionId string) error {
-	transactions, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactionsFromDb()
 	if loadFileErr != nil {
 		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -90,7 +90,7 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 				if t.Id == transactionId {
 					transactions[year][month][txType] = removeTransactionAtIndex(txList, i)
 
-					if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
+					if saveTransactionErr := saveTransactionsToDb(transactions); saveTransactionErr != nil {
 						return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 					}
 					fmt.Printf("successfully removed transaction with id %s\n\n", transactionId)
