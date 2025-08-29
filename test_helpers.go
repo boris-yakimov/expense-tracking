@@ -114,12 +114,14 @@ func setupTestJSON(t *testing.T) {
 
 // loadTransactionsFromTestStorage loads transactions from the current test storage (SQLite or JSON)
 func loadTransactionsFromTestStorage() (TransactionHistory, error) {
-	if globalConfig.StorageType == StorageSQLite {
+	switch globalConfig.StorageType {
+	case StorageSQLite:
 		return loadTransactionsFromTestDb()
-	} else if globalConfig.StorageType == StorageJSONFile {
+	case StorageJSONFile:
 		return loadTransactionsFromTestJSON()
+	default:
+		return nil, fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 	}
-	return nil, fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 }
 
 // loadTransactionsFromTestDb loads transactions from the transactions table (in test db)
@@ -197,12 +199,14 @@ func loadTransactionsFromTestJSON() (TransactionHistory, error) {
 
 // saveTransactionsToTestStorage saves transactions to the current test storage (SQLite or JSON)
 func saveTransactionsToTestStorage(transactions TransactionHistory) error {
-	if globalConfig.StorageType == StorageSQLite {
+	switch globalConfig.StorageType {
+	case StorageSQLite:
 		return saveTransactionsToTestDb(transactions)
-	} else if globalConfig.StorageType == StorageJSONFile {
+	case StorageJSONFile:
 		return saveTransactionsToTestJSON(transactions)
+	default:
+		return fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 	}
-	return fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 }
 
 // saveTransactionsToTestDb saves transactions to the transactions table (in test db)
