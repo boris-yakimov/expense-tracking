@@ -1,6 +1,7 @@
 package main
 
 import (
+	"os"
 	"testing"
 )
 
@@ -43,6 +44,36 @@ func TestLoadTransactions(t *testing.T) {
 	// Verify the loaded data
 	if tx, ok := transactions["2023"]["01"]["expense"]; !ok || len(tx) != 1 {
 		t.Errorf("Expected one expense transaction, got %v", transactions)
+	}
+}
+
+func TestConfigSystem(t *testing.T) {
+	// Test default config
+	config := DefaultConfig()
+	if config.StorageType != StorageSQLite {
+		t.Errorf("Expected default storage type to be SQLite, got %s", config.StorageType)
+	}
+	if config.SQLitePath != "db/transactions.db" {
+		t.Errorf("Expected default SQLite path to be 'db/transactions.db', got %s", config.SQLitePath)
+	}
+	if config.JSONPath != "data.json" {
+		t.Errorf("Expected default JSON path to be 'data.json', got %s", config.JSONPath)
+	}
+
+	// Test loading config from environment
+	os.Setenv("EXPENSE_STORAGE_TYPE", "json")
+	os.Setenv("EXPENSE_JSON_PATH", "test.json")
+	defer func() {
+		os.Unsetenv("EXPENSE_STORAGE_TYPE")
+		os.Unsetenv("EXPENSE_JSON_PATH")
+	}()
+
+	envConfig := LoadConfigFromEnv()
+	if envConfig.StorageType != StorageJSON {
+		t.Errorf("Expected storage type from env to be JSON, got %s", envConfig.StorageType)
+	}
+	if envConfig.JSONPath != "test.json" {
+		t.Errorf("Expected JSON path from env to be 'test.json', got %s", envConfig.JSONPath)
 	}
 }
 

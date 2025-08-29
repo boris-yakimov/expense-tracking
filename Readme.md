@@ -4,7 +4,9 @@ v1.4.0 - ui/ux improvements - TODO
 
 v1.3.0 - password protection and encryption - TODO
 
-v1.2.0 - refactor to SQLite for data persistence - In Progress
+v1.2.0 - refactor to SQLite for data persistence - Completed
+- Added configurable storage backend (SQLite or JSON)
+- Environment variable configuration support
 
 v1.1.0 - refactoring with a TUI
 ![Recording](assets/recording.gif)
@@ -69,6 +71,48 @@ August 2025
     076e2589    €78.00    insurance    life insurance august 2025
     9c022af9    €50.00    crypto       eth
 
-  P&L Result: €1582.15 | 79.1%
+   P&L Result: €1582.15 | 79.1%
 
 ```
+
+## Storage Configuration
+
+The expense tracking tool now supports configurable storage backends. You can choose between SQLite (default) or JSON file storage using environment variables.
+
+### Environment Variables
+
+- `EXPENSE_STORAGE_TYPE`: Set to `"sqlite"` (default) or `"json"`
+- `EXPENSE_SQLITE_PATH`: Path to SQLite database file (default: `"db/transactions.db"`)
+- `EXPENSE_JSON_PATH`: Path to JSON file (default: `"data.json"`)
+
+### Usage Examples
+
+**Use SQLite storage (default):**
+```bash
+./expense-tracker
+```
+
+**Use JSON storage:**
+```bash
+EXPENSE_STORAGE_TYPE=json ./expense-tracker
+```
+
+**Use custom SQLite path:**
+```bash
+EXPENSE_SQLITE_PATH=/path/to/my/database.db ./expense-tracker
+```
+
+**Use custom JSON path:**
+```bash
+EXPENSE_STORAGE_TYPE=json EXPENSE_JSON_PATH=/path/to/my/data.json ./expense-tracker
+```
+
+### Migration
+
+To migrate data from JSON to SQLite, set the `MIGRATE_TRANSACTION_DATA=true` environment variable:
+
+```bash
+MIGRATE_TRANSACTION_DATA=true ./expense-tracker
+```
+
+**Note:** Migration only works when using SQLite storage and will load data from the configured JSON file path.

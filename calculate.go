@@ -14,7 +14,7 @@ func calculateMonthPnL(month, year string) (PnLResult, error) {
 	var spendTotal float64
 	var pnl PnLResult
 
-	transactions, loadFileErr := loadTransactionsFromDb()
+	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
 		return pnl, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -54,7 +54,7 @@ func calculateYearPnL(year string) (PnLResult, error) {
 	var spendTotal float64
 	var pnl PnLResult
 
-	transactions, loadFileErr := loadTransactionsFromDb()
+	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
 		return pnl, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}

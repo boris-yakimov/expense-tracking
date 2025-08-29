@@ -10,23 +10,31 @@ import (
 
 var tui *tview.Application
 
-const (
-	sqliteDbFilePath = "db/transactions.db"
-)
-
 func main() {
-	if err := initDb(sqliteDbFilePath); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to initialize DB with err: \n\n%v", err)
-		os.Exit(1)
-	}
-	defer closeDb()
+	// Load configuration
+	config := loadConfigFromEnvVars()
+	SetGlobalConfig(config)
 
+	// initialize db only if using SQLite storage
+	if config.StorageType == StorageSQLite {
+		if err := initDb(config.SQLitePath); err != nil {
+			fmt.Fprintf(os.Stderr, "failed to initialize DB with err: \n\n%v", err)
+			os.Exit(1)
+		}
+		defer closeDb()
+	}
+
+	// handle migration from JSON to SQLite if requested
 	if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
+		if config.StorageType != StorageSQLite {
+			fmt.Fprintf(os.Stderr, "Migration can only be performed when using SQLite storage")
+			os.Exit(1)
+		}
 		if err := migrateJsonToDb(); err != nil {
 			fmt.Fprintf(os.Stderr, "executed migration from json to db because MIGRATE_TRANSACTION_DATA=true was set, however migration failed with err: %v", err)
 			os.Exit(1)
 		}
-		fmt.Fprintf(os.Stdout, "successfully executed db migration from json to sqlite db")
+		fmt.Fprintf(os.Stdout, "successfully executed db migration from json to sqlite db\n")
 	}
 
 	tui = tview.NewApplication()

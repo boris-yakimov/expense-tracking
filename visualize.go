@@ -73,7 +73,7 @@ func showMonthSelector() error {
 }
 
 func showTransactionsForMonth(month, year string) error {
-	transactions, err := loadTransactionsFromDb()
+	transactions, err := LoadTransactions()
 	if err != nil {
 		return fmt.Errorf("unable to load transactions file: %w", err)
 	}
@@ -141,7 +141,7 @@ func showTransactionsForMonth(month, year string) error {
 }
 
 func gridVisualizeTransactions() error {
-	transactions, err := loadTransactionsFromDb()
+	transactions, err := LoadTransactions()
 	if err != nil {
 		return fmt.Errorf("unable to load transactions file: %w", err)
 	}

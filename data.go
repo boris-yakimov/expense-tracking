@@ -109,10 +109,8 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 // year -> month -> transcation type (expense, income, or investment) -> transaction
 type TransactionHistory map[string]map[string]map[string][]Transaction
 
-var transactionsFilePath = "data.json"
-
 func loadTransactionsFromJsonFile() (TransactionHistory, error) {
-	file, err := os.Open(transactionsFilePath)
+	file, err := os.Open(globalConfig.JSONFilePath)
 	if os.IsNotExist(err) {
 		return make(TransactionHistory), nil
 	}
@@ -129,7 +127,7 @@ func loadTransactionsFromJsonFile() (TransactionHistory, error) {
 }
 
 func saveTransactionsToJsonFile(transactions TransactionHistory) error {
-	file, err := os.Create(transactionsFilePath)
+	file, err := os.Create(globalConfig.JSONFilePath)
 	if err != nil {
 		return err
 	}
@@ -251,4 +249,36 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 	}
 
 	return nil
+}
+
+// LoadTransactions loads transactions using the configured storage backend
+func LoadTransactions() (TransactionHistory, error) {
+	if globalConfig == nil {
+		globalConfig = DefaultConfig()
+	}
+
+	switch globalConfig.StorageType {
+	case StorageJSONFile:
+		return loadTransactionsFromJsonFile()
+	case StorageSQLite:
+		return loadTransactionsFromDb()
+	default:
+		return nil, fmt.Errorf("unsupported storage type: %s", globalConfig.StorageType)
+	}
+}
+
+// SaveTransactions saves transactions using the configured storage backend
+func SaveTransactions(transactions TransactionHistory) error {
+	if globalConfig == nil {
+		globalConfig = DefaultConfig()
+	}
+
+	switch globalConfig.StorageType {
+	case StorageJSONFile:
+		return saveTransactionsToJsonFile(transactions)
+	case StorageSQLite:
+		return saveTransactionsToDb(transactions)
+	default:
+		return fmt.Errorf("unsupported storage type: %s", globalConfig.StorageType)
+	}
 }

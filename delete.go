@@ -67,7 +67,7 @@ func formDeleteTransaction() error {
 }
 
 func handleDeleteTransaction(transactionType, transactionId string) error {
-	transactions, loadFileErr := loadTransactionsFromDb()
+	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
 		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -77,8 +77,8 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	if len(transactionId) != TransactionIDLength {
-		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", TransactionIDLength, len(transactionId))
+	if len(transactionId) != transactionIDLength {
+		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", transactionIDLength, len(transactionId))
 	}
 
 	for year, months := range transactions {
@@ -90,7 +90,7 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 				if t.Id == transactionId {
 					transactions[year][month][txType] = removeTransactionAtIndex(txList, i)
 
-					if saveTransactionErr := saveTransactionsToDb(transactions); saveTransactionErr != nil {
+					if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
 						return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 					}
 					// TODO: seems to appear in the frame next to the helper menu, figure out what is a better place for this to appear in

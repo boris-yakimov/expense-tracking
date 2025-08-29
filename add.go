@@ -10,10 +10,6 @@ import (
 	"github.com/rivo/tview"
 )
 
-const (
-	descriptionMaxCharLength = 40
-)
-
 type AddTransactionRequest struct {
 	Type        string
 	Amount      string
@@ -190,7 +186,7 @@ func handleAddTransaction(req AddTransactionRequest) error {
 		return fmt.Errorf("invalid character in description, should contain only letters, numbers, spaces, commas, or dashes: %s", req.Description)
 	}
 
-	transactions, loadFileErr := loadTransactionsFromDb()
+	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
 		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -237,8 +233,8 @@ func handleAddTransaction(req AddTransactionRequest) error {
 		}
 	}
 
-	if len(transactionId) > TransactionIDLength {
-		return fmt.Errorf("transcation id should have a maximum of %v chars, current id %s with length of %v", TransactionIDLength, transactionId, len(transactionId))
+	if len(transactionId) > transactionIDLength {
+		return fmt.Errorf("transcation id should have a maximum of %v chars, current id %s with length of %v", transactionIDLength, transactionId, len(transactionId))
 	}
 
 	newTransaction := Transaction{
@@ -249,7 +245,7 @@ func handleAddTransaction(req AddTransactionRequest) error {
 	}
 
 	transactions[req.Year][req.Month][txType] = append(transactions[req.Year][req.Month][txType], newTransaction)
-	if saveTransactionErr := saveTransactionsToDb(transactions); saveTransactionErr != nil {
+	if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
 		return fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 

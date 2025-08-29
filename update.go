@@ -171,8 +171,8 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	if len(req.Id) != TransactionIDLength {
-		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", TransactionIDLength, len(req.Id))
+	if len(req.Id) != transactionIDLength {
+		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", transactionIDLength, len(req.Id))
 	}
 
 	updatedAmount, err := strconv.ParseFloat(req.Amount, 64)
@@ -188,7 +188,7 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
-	transactions, loadFileErr := loadTransactionsFromDb()
+	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
 		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -217,7 +217,7 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("transaction with id %s not found", req.Id)
 	}
 
-	if saveTransactionErr := saveTransactionsToDb(transactions); saveTransactionErr != nil {
+	if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
 		return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 	}
 	// TODO: seems to appear in the frame next to the helper menu, figure out what is a better place for this to appear in
