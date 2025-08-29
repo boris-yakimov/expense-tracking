@@ -188,7 +188,7 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
 	}
 
-	transactions, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactionsFromDb()
 	if loadFileErr != nil {
 		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -217,7 +217,7 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("transaction with id %s not found", req.Id)
 	}
 
-	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
+	if saveTransactionErr := saveTransactionsToDb(transactions); saveTransactionErr != nil {
 		return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 	}
 	fmt.Printf("transaction successully updated")

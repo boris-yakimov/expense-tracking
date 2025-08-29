@@ -190,7 +190,7 @@ func handleAddTransaction(req AddTransactionRequest) error {
 		return fmt.Errorf("invalid character in description, should contain only letters, numbers, spaces, commas, or dashes: %s", req.Description)
 	}
 
-	transactions, loadFileErr := loadTransactions()
+	transactions, loadFileErr := loadTransactionsFromDb()
 	if loadFileErr != nil {
 		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
 	}
@@ -249,7 +249,7 @@ func handleAddTransaction(req AddTransactionRequest) error {
 	}
 
 	transactions[req.Year][req.Month][txType] = append(transactions[req.Year][req.Month][txType], newTransaction)
-	if saveTransactionErr := saveTransactions(transactions); saveTransactionErr != nil {
+	if saveTransactionErr := saveTransactionsToDb(transactions); saveTransactionErr != nil {
 		return fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 
