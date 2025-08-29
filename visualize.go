@@ -20,6 +20,7 @@ func showMonthSelector() error {
 
 	list := styleList(tview.NewList())
 
+	// TODO: convert month back to word instead of number
 	for _, monthYear := range months {
 		list.AddItem(monthYear, "", 0, func() {
 			// parse the selected month and year
@@ -57,6 +58,7 @@ func showMonthSelector() error {
 		}
 
 		// handle list months event
+		// TODO: convert month back to word instead of number
 		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
 			if err := showMonthSelector(); err != nil {
 				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, list)
