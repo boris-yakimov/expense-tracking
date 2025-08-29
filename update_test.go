@@ -1,28 +1,19 @@
 package main
 
 import (
-	"os"
 	"strconv"
 	"testing"
 	"time"
 )
 
 func TestHandleUpdateTransaction(t *testing.T) {
-	tmpFile := "test_update_transactions.json"
-	originalFilePath := transactionsFilePath
-	transactionsFilePath = tmpFile
-
-	// Clean up after test
-	defer func() {
-		transactionsFilePath = originalFilePath
-		os.Remove(tmpFile)
-	}()
+	setupTestDb(t)
 
 	// Initialize with some test data
 	year := time.Now().Format("2006")
 	month := time.Now().Format("01")
 
-	testTransactions := map[string]map[string]map[string][]Transaction{
+	testTransactions := TransactionHistory{
 		year: {
 			month: {
 				"expense": {
@@ -36,8 +27,8 @@ func TestHandleUpdateTransaction(t *testing.T) {
 		},
 	}
 
-	if err := saveTransactions(testTransactions); err != nil {
-		t.Fatalf("Failed to initialize test file: %v", err)
+	if err := saveTransactionsToTestDb(testTransactions); err != nil {
+		t.Fatalf("Failed to initialize test database: %v", err)
 	}
 
 	cases := []struct {
@@ -142,7 +133,7 @@ func TestHandleUpdateTransaction(t *testing.T) {
 
 			// If no error expected, verify transaction was updated
 			if !c.expectedError {
-				transactions, loadErr := loadTransactions()
+				transactions, loadErr := loadTransactionsFromTestDb()
 				if loadErr != nil {
 					t.Errorf("Failed to load transactions after successful update: %v", loadErr)
 					return
