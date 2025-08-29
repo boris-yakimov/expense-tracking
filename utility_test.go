@@ -76,8 +76,8 @@ func TestGenerateTransactionId(t *testing.T) {
 		if err != nil {
 			t.Errorf("generateTransactionId() returned error: %v", err)
 		}
-		if len(id) != transactionIDLength {
-			t.Errorf("generateTransactionId() returned ID of length %d; expected %v", len(id), transactionIDLength)
+		if len(id) != TransactionIDLength {
+			t.Errorf("generateTransactionId() returned ID of length %d; expected %v", len(id), TransactionIDLength)
 		}
 		// Check that ID contains only alphanumeric characters
 		for _, char := range id {

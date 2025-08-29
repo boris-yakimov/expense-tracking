@@ -56,8 +56,8 @@ func TestConfigSystem(t *testing.T) {
 	if config.SQLitePath != "db/transactions.db" {
 		t.Errorf("Expected default SQLite path to be 'db/transactions.db', got %s", config.SQLitePath)
 	}
-	if config.JSONPath != "data.json" {
-		t.Errorf("Expected default JSON path to be 'data.json', got %s", config.JSONPath)
+	if config.JSONFilePath != "db/transactions.json" {
+		t.Errorf("Expected default JSON path to be 'data.json', got %s", config.JSONFilePath)
 	}
 
 	// Test loading config from environment
@@ -68,12 +68,12 @@ func TestConfigSystem(t *testing.T) {
 		os.Unsetenv("EXPENSE_JSON_PATH")
 	}()
 
-	envConfig := LoadConfigFromEnv()
-	if envConfig.StorageType != StorageJSON {
+	envConfig := loadConfigFromEnvVars()
+	if envConfig.StorageType != StorageJSONFile {
 		t.Errorf("Expected storage type from env to be JSON, got %s", envConfig.StorageType)
 	}
-	if envConfig.JSONPath != "test.json" {
-		t.Errorf("Expected JSON path from env to be 'test.json', got %s", envConfig.JSONPath)
+	if envConfig.JSONFilePath != "test.json" {
+		t.Errorf("Expected JSON path from env to be 'test.json', got %s", envConfig.JSONFilePath)
 	}
 }
 

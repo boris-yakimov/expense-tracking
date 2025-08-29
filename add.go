@@ -233,8 +233,8 @@ func handleAddTransaction(req AddTransactionRequest) error {
 		}
 	}
 
-	if len(transactionId) > transactionIDLength {
-		return fmt.Errorf("transcation id should have a maximum of %v chars, current id %s with length of %v", transactionIDLength, transactionId, len(transactionId))
+	if len(transactionId) > TransactionIDLength {
+		return fmt.Errorf("transcation id should have a maximum of %v chars, current id %s with length of %v", TransactionIDLength, transactionId, len(transactionId))
 	}
 
 	newTransaction := Transaction{

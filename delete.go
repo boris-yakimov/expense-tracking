@@ -77,8 +77,8 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	if len(transactionId) != transactionIDLength {
-		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", transactionIDLength, len(transactionId))
+	if len(transactionId) != TransactionIDLength {
+		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", TransactionIDLength, len(transactionId))
 	}
 
 	for year, months := range transactions {

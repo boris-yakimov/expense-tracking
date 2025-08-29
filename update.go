@@ -171,8 +171,8 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("transaction type error: %w", err)
 	}
 
-	if len(req.Id) != transactionIDLength {
-		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", transactionIDLength, len(req.Id))
+	if len(req.Id) != TransactionIDLength {
+		return fmt.Errorf("invalid transaction id length, expected %v char id, got %v", TransactionIDLength, len(req.Id))
 	}
 
 	updatedAmount, err := strconv.ParseFloat(req.Amount, 64)

@@ -12,8 +12,6 @@ const (
 	TransactionIDLength      = 8
 )
 
-var globalConfig *Config
-
 type Config struct {
 	StorageType  StorageType
 	SQLitePath   string
@@ -24,10 +22,11 @@ func SetGlobalConfig(config *Config) {
 	globalConfig = config
 }
 
-// DefaultConfig returns the default configuration
+var globalConfig *Config
+
 func DefaultConfig() *Config {
 	return &Config{
-		StorageType:  StorageSQLite, // Default to SQLite for better performance
+		StorageType:  StorageSQLite,
 		SQLitePath:   "db/transactions.db",
 		JSONFilePath: "db/transactions.json",
 	}

@@ -137,7 +137,7 @@ func getTransactionTypeById(txId string) (txType string, err error) {
 }
 
 func enforceCharLimit(textToCheck string, lastChar rune) bool {
-	return len(textToCheck) <= descriptionMaxCharLength
+	return len(textToCheck) <= DescriptionMaxCharLength
 }
 
 func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {

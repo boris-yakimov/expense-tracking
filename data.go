@@ -251,7 +251,6 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 	return nil
 }
 
-// LoadTransactions loads transactions using the configured storage backend
 func LoadTransactions() (TransactionHistory, error) {
 	if globalConfig == nil {
 		globalConfig = DefaultConfig()
@@ -267,7 +266,6 @@ func LoadTransactions() (TransactionHistory, error) {
 	}
 }
 
-// SaveTransactions saves transactions using the configured storage backend
 func SaveTransactions(transactions TransactionHistory) error {
 	if globalConfig == nil {
 		globalConfig = DefaultConfig()
