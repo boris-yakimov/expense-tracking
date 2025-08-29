@@ -1,21 +1,12 @@
 package main
 
 import (
-	"os"
 	"testing"
 	"time"
 )
 
 func TestCalculateMonthPnL(t *testing.T) {
-	tmpFile := "test_calculate_month_pnl.json"
-	originalFilePath := transactionsFilePath
-	transactionsFilePath = tmpFile
-
-	// Clean up after test
-	defer func() {
-		transactionsFilePath = originalFilePath
-		os.Remove(tmpFile)
-	}()
+	setupTestDb(t)
 
 	// Get current month and year for testing
 	year := time.Now().Format("2006")
@@ -23,7 +14,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 
 	cases := []struct {
 		name            string
-		transactions    map[string]map[string]map[string][]Transaction
+		transactions    TransactionHistory
 		month           string
 		year            string
 		expectedAmount  float64
@@ -32,7 +23,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 	}{
 		{
 			name: "positive P&L with income and expenses",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {
 					month: {
 						"income": {
@@ -53,7 +44,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 		},
 		{
 			name: "negative P&L with high expenses",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {
 					month: {
 						"income": {
@@ -73,7 +64,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 		},
 		{
 			name: "zero income with expenses",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {
 					month: {
 						"expense": {
@@ -90,7 +81,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 		},
 		{
 			name: "only income no expenses",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {
 					month: {
 						"income": {
@@ -107,7 +98,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 		},
 		{
 			name: "no transactions",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {
 					month: {},
 				},
@@ -123,7 +114,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			// Set up test data
-			if err := saveTransactions(c.transactions); err != nil {
+			if err := saveTransactionsToTestDb(c.transactions); err != nil {
 				t.Fatalf("Failed to set up test data: %v", err)
 			}
 
@@ -149,21 +140,13 @@ func TestCalculateMonthPnL(t *testing.T) {
 }
 
 func TestCalculateYearPnL(t *testing.T) {
-	tmpFile := "test_calculate_year_pnl.json"
-	originalFilePath := transactionsFilePath
-	transactionsFilePath = tmpFile
-
-	// Clean up after test
-	defer func() {
-		transactionsFilePath = originalFilePath
-		os.Remove(tmpFile)
-	}()
+	setupTestDb(t)
 
 	year := time.Now().Format("2006")
 
 	cases := []struct {
 		name            string
-		transactions    map[string]map[string]map[string][]Transaction
+		transactions    TransactionHistory
 		year            string
 		expectedAmount  float64
 		expectedPercent float64
@@ -171,7 +154,7 @@ func TestCalculateYearPnL(t *testing.T) {
 	}{
 		{
 			name: "year with multiple months",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {
 					"01": {
 						"income": {
@@ -198,7 +181,7 @@ func TestCalculateYearPnL(t *testing.T) {
 		},
 		{
 			name: "year with only expenses",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {
 					"01": {
 						"expense": {
@@ -214,7 +197,7 @@ func TestCalculateYearPnL(t *testing.T) {
 		},
 		{
 			name: "empty year",
-			transactions: map[string]map[string]map[string][]Transaction{
+			transactions: TransactionHistory{
 				year: {},
 			},
 			year:            year,
@@ -227,7 +210,7 @@ func TestCalculateYearPnL(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
 			// Set up test data
-			if err := saveTransactions(c.transactions); err != nil {
+			if err := saveTransactionsToTestDb(c.transactions); err != nil {
 				t.Fatalf("Failed to set up test data: %v", err)
 			}
 

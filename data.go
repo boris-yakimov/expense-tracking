@@ -194,8 +194,15 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 		return fmt.Errorf("begin save transaction failed: %w", err)
 	}
 
+	// Clear existing data first
+	_, err = tx.Exec("DELETE FROM transactions")
+	if err != nil {
+		tx.Rollback()
+		return fmt.Errorf("failed to clear transactions: %w", err)
+	}
+
 	sqlStatement, err := tx.Prepare(`
-			INSERT OR REPLACE INTO transactions
+			INSERT INTO transactions
 			(id, amount, type, category, description, year, month)
 			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`)

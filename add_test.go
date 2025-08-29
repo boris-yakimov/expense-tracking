@@ -1,25 +1,17 @@
 package main
 
 import (
-	"os"
 	"testing"
 	"time"
 )
 
 func TestHandleAddTransaction(t *testing.T) {
-	tmpFile := "test_add_transactions.json"
-	originalFilePath := transactionsFilePath
-	transactionsFilePath = tmpFile
+	setupTestDb(t)
 
-	// Clean up after test
-	defer func() {
-		transactionsFilePath = originalFilePath
-		os.Remove(tmpFile)
-	}()
-
-	// Initialize empty transactions file
-	if err := saveTransactions(make(map[string]map[string]map[string][]Transaction)); err != nil {
-		t.Fatalf("Failed to initialize test file: %v", err)
+	// Initialize empty test database
+	emptyTransactions := make(TransactionHistory)
+	if err := saveTransactionsToTestDb(emptyTransactions); err != nil {
+		t.Fatalf("Failed to initialize test database: %v", err)
 	}
 
 	// Get current month and year for testing
@@ -117,7 +109,7 @@ func TestHandleAddTransaction(t *testing.T) {
 
 			// If no error expected, verify transaction was added
 			if !c.expectedError {
-				transactions, loadErr := loadTransactions()
+				transactions, loadErr := loadTransactionsFromTestDb()
 				if loadErr != nil {
 					t.Errorf("Failed to load transactions after successful add: %v", loadErr)
 					return

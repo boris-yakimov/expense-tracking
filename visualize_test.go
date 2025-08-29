@@ -1,27 +1,18 @@
 package main
 
 import (
-	"os"
 	"testing"
 	"time"
 )
 
 func TestListTransactionsByMonth(t *testing.T) {
-	tmpFile := "test_list_by_month.json"
-	originalFilePath := transactionsFilePath
-	transactionsFilePath = tmpFile
-
-	// Clean up after test
-	defer func() {
-		transactionsFilePath = originalFilePath
-		os.Remove(tmpFile)
-	}()
+	setupTestDb(t)
 
 	// Initialize with test data
 	year := time.Now().Format("2006")
 	month := time.Now().Format("01")
 
-	testTransactions := map[string]map[string]map[string][]Transaction{
+	testTransactions := TransactionHistory{
 		year: {
 			month: {
 				"expense": {
@@ -34,8 +25,8 @@ func TestListTransactionsByMonth(t *testing.T) {
 		},
 	}
 
-	if err := saveTransactions(testTransactions); err != nil {
-		t.Fatalf("Failed to initialize test file: %v", err)
+	if err := saveTransactionsToTestDb(testTransactions); err != nil {
+		t.Fatalf("Failed to initialize test database: %v", err)
 	}
 
 	cases := []struct {
