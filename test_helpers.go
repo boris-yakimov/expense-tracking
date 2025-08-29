@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"os"
 	"strconv"
@@ -11,6 +12,23 @@ import (
 )
 
 var testDb *sql.DB
+var testJSONFilePath string
+var originalConfig *Config
+
+// setupTestStorage creates temporary storage for testing (either SQLite or JSON)
+func setupTestStorage(t *testing.T, storageType StorageType) {
+	// Save original config
+	originalConfig = globalConfig
+
+	switch storageType {
+	case StorageSQLite:
+		setupTestDb(t)
+	case StorageJSONFile:
+		setupTestJSON(t)
+	default:
+		t.Fatalf("Unsupported storage type for testing: %s", storageType)
+	}
+}
 
 // setupTestDb creates a temporary test database with a transactions table
 func setupTestDb(t *testing.T) {
@@ -48,6 +66,14 @@ func setupTestDb(t *testing.T) {
 		t.Fatalf("Failed to create test schema: %v", err)
 	}
 
+	// Set up test config for SQLite
+	testConfig := &Config{
+		StorageType:  StorageSQLite,
+		SQLitePath:   testDbFilePath,
+		JSONFilePath: "",
+	}
+	SetGlobalConfig(testConfig)
+
 	// Replace the global db with testDb for the duration of the test
 	originalDb := db
 	db = testDb
@@ -57,7 +83,43 @@ func setupTestDb(t *testing.T) {
 		db = originalDb
 		testDb.Close()
 		os.Remove(testDbFilePath)
+		SetGlobalConfig(originalConfig)
 	})
+}
+
+// setupTestJSON creates a temporary JSON file for testing
+func setupTestJSON(t *testing.T) {
+	// Create temporary JSON file
+	tmpJSONFile, err := os.CreateTemp("", "test_transactions_*.json")
+	if err != nil {
+		t.Fatalf("Failed to create temp JSON file: %v", err)
+	}
+	testJSONFilePath = tmpJSONFile.Name()
+	tmpJSONFile.Close()
+
+	// Set up test config for JSON
+	testConfig := &Config{
+		StorageType:  StorageJSONFile,
+		SQLitePath:   "",
+		JSONFilePath: testJSONFilePath,
+	}
+	SetGlobalConfig(testConfig)
+
+	// Clean up function
+	t.Cleanup(func() {
+		os.Remove(testJSONFilePath)
+		SetGlobalConfig(originalConfig)
+	})
+}
+
+// loadTransactionsFromTestStorage loads transactions from the current test storage (SQLite or JSON)
+func loadTransactionsFromTestStorage() (TransactionHistory, error) {
+	if globalConfig.StorageType == StorageSQLite {
+		return loadTransactionsFromTestDb()
+	} else if globalConfig.StorageType == StorageJSONFile {
+		return loadTransactionsFromTestJSON()
+	}
+	return nil, fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 }
 
 // loadTransactionsFromTestDb loads transactions from the transactions table (in test db)
@@ -107,6 +169,40 @@ func loadTransactionsFromTestDb() (TransactionHistory, error) {
 	}
 
 	return transactions, nil
+}
+
+// loadTransactionsFromTestJSON loads transactions from the test JSON file
+func loadTransactionsFromTestJSON() (TransactionHistory, error) {
+	file, err := os.Open(testJSONFilePath)
+	if os.IsNotExist(err) {
+		return make(TransactionHistory), nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer file.Close()
+
+	var transactions TransactionHistory
+	decoder := json.NewDecoder(file)
+	err = decoder.Decode(&transactions)
+	if err != nil {
+		// If the file exists but is empty or has EOF, return empty transactions
+		if err.Error() == "EOF" {
+			return make(TransactionHistory), nil
+		}
+		return nil, err
+	}
+	return transactions, nil
+}
+
+// saveTransactionsToTestStorage saves transactions to the current test storage (SQLite or JSON)
+func saveTransactionsToTestStorage(transactions TransactionHistory) error {
+	if globalConfig.StorageType == StorageSQLite {
+		return saveTransactionsToTestDb(transactions)
+	} else if globalConfig.StorageType == StorageJSONFile {
+		return saveTransactionsToTestJSON(transactions)
+	}
+	return fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 }
 
 // saveTransactionsToTestDb saves transactions to the transactions table (in test db)
@@ -172,4 +268,17 @@ func saveTransactionsToTestDb(transactions TransactionHistory) error {
 	}
 
 	return nil
+}
+
+// saveTransactionsToTestJSON saves transactions to the test JSON file
+func saveTransactionsToTestJSON(transactions TransactionHistory) error {
+	file, err := os.Create(testJSONFilePath)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	encoder := json.NewEncoder(file)
+	encoder.SetIndent("", "  ")
+	return encoder.Encode(transactions)
 }
