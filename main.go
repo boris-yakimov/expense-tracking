@@ -44,11 +44,14 @@ func main() {
 		return false
 	})
 
-	if err := mainMenu(); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
-		os.Exit(1)
-	}
+	// TODO: move os.Exit here
+	tuiLogin()
 
+	// if err := mainMenu(); err != nil {
+	// 	fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
+	// 	os.Exit(1)
+	// }
+	//
 	if err := tui.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
 		os.Exit(1)

@@ -82,3 +82,11 @@ func styleList(list *tview.List) *tview.List {
 
 	return list
 }
+
+func styleFlex(flex *tview.Flex) *tview.Flex {
+	flex.SetBackgroundColor(theme.BackgroundColor)
+	flex.SetBorderColor(theme.BorderColor)
+	flex.SetTitleColor(theme.TitleColor)
+
+	return flex
+}
