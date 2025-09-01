@@ -90,3 +90,12 @@ func styleFlex(flex *tview.Flex) *tview.Flex {
 
 	return flex
 }
+
+func styleTextView(textView *tview.TextView) *tview.TextView {
+	textView.SetBackgroundColor(theme.FieldBackgroundColor)
+	textView.SetBorderColor(theme.BorderColor)
+	textView.SetTitleColor(theme.TitleColor)
+	textView.SetTextColor(theme.FieldTextColor)
+
+	return textView
+}
