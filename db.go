@@ -85,7 +85,7 @@ func loadTransactionsFromDb() (TransactionHistory, error) {
 		)
 
 		if err := rows.Scan(&id, &amount, &txType, &category, &description, &year, &month); err != nil {
-			return nil, fmt.Errorf("scan failed: %w", err)
+			return nil, fmt.Errorf("db scan failed during load transactions: %w", err)
 		}
 
 		y := fmt.Sprintf("%d", year)
@@ -114,25 +114,25 @@ func loadTransactionsFromDb() (TransactionHistory, error) {
 }
 
 func saveTransactionsToDb(transactions TransactionHistory) error {
-	tx, err := db.Begin()
+	sqlTx, err := db.Begin()
 	if err != nil {
 		return fmt.Errorf("begin save transaction failed: %w", err)
 	}
 
 	// Clear existing data first
-	_, err = tx.Exec("DELETE FROM transactions")
+	_, err = sqlTx.Exec("DELETE FROM transactions")
 	if err != nil {
-		tx.Rollback()
+		sqlTx.Rollback()
 		return fmt.Errorf("failed to clear transactions: %w", err)
 	}
 
-	sqlStatement, err := tx.Prepare(`
+	sqlStatement, err := sqlTx.Prepare(`
 			INSERT INTO transactions
 			(id, amount, type, category, description, year, month)
 			VALUES (?, ?, ?, ?, ?, ?, ?)
 		`)
 	if err != nil {
-		tx.Rollback()
+		sqlTx.Rollback()
 		return fmt.Errorf("prepare insert during save transaction failed: %w", err)
 	}
 	defer sqlStatement.Close()
@@ -140,14 +140,14 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 	for year, months := range transactions {
 		y, err := strconv.Atoi(year)
 		if err != nil {
-			tx.Rollback()
+			sqlTx.Rollback()
 			return fmt.Errorf("invalid year key %q: %w", year, err)
 		}
 
 		for month, types := range months {
 			m, err := strconv.Atoi(month)
 			if err != nil {
-				tx.Rollback()
+				sqlTx.Rollback()
 				return fmt.Errorf("invalid month key %q: %w", month, err)
 			}
 
@@ -163,7 +163,7 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 						m,
 					)
 					if err != nil {
-						tx.Rollback()
+						sqlTx.Rollback()
 						return fmt.Errorf("insert failed for transaction %s: %w", tr.Id, err)
 					}
 				}
@@ -171,7 +171,7 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 		}
 	}
 
-	if err := tx.Commit(); err != nil {
+	if err := sqlTx.Commit(); err != nil {
 		return fmt.Errorf("commit failed: %w", err)
 	}
 

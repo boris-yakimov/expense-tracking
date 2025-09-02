@@ -4,15 +4,20 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"os"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
+	"golang.org/x/crypto/bcrypt"
 )
 
 // TODO: fix temp pass with a better approach
 var passwordHash string = fmt.Sprintf("%x", sha256.Sum256([]byte("secret123")))
 
 func tuiLogin() {
+	// TODO: add a check if a password has been set previously
+	// TODO: if it has prompt for login
+	// TODO: if it has not, prompt to set password
 	passwordInputField := styleInputField(tview.NewInputField().
 		SetLabel("Enter Password: ").
 		SetMaskCharacter('*'))
@@ -78,4 +83,68 @@ func tuiLogin() {
 	})
 
 	tui.SetRoot(root, true).SetFocus(passwordInputField)
+}
+
+func addInitialPassword(providedPass string) error {
+	hashedPass, err := bcrypt.GenerateFromPassword([]byte(providedPass), bcrypt.DefaultCost)
+	if err != nil {
+		return fmt.Errorf("unable to generate password, err: %w", err)
+	}
+
+	sqlTx, err := db.Begin()
+	if err != nil {
+		return fmt.Errorf("db connection during new password hashing failed, err: %w", err)
+	}
+	sqlStatement, err := sqlTx.Prepare(`
+		INSERT INTO authentication
+		(password_hash, created_at)
+		VALUES(?, ?)
+	`)
+	if err != nil {
+		sqlTx.Rollback()
+		return fmt.Errorf("prepare insert of new hashed password failed, err: %w", err)
+	}
+	defer sqlStatement.Close()
+
+	creationTimestamp := time.Now().Format("200601021504") // year, month, day, hour, minute
+
+	_, err = sqlStatement.Exec(
+		hashedPass,
+		creationTimestamp,
+	)
+	if err != nil {
+		sqlTx.Rollback()
+		return fmt.Errorf("insert of new hashed password failed, err: %w", err)
+	}
+
+	// TODO: audit log
+	// TODO: maybe this should be a modal in the TUI instead
+	fmt.Printf("successfully added new password")
+	return nil
+}
+
+func validatePassword(providedPass string, storedHash string) error {
+	if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(providedPass)); err != nil {
+		return fmt.Errorf("invalid password: %w", err)
+	}
+	return nil
+}
+
+func getHashedPassword() (hashedPassword string, err error) {
+	sqlTx, err := db.Begin()
+	if err != nil {
+		return "", fmt.Errorf("db connection during password validation failed, err: %w", err)
+	}
+
+	// TODO: to be reviewed
+	err = sqlTx.QueryRow(`
+			SELECT password_hash
+			FROM authentication
+			LIMIT 1
+		`).Scan(&hashedPassword)
+	if err != nil {
+		return "", fmt.Errorf("unable to retrieve hashed password from db, err: %w", err)
+	}
+
+	return hashedPassword, nil
 }
