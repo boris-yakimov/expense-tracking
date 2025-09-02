@@ -9,6 +9,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// TODO: fix temp pass with a better approach
 var passwordHash string = fmt.Sprintf("%x", sha256.Sum256([]byte("secret123")))
 
 func tuiLogin() {

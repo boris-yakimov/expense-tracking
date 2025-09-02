@@ -21,7 +21,7 @@ func initDb(dbFilePath string) error {
 		return fmt.Errorf("unable to open db connection, err: %w", err)
 	}
 
-	prepTransactionSchema := `
+	prepTransactionTable := `
 		CREATE TABLE IF NOT EXISTS transactions (
 			id				  TEXT PRIMARY KEY,
 			amount 			NUMERIC(12, 2) NOT NULL,
@@ -33,12 +33,29 @@ func initDb(dbFilePath string) error {
 		);
 	`
 
-	_, err = db.Exec(prepTransactionSchema)
+	_, err = db.Exec(prepTransactionTable)
 	if err != nil {
-		return fmt.Errorf("prep db schema err: %w", err)
+		return fmt.Errorf("prep transactions db table err: %w", err)
 	}
 
-	fmt.Printf("db schema initialized successfully\n\n")
+	// TODO: convert to an audit log
+	fmt.Printf("transactions table initialized successfully\n")
+
+	prepAuthTable := `
+		CREATE TABLE IF NOT EXISTS authentication (
+			password_hash TEXT NOT NULL,
+			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+	  );
+	`
+
+	_, err = db.Exec(prepAuthTable)
+	if err != nil {
+		return fmt.Errorf("prep auth db table err: %w", err)
+	}
+
+	// TODO: convert to an audit log
+	fmt.Printf("auth table initialized successfully\n")
+
 	return nil
 }
 
