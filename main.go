@@ -45,13 +45,13 @@ func main() {
 	})
 
 	// TODO: move os.Exit here
-	tuiLogin()
+	// TODO: check is this a first login, i.e. no previous password has been set
+	if firstLogin {
+		setPasswordTui()
+	} else {
+		tuiLogin()
+	}
 
-	// if err := mainMenu(); err != nil {
-	// 	fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
-	// 	os.Exit(1)
-	// }
-	//
 	if err := tui.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
 		os.Exit(1)

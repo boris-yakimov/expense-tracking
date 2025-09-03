@@ -11,13 +11,15 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// TODO: fix temp pass with a better approach
-var passwordHash string = fmt.Sprintf("%x", sha256.Sum256([]byte("secret123")))
+// // TODO: fix temp pass with a better approach
+// var passwordHash string = fmt.Sprintf("%x", sha256.Sum256([]byte("secret123")))
 
 func tuiLogin() {
-	// TODO: add a check if a password has been set previously
-	// TODO: if it has prompt for login
-	// TODO: if it has not, prompt to set password
+	passHashInDb, err := getHashedPassword()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to get hashed password from db: %v\n", err)
+	}
+
 	passwordInputField := styleInputField(tview.NewInputField().
 		SetLabel("Enter Password: ").
 		SetMaskCharacter('*'))
@@ -30,9 +32,9 @@ func tuiLogin() {
 		AddFormItem(passwordInputField).
 		AddButton("Login", func() {
 			entered := passwordInputField.GetText()
-			hash := fmt.Sprintf("%x", sha256.Sum256([]byte(entered)))
+			// hash := fmt.Sprintf("%x", sha256.Sum256([]byte(entered)))
 
-			if hash == passwordHash {
+			if isValid := validatePassword(entered, passHashInDb); isValid {
 				if err := mainMenu(); err != nil {
 					fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
 					os.Exit(1)
@@ -41,6 +43,15 @@ func tuiLogin() {
 				message.SetText("Wrong password. Try again.")
 				passwordInputField.SetText("")
 			}
+			// if hash == passwordHash {
+			// 	if err := mainMenu(); err != nil {
+			// 		fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
+			// 		os.Exit(1)
+			// 	}
+			// } else {
+			// 	message.SetText("Wrong password. Try again.")
+			// 	passwordInputField.SetText("")
+			// }
 		}).
 		AddButton("Quit", func() {
 			tui.Stop()
@@ -85,6 +96,15 @@ func tuiLogin() {
 	tui.SetRoot(root, true).SetFocus(passwordInputField)
 }
 
+func setPasswordTui() error {
+	// TODO: create a modal prompt to set password
+	// TODO: when initial password is being set, ask to repeat it and check if they match before setting it on DB
+
+	if err := addInitialPassword(entered); err != nil {
+		return err
+	}
+}
+
 func addInitialPassword(providedPass string) error {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(providedPass), bcrypt.DefaultCost)
 	if err != nil {
@@ -123,11 +143,11 @@ func addInitialPassword(providedPass string) error {
 	return nil
 }
 
-func validatePassword(providedPass string, storedHash string) error {
+func validatePassword(providedPass string, storedHash string) bool {
 	if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(providedPass)); err != nil {
-		return fmt.Errorf("invalid password: %w", err)
+		return false
 	}
-	return nil
+	return true
 }
 
 func getHashedPassword() (hashedPassword string, err error) {
@@ -136,7 +156,6 @@ func getHashedPassword() (hashedPassword string, err error) {
 		return "", fmt.Errorf("db connection during password validation failed, err: %w", err)
 	}
 
-	// TODO: to be reviewed
 	err = sqlTx.QueryRow(`
 			SELECT password_hash
 			FROM authentication
