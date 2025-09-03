@@ -179,8 +179,6 @@ func setPasswordForm() {
 	tui.SetRoot(root, true).SetFocus(passwordInputField)
 }
 
-// TODO: make sure only one password exists in the authentication table at any given time
-// give an error and that pass already exists, if so
 func addInitialPassword(providedPass string) error {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(providedPass), bcrypt.DefaultCost)
 	if err != nil {
@@ -233,7 +231,6 @@ func getHashedPassword() (hashedPassword string, err error) {
 	err = db.QueryRow(`
 			SELECT password_hash
 			FROM authentication
-			LIMIT 1
 		`).Scan(&hashedPassword)
 
 	if err != nil {

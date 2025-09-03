@@ -41,8 +41,10 @@ func initDb(dbFilePath string) error {
 	// TODO: convert to an audit log
 	fmt.Printf("transactions table initialized successfully\n")
 
+	// the expecation is that we maintain only one auth password at the moment
 	prepAuthTable := `
 		CREATE TABLE IF NOT EXISTS authentication (
+			id INT PRIMARY KEY DEFAULT 1,
 			password_hash TEXT NOT NULL,
 			created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 	  );
