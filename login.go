@@ -12,36 +12,43 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-func loginForm() {
+func loginForm() error {
 	passHashInDb, err := getHashedPassword()
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "failed to get hashed password from db: %v\n", err)
-		os.Exit(1)
+		return fmt.Errorf("failed to get hashed password from db: %w", err)
 	}
 
-	// if no previous pass has been set, switch to the set password form
+	// if no previous pass has been set, switch to the setPasswordForm()
 	if passHashInDb == "" {
 		setPasswordForm()
-		return // i.e. don't build the login form
+		return nil // i.e. don't proceed to build the login form in the event of a first login
 	}
 
 	passwordInputField := styleInputField(tview.NewInputField().
 		SetLabel("Enter Password: ").
 		SetMaskCharacter('*'))
 
+	var form *tview.Form
+	var formWithMessage *tview.Flex
+
+	passwordInputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			form.GetButton(0).InputHandler()(nil, nil) // triggers the "Login" button when enter is pressed
+		}
+	})
+
 	message := styleTextView(tview.NewTextView().
 		SetText("").
 		SetTextAlign(tview.AlignCenter))
 
-	form := styleForm(tview.NewForm().
+	form = styleForm(tview.NewForm().
 		AddFormItem(passwordInputField).
 		AddButton("Login", func() {
 			entered := passwordInputField.GetText()
 
 			if isValid := validatePassword(entered, passHashInDb); isValid {
 				if err := mainMenu(); err != nil {
-					fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
-					os.Exit(1)
+					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
 				}
 			} else {
 				message.SetText("Wrong password. Try again.")
@@ -59,7 +66,7 @@ func loginForm() {
 	topSpacer := tview.NewBox()
 
 	// form + message - vertical alignment
-	formWithMessage := styleFlex(tview.NewFlex().
+	formWithMessage = styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(topSpacer, 1, 0, false).
 		// AddItem(infoMsg, 1, 1, false).
@@ -94,6 +101,7 @@ func loginForm() {
 	})
 
 	tui.SetRoot(root, true).SetFocus(passwordInputField)
+	return nil
 }
 
 func setPasswordForm() {
@@ -104,11 +112,20 @@ func setPasswordForm() {
 		SetLabel("Repeat Password: ").
 		SetMaskCharacter('*'))
 
+	var form *tview.Form
+	var formWithMessage *tview.Flex
+
+	repeatPasswordField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			form.GetButton(0).InputHandler()(nil, nil)
+		}
+	})
+
 	message := styleTextView(tview.NewTextView().
 		SetText("").
 		SetTextAlign(tview.AlignCenter))
 
-	form := styleForm(tview.NewForm().
+	form = styleForm(tview.NewForm().
 		AddFormItem(passwordInputField).
 		AddFormItem(repeatPasswordField).
 		AddButton("Confirm", func() {
@@ -117,7 +134,8 @@ func setPasswordForm() {
 
 			if entered == repeat {
 				if err := addInitialPassword(entered); err != nil {
-					fmt.Fprintf(os.Stderr, "failed to set a new password: %v\n", err)
+					showErrorModal(fmt.Sprintf("failed to set a new password: %v", err), formWithMessage, passwordInputField)
+					return // interrupt here
 				}
 
 				message.SetText("New password has been set")
@@ -142,7 +160,7 @@ func setPasswordForm() {
 	topSpacer := tview.NewBox()
 
 	// form + message - vertical alignment
-	formWithMessage := styleFlex(tview.NewFlex().
+	formWithMessage = styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(topSpacer, 1, 0, false).
 		AddItem(infoMsg, 1, 1, false).
@@ -213,7 +231,7 @@ func addInitialPassword(providedPass string) error {
 
 	// TODO: audit log
 	// TODO: maybe this should be a modal in the TUI instead
-	if err != sqlTx.Commit() {
+	if err = sqlTx.Commit(); err != nil {
 		return fmt.Errorf("unable to commit db transaction when adding new password hash, err: %w", err)
 	}
 

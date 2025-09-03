@@ -1,4 +1,4 @@
-## expense tracking cli tool
+## expense tracking CLI tool
 Track your expenses in the terminal
 
 ![Recording](assets/recording.gif)

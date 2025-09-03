@@ -44,9 +44,10 @@ func main() {
 		return false
 	})
 
-	// TODO: move os.Exit here
-	// TODO: check is this a first login, i.e. no previous password has been set
-	loginForm()
+	if err := loginForm(); err != nil {
+		fmt.Fprintf(os.Stderr, "login failed: %v\n", err)
+		os.Exit(1)
+	}
 
 	if err := tui.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
