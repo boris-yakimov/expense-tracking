@@ -28,20 +28,13 @@ func loginForm() error {
 		SetLabel("Enter Password: ").
 		SetMaskCharacter('*'))
 
-	var form *tview.Form
 	var formWithMessage *tview.Flex
-
-	passwordInputField.SetDoneFunc(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			form.GetButton(0).InputHandler()(nil, nil) // triggers the "Login" button when enter is pressed
-		}
-	})
 
 	message := styleTextView(tview.NewTextView().
 		SetText("").
 		SetTextAlign(tview.AlignCenter))
 
-	form = styleForm(tview.NewForm().
+	form := styleForm(tview.NewForm().
 		AddFormItem(passwordInputField).
 		AddButton("Login", func() {
 			entered := passwordInputField.GetText()
@@ -61,6 +54,13 @@ func loginForm() error {
 		}))
 
 	form.SetButtonsAlign(tview.AlignCenter)
+
+	// TODO: this doesn't seem to work
+	passwordInputField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			form.GetButton(0).InputHandler()(nil, nil) // triggers the "Login" button when enter is pressed
+		}
+	})
 
 	// just a spacer that can be used to structure the UI, using this instead of nil because it also inherits theme styling
 	topSpacer := tview.NewBox()
@@ -112,20 +112,13 @@ func setPasswordForm() {
 		SetLabel("Repeat Password: ").
 		SetMaskCharacter('*'))
 
-	var form *tview.Form
 	var formWithMessage *tview.Flex
-
-	repeatPasswordField.SetDoneFunc(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			form.GetButton(0).InputHandler()(nil, nil)
-		}
-	})
 
 	message := styleTextView(tview.NewTextView().
 		SetText("").
 		SetTextAlign(tview.AlignCenter))
 
-	form = styleForm(tview.NewForm().
+	form := styleForm(tview.NewForm().
 		AddFormItem(passwordInputField).
 		AddFormItem(repeatPasswordField).
 		AddButton("Confirm", func() {
@@ -151,6 +144,12 @@ func setPasswordForm() {
 			os.Exit(0)
 		}))
 	form.SetButtonsAlign(tview.AlignCenter)
+
+	repeatPasswordField.SetDoneFunc(func(key tcell.Key) {
+		if key == tcell.KeyEnter {
+			form.GetButton(0).InputHandler()(nil, nil)
+		}
+	})
 
 	infoMsg := styleTextView(tview.NewTextView().
 		SetText("Set a password").
