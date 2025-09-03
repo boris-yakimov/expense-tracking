@@ -1,7 +1,8 @@
 package main
 
 import (
-	"crypto/sha256"
+	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -11,13 +12,17 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// // TODO: fix temp pass with a better approach
-// var passwordHash string = fmt.Sprintf("%x", sha256.Sum256([]byte("secret123")))
-
-func tuiLogin() {
+func loginForm() {
 	passHashInDb, err := getHashedPassword()
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "failed to get hashed password from db: %v\n", err)
+		os.Exit(1)
+	}
+
+	// if no previous pass has been set, switch to the set password form
+	if passHashInDb == "" {
+		setPasswordForm()
+		return // i.e. don't build the login form
 	}
 
 	passwordInputField := styleInputField(tview.NewInputField().
@@ -32,7 +37,6 @@ func tuiLogin() {
 		AddFormItem(passwordInputField).
 		AddButton("Login", func() {
 			entered := passwordInputField.GetText()
-			// hash := fmt.Sprintf("%x", sha256.Sum256([]byte(entered)))
 
 			if isValid := validatePassword(entered, passHashInDb); isValid {
 				if err := mainMenu(); err != nil {
@@ -43,15 +47,6 @@ func tuiLogin() {
 				message.SetText("Wrong password. Try again.")
 				passwordInputField.SetText("")
 			}
-			// if hash == passwordHash {
-			// 	if err := mainMenu(); err != nil {
-			// 		fmt.Fprintf(os.Stderr, "failed to initialize main menu: %v\n", err)
-			// 		os.Exit(1)
-			// 	}
-			// } else {
-			// 	message.SetText("Wrong password. Try again.")
-			// 	passwordInputField.SetText("")
-			// }
 		}).
 		AddButton("Quit", func() {
 			tui.Stop()
@@ -60,9 +55,14 @@ func tuiLogin() {
 
 	form.SetButtonsAlign(tview.AlignCenter)
 
+	// just a spacer that can be used to structure the UI, using this instead of nil because it also inherits theme styling
+	topSpacer := tview.NewBox()
+
 	// form + message - vertical alignment
 	formWithMessage := styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
+		AddItem(topSpacer, 1, 0, false).
+		// AddItem(infoMsg, 1, 1, false).
 		AddItem(form, 0, 1, true).
 		AddItem(message, 1, 0, false))
 
@@ -73,7 +73,7 @@ func tuiLogin() {
 	// horizontal centering
 	initialModal := styleFlex(tview.NewFlex().
 		AddItem(nil, 0, 1, false).             // left spacer
-		AddItem(formWithMessage, 40, 1, true). // modal width fixed at 40
+		AddItem(formWithMessage, 50, 1, true). // modal width fixed at 40
 		AddItem(nil, 0, 1, false))             // right spacer
 
 	// vertical centering
@@ -96,15 +96,91 @@ func tuiLogin() {
 	tui.SetRoot(root, true).SetFocus(passwordInputField)
 }
 
-func setPasswordTui() error {
-	// TODO: create a modal prompt to set password
-	// TODO: when initial password is being set, ask to repeat it and check if they match before setting it on DB
+func setPasswordForm() {
+	passwordInputField := styleInputField(tview.NewInputField().
+		SetLabel("Enter Password: ").
+		SetMaskCharacter('*'))
+	repeatPasswordField := styleInputField(tview.NewInputField().
+		SetLabel("Repeat Password: ").
+		SetMaskCharacter('*'))
 
-	if err := addInitialPassword(entered); err != nil {
-		return err
-	}
+	message := styleTextView(tview.NewTextView().
+		SetText("").
+		SetTextAlign(tview.AlignCenter))
+
+	form := styleForm(tview.NewForm().
+		AddFormItem(passwordInputField).
+		AddFormItem(repeatPasswordField).
+		AddButton("Confirm", func() {
+			entered := passwordInputField.GetText()
+			repeat := repeatPasswordField.GetText()
+
+			if entered == repeat {
+				if err := addInitialPassword(entered); err != nil {
+					fmt.Fprintf(os.Stderr, "failed to set a new password: %v\n", err)
+				}
+
+				message.SetText("New password has been set")
+				loginForm() // switch back to login screen
+			} else {
+				message.SetText("Passwords do not match. Try Again.")
+				passwordInputField.SetText("")
+				repeatPasswordField.SetText("")
+			}
+		}).
+		AddButton("Quit", func() {
+			tui.Stop()
+			os.Exit(0)
+		}))
+	form.SetButtonsAlign(tview.AlignCenter)
+
+	infoMsg := styleTextView(tview.NewTextView().
+		SetText("Set a password").
+		SetTextAlign(tview.AlignCenter))
+
+	// just a spacer that can be used to structure the UI, using this instead of nil because it also inherits theme styling
+	topSpacer := tview.NewBox()
+
+	// form + message - vertical alignment
+	formWithMessage := styleFlex(tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(topSpacer, 1, 0, false).
+		AddItem(infoMsg, 1, 1, false).
+		AddItem(form, 0, 1, true).
+		AddItem(message, 1, 0, false))
+
+	formWithMessage.SetBorder(true).
+		SetTitle("Expense Tracking Tool").
+		SetTitleAlign(tview.AlignCenter)
+
+	// horizontal centering
+	initialModal := styleFlex(tview.NewFlex().
+		AddItem(nil, 0, 1, false).             // left spacer
+		AddItem(formWithMessage, 50, 1, true). // modal fixed width
+		AddItem(nil, 0, 1, false))             // right spacer
+
+	// vertical centering
+	centeredModal := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).          // top spacer
+		AddItem(initialModal, 15, 1, true). // form box automatic height
+		AddItem(nil, 0, 1, false))          // bottom spacer
+
+	root := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
+		AddItem(centeredModal, 0, 1, true))
+
+	root.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc {
+			tui.Stop()
+			os.Exit(0)
+		}
+		return event
+	})
+
+	tui.SetRoot(root, true).SetFocus(passwordInputField)
 }
 
+// TODO: make sure only one password exists in the authentication table at any given time
+// give an error and that pass already exists, if so
 func addInitialPassword(providedPass string) error {
 	hashedPass, err := bcrypt.GenerateFromPassword([]byte(providedPass), bcrypt.DefaultCost)
 	if err != nil {
@@ -139,7 +215,10 @@ func addInitialPassword(providedPass string) error {
 
 	// TODO: audit log
 	// TODO: maybe this should be a modal in the TUI instead
-	fmt.Printf("successfully added new password")
+	if err != sqlTx.Commit() {
+		return fmt.Errorf("unable to commit db transaction when adding new password hash, err: %w", err)
+	}
+
 	return nil
 }
 
@@ -151,18 +230,18 @@ func validatePassword(providedPass string, storedHash string) bool {
 }
 
 func getHashedPassword() (hashedPassword string, err error) {
-	sqlTx, err := db.Begin()
-	if err != nil {
-		return "", fmt.Errorf("db connection during password validation failed, err: %w", err)
-	}
-
-	err = sqlTx.QueryRow(`
+	err = db.QueryRow(`
 			SELECT password_hash
 			FROM authentication
 			LIMIT 1
 		`).Scan(&hashedPassword)
+
 	if err != nil {
-		return "", fmt.Errorf("unable to retrieve hashed password from db, err: %w", err)
+		if errors.Is(err, sql.ErrNoRows) {
+			// no password has been set yet
+			return "", nil
+		}
+		return "", fmt.Errorf("unable to retrieve hashed password: %w", err)
 	}
 
 	return hashedPassword, nil

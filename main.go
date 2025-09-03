@@ -24,7 +24,7 @@ func main() {
 		defer closeDb()
 	}
 
-	// option to migrate data from JSON to SQLite if requested
+	// option to migrate data from JSON to SQLite
 	if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
 		if config.StorageType != StorageSQLite {
 			fmt.Fprintf(os.Stderr, "migration can only be performed when using SQLite storage")
@@ -46,11 +46,7 @@ func main() {
 
 	// TODO: move os.Exit here
 	// TODO: check is this a first login, i.e. no previous password has been set
-	if firstLogin {
-		setPasswordTui()
-	} else {
-		tuiLogin()
-	}
+	loginForm()
 
 	if err := tui.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
