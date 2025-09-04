@@ -38,9 +38,6 @@ func initDb(dbFilePath string) error {
 		return fmt.Errorf("prep transactions db table err: %w", err)
 	}
 
-	// TODO: convert to an audit log
-	fmt.Printf("transactions table initialized successfully\n")
-
 	// the expecation is that we maintain only one auth password at the moment
 	prepAuthTable := `
 		CREATE TABLE IF NOT EXISTS authentication (
@@ -54,9 +51,6 @@ func initDb(dbFilePath string) error {
 	if err != nil {
 		return fmt.Errorf("prep auth db table err: %w", err)
 	}
-
-	// TODO: convert to an audit log
-	fmt.Printf("auth table initialized successfully\n")
 
 	return nil
 }

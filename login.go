@@ -55,13 +55,6 @@ func loginForm() error {
 
 	form.SetButtonsAlign(tview.AlignCenter)
 
-	// TODO: this doesn't seem to work
-	passwordInputField.SetDoneFunc(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			form.GetButton(0).InputHandler()(nil, nil) // triggers the "Login" button when enter is pressed
-		}
-	})
-
 	// just a spacer that can be used to structure the UI, using this instead of nil because it also inherits theme styling
 	topSpacer := tview.NewBox()
 
@@ -144,12 +137,6 @@ func setPasswordForm() {
 			os.Exit(0)
 		}))
 	form.SetButtonsAlign(tview.AlignCenter)
-
-	repeatPasswordField.SetDoneFunc(func(key tcell.Key) {
-		if key == tcell.KeyEnter {
-			form.GetButton(0).InputHandler()(nil, nil)
-		}
-	})
 
 	infoMsg := styleTextView(tview.NewTextView().
 		SetText("Set a password").
