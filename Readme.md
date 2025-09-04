@@ -3,6 +3,14 @@ Track your expenses in the terminal
 
 ![Recording](assets/recording.gif)
 
+## Authentication and encryption
+
+On initial login you get prompted to set an initial password. The password is stored encrypted (using bcrypt) inside the SQLite database. On subsequent logins you are prompted to enter the same password. Only one password can be set at a time.
+
+The same authentication password is used for encryption of the database at rest with AES-GCM (with an additional salt and random number on top of our password). The encryption/decryption of the transaction data is handled by the expense tracking tool automatically.
+
+It is safe to backup your db/transactions.enc file in a separate location as it is fully encrypted.
+
 ## Storage Configuration
 
 The expense tracking tool now supports configurable storage backends. You can choose between SQLite (default) or JSON file storage using environment variables.
