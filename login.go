@@ -43,6 +43,7 @@ func loginForm() error {
 			entered := passwordInputField.GetText()
 
 			if isValid := validatePassword(entered, passHashInDb); isValid {
+				// TODO: when a valid password is provided decrypt the data from DB
 				if err := mainMenu(); err != nil {
 					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
 				}
