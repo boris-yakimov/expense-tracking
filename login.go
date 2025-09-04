@@ -12,6 +12,9 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
+// TODO: when a user authenticates successfully the same password should be used to decrypt the database
+// an additional Salt is added to the password and than this is used as key for the crypto/aes library to use to encrypt the data
+// salt can be backed up somewhere, password should not be stored in code or file, only typed during login, once typed the password goes into memory and is used for said encryption key
 func loginForm() error {
 	passHashInDb, err := getHashedPassword()
 	if err != nil {
