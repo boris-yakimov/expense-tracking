@@ -1,14 +1,17 @@
 package main
 
 import (
+	"crypto/sha256"
 	"database/sql"
 	"encoding/json"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
+	"golang.org/x/crypto/pbkdf2"
 )
 
 var testDb *sql.DB
@@ -285,4 +288,149 @@ func saveTransactionsToTestJSON(transactions TransactionHistory) error {
 	encoder := json.NewEncoder(file)
 	encoder.SetIndent("", "  ")
 	return encoder.Encode(transactions)
+}
+
+// setupTestEncryption creates temporary directories for encryption testing
+func setupTestEncryption(t *testing.T) (string, string) {
+	// Create temporary directory for encryption files
+	tmpDir, err := os.MkdirTemp("", "test_encryption_*")
+	if err != nil {
+		t.Fatalf("Failed to create temp encryption dir: %v", err)
+	}
+
+	// Create temporary encryption file paths
+	testEncFile := filepath.Join(tmpDir, "test_transactions.enc")
+	testSaltFile := filepath.Join(tmpDir, "test_transactions.salt")
+
+	t.Cleanup(func() {
+		// Clean up temporary files
+		os.RemoveAll(tmpDir)
+	})
+
+	return testEncFile, testSaltFile
+}
+
+// testEncryptDatabase encrypts a database file using test-specific paths
+func testEncryptDatabase(t *testing.T, dbPath, testEncFile, testSaltFile string) error {
+	if userPassword == "" {
+		return fmt.Errorf("user password not set")
+	}
+
+	dbData, err := os.ReadFile(dbPath)
+	if err != nil {
+		return fmt.Errorf("failed to read database file: %w", err)
+	}
+
+	// Use test-specific salt file
+	salt, err := testGetOrCreateSalt(testSaltFile)
+	if err != nil {
+		return fmt.Errorf("failed to get salt: %w", err)
+	}
+
+	key := pbkdf2.Key([]byte(userPassword), salt, iterations, keyLen, sha256.New)
+
+	encryptedData, err := encryptTransactions(key, dbData)
+	if err != nil {
+		return fmt.Errorf("failed to encrypt database: %w", err)
+	}
+
+	// Write to test-specific encrypted file
+	if err := os.WriteFile(testEncFile, encryptedData, 0600); err != nil {
+		return fmt.Errorf("failed to write encrypted database: %w", err)
+	}
+
+	return nil
+}
+
+// testDecryptDatabase decrypts a database file using test-specific paths
+func testDecryptDatabase(t *testing.T, dbPath, testEncFile, testSaltFile string) error {
+	if userPassword == "" {
+		return fmt.Errorf("user password not set")
+	}
+
+	// Check if encrypted file exists
+	if _, err := os.Stat(testEncFile); os.IsNotExist(err) {
+		return nil // nothing to decrypt
+	}
+
+	encryptedData, err := os.ReadFile(testEncFile)
+	if err != nil {
+		return fmt.Errorf("failed to read encrypted database: %w", err)
+	}
+
+	// Use test-specific salt file
+	salt, err := testLoadSalt(testSaltFile)
+	if err != nil {
+		return fmt.Errorf("failed to load salt: %w", err)
+	}
+
+	key := pbkdf2.Key([]byte(userPassword), salt, iterations, keyLen, sha256.New)
+
+	decryptedData, err := decryptTransactions(key, encryptedData)
+	if err != nil {
+		return fmt.Errorf("failed to decrypt database: %w", err)
+	}
+
+	// Write decrypted data to database file
+	if err := os.WriteFile(dbPath, decryptedData, 0600); err != nil {
+		return fmt.Errorf("failed to write decrypted database: %w", err)
+	}
+
+	return nil
+}
+
+// testGetOrCreateSalt gets or creates salt using test-specific path
+func testGetOrCreateSalt(testSaltFile string) ([]byte, error) {
+	// if it exists return it
+	if _, err := os.Stat(testSaltFile); err == nil {
+		return testLoadSalt(testSaltFile)
+		// if it doesn't create it and than return it
+	} else if os.IsNotExist(err) {
+		salt, err := generateSalt()
+		if err != nil {
+			return nil, err
+		}
+
+		if err := testSaveSalt(salt, testSaltFile); err != nil {
+			return nil, err
+		}
+
+		return salt, nil
+	} else {
+		// unexpected error
+		return nil, fmt.Errorf("failed to check salt file: %w", err)
+	}
+}
+
+// testLoadSalt loads salt from test-specific file
+func testLoadSalt(testSaltFile string) ([]byte, error) {
+	salt, err := os.ReadFile(testSaltFile)
+	if err != nil {
+		if os.IsNotExist(err) {
+			return nil, fmt.Errorf("salt file not found: %w", err)
+		}
+		return nil, fmt.Errorf("failed to load salt: %w", err)
+	}
+
+	if len(salt) != saltLen {
+		return nil, fmt.Errorf("invalid salt length: expected %d, got %d", saltLen, len(salt))
+	}
+
+	return salt, nil
+}
+
+// testSaveSalt saves salt to test-specific file
+func testSaveSalt(salt []byte, testSaltFile string) error {
+	dir := filepath.Dir(testSaltFile)
+
+	// make sure dir exists
+	if err := os.MkdirAll(dir, 0700); err != nil {
+		return fmt.Errorf("failed to create salt directory: %w", err)
+	}
+
+	if err := os.WriteFile(testSaltFile, salt, 0600); err != nil {
+		return fmt.Errorf("failed to save salt: %w", err)
+	}
+
+	return nil
 }
