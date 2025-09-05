@@ -1,26 +1,19 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func loginForm() error {
-	passHashInDb, err := getHashedPassword()
-	if err != nil {
-		return fmt.Errorf("failed to get hashed password from db: %w", err)
-	}
+	// TODO: should add a message to let the user know that the TUI things he is starting from scratch, i.e. new password, new transactions file, etc - mainly to cover cases where the user might have moved their DB file and are trying to run the app but they forgot to copy the DB file, this way they will know why they are getting prompted to set a new password
 
-	// if no previous pass has been set, switch to the setPasswordForm()
-	if passHashInDb == "" {
-		setPasswordForm()
+	// first-run for encryption: if no encrypted DB exists, prompt to set a password
+	if _, err := os.Stat(encFile); os.IsNotExist(err) {
+		setNewPasswordForm()
 		return nil // i.e. don't proceed to build the login form in the event of a first login
 	}
 
@@ -39,18 +32,51 @@ func loginForm() error {
 		AddButton("Login", func() {
 			entered := passwordInputField.GetText()
 
-			if isValid := validatePassword(entered, passHashInDb); isValid {
-				if err := mainMenu(); err != nil {
-					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+			// store password in memory to derive an encryption key from it
+			setUserPassword(entered)
+
+			// if encrypted file exists, decrypt with provided password
+			if _, err := os.Stat(encFile); err == nil {
+				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
+
+					// TODO: how do we handle cases where the password is correct but there is a different decryption error ?
+					// wrong password or other decrypt error; keep on login
+					message.SetText("Wrong password. Try again.")
+					passwordInputField.SetText("")
+					clearUserPassword() // remove pass from memory on error
+					return
 				}
-			} else {
-				message.SetText("Wrong password. Try again.")
-				passwordInputField.SetText("")
 			}
+
+			// initialize DB connection now that the DB is decrypted or already plaintext
+			if err := initDb(globalConfig.SQLitePath); err != nil {
+				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
+				clearUserPassword() // remove pass from memory on error
+				return
+			}
+
+			// optional migration from JSON to SQLite (runs only if env var is set)
+			if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
+				if globalConfig.StorageType != StorageSQLite {
+					showErrorModal("migration requires sqlite storage", formWithMessage, passwordInputField)
+					return
+				}
+				if err := migrateJsonToDb(); err != nil {
+					showErrorModal(fmt.Sprintf("migration failed: %v", err), formWithMessage, passwordInputField)
+					return
+				}
+			}
+
+			if err := mainMenu(); err != nil {
+				showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+				clearUserPassword() // remove pass from memory on error
+				return
+			}
+
 		}).
 		AddButton("Quit", func() {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}))
 
 	form.SetButtonsAlign(tview.AlignCenter)
@@ -87,8 +113,8 @@ func loginForm() error {
 
 	root.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}
 		return event
 	})
@@ -97,7 +123,7 @@ func loginForm() error {
 	return nil
 }
 
-func setPasswordForm() {
+func setNewPasswordForm() {
 	passwordInputField := styleInputField(tview.NewInputField().
 		SetLabel("Enter Password: ").
 		SetMaskCharacter('*'))
@@ -124,8 +150,31 @@ func setPasswordForm() {
 					return // interrupt here
 				}
 
-				message.SetText("New password has been set")
-				loginForm() // switch back to login screen
+				// proceed directly to app using the newly set in-memory password
+				if err := initDb(globalConfig.SQLitePath); err != nil {
+					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
+					clearUserPassword() // remove pass from memory on error
+					return
+				}
+
+				// optional migration from JSON to SQLite (runs only if env var is set)
+				if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
+					if globalConfig.StorageType != StorageSQLite {
+						showErrorModal("migration requires sqlite storage", formWithMessage, passwordInputField)
+						return
+					}
+					if err := migrateJsonToDb(); err != nil {
+						showErrorModal(fmt.Sprintf("migration failed: %v", err), formWithMessage, passwordInputField)
+						return
+					}
+				}
+
+				if err := mainMenu(); err != nil {
+					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+					clearUserPassword() // remove pass from memory on error
+					return
+				}
+
 			} else {
 				message.SetText("Passwords do not match. Try Again.")
 				passwordInputField.SetText("")
@@ -133,8 +182,8 @@ func setPasswordForm() {
 			}
 		}).
 		AddButton("Quit", func() {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}))
 	form.SetButtonsAlign(tview.AlignCenter)
 
@@ -174,8 +223,8 @@ func setPasswordForm() {
 
 	root.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}
 		return event
 	})
@@ -184,66 +233,9 @@ func setPasswordForm() {
 }
 
 func addInitialPassword(providedPass string) error {
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(providedPass), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("unable to generate password, err: %w", err)
+	if providedPass == "" {
+		return fmt.Errorf("password cannot be empty")
 	}
-
-	sqlTx, err := db.Begin()
-	if err != nil {
-		return fmt.Errorf("db connection during new password hashing failed, err: %w", err)
-	}
-	sqlStatement, err := sqlTx.Prepare(`
-		INSERT INTO authentication
-		(password_hash, created_at)
-		VALUES(?, ?)
-	`)
-	if err != nil {
-		sqlTx.Rollback()
-		return fmt.Errorf("prepare insert of new hashed password failed, err: %w", err)
-	}
-	defer sqlStatement.Close()
-
-	creationTimestamp := time.Now().Format("200601021504") // year, month, day, hour, minute
-
-	_, err = sqlStatement.Exec(
-		hashedPass,
-		creationTimestamp,
-	)
-	if err != nil {
-		sqlTx.Rollback()
-		return fmt.Errorf("insert of new hashed password failed, err: %w", err)
-	}
-
-	// TODO: audit log
-	// TODO: maybe this should be a modal in the TUI instead
-	if err = sqlTx.Commit(); err != nil {
-		return fmt.Errorf("unable to commit db transaction when adding new password hash, err: %w", err)
-	}
-
+	setUserPassword(providedPass)
 	return nil
-}
-
-func validatePassword(providedPass string, storedHash string) bool {
-	if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(providedPass)); err != nil {
-		return false
-	}
-	return true
-}
-
-func getHashedPassword() (hashedPassword string, err error) {
-	err = db.QueryRow(`
-			SELECT password_hash
-			FROM authentication
-		`).Scan(&hashedPassword)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			// no password has been set yet
-			return "", nil
-		}
-		return "", fmt.Errorf("unable to retrieve hashed password: %w", err)
-	}
-
-	return hashedPassword, nil
 }

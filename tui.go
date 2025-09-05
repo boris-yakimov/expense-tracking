@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/rivo/tview"
 )
@@ -41,8 +42,9 @@ func mainMenu() error {
 
 	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
-	// navigation help
+	// navigation help and db status line
 	frame = tview.NewFrame(menu).
+		AddText(generateDbStatusLine(), false, tview.AlignLeft, theme.FieldTextColor).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// Add vim-like navigation with j and k keys
@@ -54,6 +56,17 @@ func mainMenu() error {
 
 func generateControlsFooter() string {
 	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
+}
+
+// shows DB encryption status
+func generateDbStatusLine() string {
+	if _, err := os.Stat(globalConfig.SQLitePath); err == nil && userPassword != "" {
+		return "[green]DB status:[-] decrypted for session"
+	}
+	if _, err := os.Stat(encFile); err == nil {
+		return "[cyan]DB status:[-] encrypted"
+	}
+	return "[yellow]DB status:[-] unknown"
 }
 
 // pop-up for error messages
