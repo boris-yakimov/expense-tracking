@@ -32,19 +32,6 @@ func main() {
 		os.Exit(1)
 	}
 
-	// option to migrate data from JSON to SQLite
-	if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
-		if config.StorageType != StorageSQLite {
-			fmt.Fprintf(os.Stderr, "migration can only be performed when using SQLite storage")
-			os.Exit(1)
-		}
-		if err := migrateJsonToDb(); err != nil {
-			fmt.Fprintf(os.Stderr, "executed migration from json to db because MIGRATE_TRANSACTION_DATA=true was set, however migration failed with err: %v", err)
-			os.Exit(1)
-		}
-		fmt.Fprintf(os.Stdout, "successfully executed db migration from json to sqlite db\n")
-	}
-
 	if err := tui.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
 		os.Exit(1)

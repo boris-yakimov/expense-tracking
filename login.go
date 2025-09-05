@@ -3,22 +3,18 @@ package main
 import (
 	"fmt"
 	"os"
-	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func loginForm() error {
 	// TODO: should add a message to let the user know that the TUI things he is starting from scratch, i.e. new password, new transactions file, etc - mainly to cover cases where the user might have moved their DB file and are trying to run the app but they forgot to copy the DB file, this way they will know why they are getting prompted to set a new password
 
-	// first-run detection without touching DB: if neither plaintext nor encrypted DB exists, prompt to set password
-	if _, err := os.Stat(globalConfig.SQLitePath); os.IsNotExist(err) {
-		if _, encErr := os.Stat(encFile); os.IsNotExist(encErr) {
-			setPasswordForm()
-			return nil // i.e. don't proceed to build the login form in the event of a first login
-		}
+	// first-run for encryption: if no encrypted DB exists, prompt to set a password
+	if _, err := os.Stat(encFile); os.IsNotExist(err) {
+		setNewPasswordForm()
+		return nil // i.e. don't proceed to build the login form in the event of a first login
 	}
 
 	passwordInputField := styleInputField(tview.NewInputField().
@@ -39,13 +35,15 @@ func loginForm() error {
 			// store password in memory to derive an encryption key from it
 			setUserPassword(entered)
 
-			// If encrypted file exists, decrypt with provided password
+			// if encrypted file exists, decrypt with provided password
 			if _, err := os.Stat(encFile); err == nil {
 				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
-					// Wrong password or other decrypt error; keep on login
+					// TODO: how do we handle cases where the password is correct but there is a different decryption error ?
+
+					// wrong password or other decrypt error; keep on login
 					message.SetText("Wrong password. Try again.")
 					passwordInputField.SetText("")
-					clearUserPassword()
+					clearUserPassword() // remove pass from memory on error
 					return
 				}
 			}
@@ -53,14 +51,28 @@ func loginForm() error {
 			// initialize DB connection now that the DB is decrypted or already plaintext
 			if err := initDb(globalConfig.SQLitePath); err != nil {
 				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
-				clearUserPassword()
+				clearUserPassword() // remove pass from memory on error
 				return
+			}
+
+			// optional migration from JSON to SQLite (runs only if env var is set)
+			if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
+				if globalConfig.StorageType != StorageSQLite {
+					showErrorModal("migration requires sqlite storage", formWithMessage, passwordInputField)
+					return
+				}
+				if err := migrateJsonToDb(); err != nil {
+					showErrorModal(fmt.Sprintf("migration failed: %v", err), formWithMessage, passwordInputField)
+					return
+				}
 			}
 
 			if err := mainMenu(); err != nil {
 				showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
 				clearUserPassword() // remove pass from memory on error
+				return
 			}
+
 		}).
 		// TODO: pressing enter on the quit button does nothing at the moment
 		AddButton("Quit", func() {
@@ -112,7 +124,7 @@ func loginForm() error {
 	return nil
 }
 
-func setPasswordForm() {
+func setNewPasswordForm() {
 	passwordInputField := styleInputField(tview.NewInputField().
 		SetLabel("Enter Password: ").
 		SetMaskCharacter('*'))
@@ -139,8 +151,31 @@ func setPasswordForm() {
 					return // interrupt here
 				}
 
-				message.SetText("New password has been set")
-				loginForm() // switch back to login screen
+				// proceed directly to app using the newly set in-memory password
+				if err := initDb(globalConfig.SQLitePath); err != nil {
+					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
+					clearUserPassword() // remove pass from memory on error
+					return
+				}
+
+				// optional migration from JSON to SQLite (runs only if env var is set)
+				if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
+					if globalConfig.StorageType != StorageSQLite {
+						showErrorModal("migration requires sqlite storage", formWithMessage, passwordInputField)
+						return
+					}
+					if err := migrateJsonToDb(); err != nil {
+						showErrorModal(fmt.Sprintf("migration failed: %v", err), formWithMessage, passwordInputField)
+						return
+					}
+				}
+
+				if err := mainMenu(); err != nil {
+					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+					clearUserPassword() // remove pass from memory on error
+					return
+				}
+
 			} else {
 				message.SetText("Passwords do not match. Try Again.")
 				passwordInputField.SetText("")
@@ -199,42 +234,9 @@ func setPasswordForm() {
 }
 
 func addInitialPassword(providedPass string) error {
-	hashedPass, err := bcrypt.GenerateFromPassword([]byte(providedPass), bcrypt.DefaultCost)
-	if err != nil {
-		return fmt.Errorf("unable to generate password, err: %w", err)
+	if providedPass == "" {
+		return fmt.Errorf("password cannot be empty")
 	}
-
-	sqlTx, err := db.Begin()
-	if err != nil {
-		return fmt.Errorf("db connection during new password hashing failed, err: %w", err)
-	}
-	sqlStatement, err := sqlTx.Prepare(`
-		INSERT INTO authentication
-		(password_hash, created_at)
-		VALUES(?, ?)
-	`)
-	if err != nil {
-		sqlTx.Rollback()
-		return fmt.Errorf("prepare insert of new hashed password failed, err: %w", err)
-	}
-	defer sqlStatement.Close()
-
-	creationTimestamp := time.Now().Format("200601021504") // year, month, day, hour, minute
-
-	_, err = sqlStatement.Exec(
-		hashedPass,
-		creationTimestamp,
-	)
-	if err != nil {
-		sqlTx.Rollback()
-		return fmt.Errorf("insert of new hashed password failed, err: %w", err)
-	}
-
-	// TODO: audit log
-	// TODO: maybe this should be a modal in the TUI instead
-	if err = sqlTx.Commit(); err != nil {
-		return fmt.Errorf("unable to commit db transaction when adding new password hash, err: %w", err)
-	}
-
+	setUserPassword(providedPass)
 	return nil
 }
