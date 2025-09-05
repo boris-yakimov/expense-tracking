@@ -13,15 +13,12 @@ import (
 )
 
 func loginForm() error {
-	passHashInDb, err := getHashedPassword()
-	if err != nil {
-		return fmt.Errorf("failed to get hashed password from db: %w", err)
-	}
-
-	// if no previous pass has been set, switch to the setPasswordForm()
-	if passHashInDb == "" {
-		setPasswordForm()
-		return nil // i.e. don't proceed to build the login form in the event of a first login
+	// First-run detection without touching DB: if neither plaintext nor encrypted DB exists, prompt to set password
+	if _, err := os.Stat(globalConfig.SQLitePath); os.IsNotExist(err) {
+		if _, encErr := os.Stat(encFile); os.IsNotExist(encErr) {
+			setPasswordForm()
+			return nil // i.e. don't proceed to build the login form in the event of a first login
+		}
 	}
 
 	passwordInputField := styleInputField(tview.NewInputField().
@@ -39,25 +36,44 @@ func loginForm() error {
 		AddButton("Login", func() {
 			entered := passwordInputField.GetText()
 
-			if isValid := validatePassword(entered, passHashInDb); isValid {
-				// store password in memory to derive an encryption key from it
-				setUserPassword(entered)
+			// store password in memory to derive an encryption key from it
+			setUserPassword(entered)
 
-				// TODO: why are we storing the decrypted db as a file, shouldn't it be only in memory ?
-				// decrypt the database before proceeding
+			// If encrypted file exists, decrypt with provided password
+			if _, err := os.Stat(encFile); err == nil {
 				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
-					showErrorModal(fmt.Sprintf("failed to decrypt database: %s\n", err), formWithMessage, passwordInputField)
-					clearUserPassword() // remove pass from memory on error
+					// Wrong password or other decrypt error; keep on login
+					message.SetText("Wrong password. Try again.")
+					passwordInputField.SetText("")
+					clearUserPassword()
 					return
 				}
+			}
 
-				if err := mainMenu(); err != nil {
-					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
-					clearUserPassword() // remove pass from memory on error
+			// initialize DB connection now that the DB is decrypted or already plaintext
+			if err := initDb(globalConfig.SQLitePath); err != nil {
+				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
+				clearUserPassword()
+				return
+			}
+
+			// TODO: do I even need to validate the password hash inside the DB, given that if the wrong password is provided the DB will not be ecnrypted at all
+
+			// validate entered password against stored hash, if present
+			if passHashInDb, err := getHashedPassword(); err == nil && passHashInDb != "" {
+				if !validatePassword(entered, passHashInDb) {
+					// invalid hash match → close DB and prompt again
+					closeDb()
+					message.SetText("Wrong password. Try again.")
+					passwordInputField.SetText("")
+					clearUserPassword()
+					return
 				}
-			} else {
-				message.SetText("Wrong password. Try again.")
-				passwordInputField.SetText("")
+			}
+
+			if err := mainMenu(); err != nil {
+				showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+				clearUserPassword() // remove pass from memory on error
 			}
 		}).
 		AddButton("Quit", func() {

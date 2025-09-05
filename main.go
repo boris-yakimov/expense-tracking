@@ -17,7 +17,7 @@ func main() {
 	config := loadConfigFromEnvVars()
 	SetGlobalConfig(config)
 
-	// set up graceful shutdown handler to make sure database re-encryption happens on exit
+	// set up graceful shutdown handler to make sure database re-encryption happens even if the tui gets killed
 	setupGracefulShutdown(config)
 
 	tui = tview.NewApplication()
@@ -26,25 +26,6 @@ func main() {
 		screen.Fill(' ', tcell.StyleDefault.Background(theme.BackgroundColor))
 		return false
 	})
-
-	// DB stuff should happen only after successful login
-	// initialize db only if using SQLite storage
-	if config.StorageType == StorageSQLite {
-		// database decryption happens in login.go after successful authentication, here we just initialize the db connection pool without actually connecting to the db
-		if err := initDb(config.SQLitePath); err != nil {
-			fmt.Fprintf(os.Stderr, "failed to initialize DB with err: \n\n%v", err)
-			os.Exit(1)
-		}
-		defer func() {
-			// make sure database is encrypted on shutdown of the TUI
-			if userPassword != "" {
-				if err := encryptDatabase(config.SQLitePath); err != nil {
-					fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
-				}
-			}
-			closeDb() // cleanup db connections
-		}()
-	}
 
 	if err := loginForm(); err != nil {
 		fmt.Fprintf(os.Stderr, "login failed: %v\n", err)
@@ -67,6 +48,16 @@ func main() {
 	if err := tui.Run(); err != nil {
 		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
 		os.Exit(1)
+	}
+
+	// on normal shutdown, close and re-encrypt DB if user was authenticated
+	if config.StorageType == StorageSQLite {
+		closeDb()
+		if userPassword != "" {
+			if err := encryptDatabase(config.SQLitePath); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+			}
+		}
 	}
 }
 
