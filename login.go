@@ -1,8 +1,6 @@
 package main
 
 import (
-	"database/sql"
-	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -55,20 +53,6 @@ func loginForm() error {
 				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
 				clearUserPassword()
 				return
-			}
-
-			// TODO: do I even need to validate the password hash inside the DB, given that if the wrong password is provided the DB will not be ecnrypted at all
-
-			// validate entered password against stored hash, if present
-			if passHashInDb, err := getHashedPassword(); err == nil && passHashInDb != "" {
-				if !validatePassword(entered, passHashInDb) {
-					// invalid hash match → close DB and prompt again
-					closeDb()
-					message.SetText("Wrong password. Try again.")
-					passwordInputField.SetText("")
-					clearUserPassword()
-					return
-				}
 			}
 
 			if err := mainMenu(); err != nil {
@@ -250,28 +234,4 @@ func addInitialPassword(providedPass string) error {
 	}
 
 	return nil
-}
-
-func validatePassword(providedPass string, storedHash string) bool {
-	if err := bcrypt.CompareHashAndPassword([]byte(storedHash), []byte(providedPass)); err != nil {
-		return false
-	}
-	return true
-}
-
-func getHashedPassword() (hashedPassword string, err error) {
-	err = db.QueryRow(`
-			SELECT password_hash
-			FROM authentication
-		`).Scan(&hashedPassword)
-
-	if err != nil {
-		if errors.Is(err, sql.ErrNoRows) {
-			// no password has been set yet
-			return "", nil
-		}
-		return "", fmt.Errorf("unable to retrieve hashed password: %w", err)
-	}
-
-	return hashedPassword, nil
 }
