@@ -24,7 +24,7 @@ import (
 // TODO: to be moved to config file
 const (
 	encFile    = "db/transactions.enc"
-	salt       = "static-temporary-salt" // TODO: move to separate file and generate randomly
+	salt       = "static-temporary-salt" // TODO: move to separate file.salt and generate randomly
 	keyLen     = 32                      // TODO: ?
 	iterations = 200_000                 // TODO: ?
 )

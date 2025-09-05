@@ -11,6 +11,7 @@ import (
 var db *sql.DB
 
 func initDb(dbFilePath string) error {
+	// TODO: decrypt the db file before openning connection to it
 	var err error
 	db, err = sql.Open("sqlite3", dbFilePath)
 	if err != nil {

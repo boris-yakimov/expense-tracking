@@ -1,0 +1,176 @@
+{
+  "2025": {
+    "august": {
+      "expense": [
+        {
+          "id": "d529cb01",
+          "amount": 200,
+          "category": "cash",
+          "description": "atm withdrawal"
+        },
+        {
+          "id": "2a11aa59",
+          "amount": 12.3,
+          "category": "food",
+          "description": "tacos"
+        },
+        {
+          "id": "b3f921d7",
+          "amount": 33.62,
+          "category": "food",
+          "description": "switch back to pizza"
+        },
+        {
+          "id": "a2b734a0",
+          "amount": 9.68,
+          "category": "food",
+          "description": "sandwitch"
+        },
+        {
+          "id": "59c494be",
+          "amount": 15,
+          "category": "food",
+          "description": "patato"
+        },
+        {
+          "id": "ae9c0fd4",
+          "amount": 20.08,
+          "category": "food",
+          "description": "fruit"
+        },
+        {
+          "id": "07503556",
+          "amount": 12.35,
+          "category": "food",
+          "description": "updated lunch"
+        },
+        {
+          "id": "66f379d5",
+          "amount": 200,
+          "category": "food",
+          "description": "super long description to test if we are"
+        },
+        {
+          "id": "726e2d48",
+          "amount": 20,
+          "category": "food",
+          "description": "brownies"
+        },
+        {
+          "id": "c4d4c44d",
+          "amount": 200,
+          "category": "shopping",
+          "description": "groceries"
+        }
+      ],
+      "income": [
+        {
+          "id": "5c45c8a3",
+          "amount": 1500,
+          "category": "salary",
+          "description": "income from employment"
+        },
+        {
+          "id": "ec6cbc9a",
+          "amount": 500,
+          "category": "rentals",
+          "description": "apartment rental"
+        },
+        {
+          "id": "d0294eb5",
+          "amount": 200,
+          "category": "dividends",
+          "description": "from stonks"
+        }
+      ],
+      "investment": [
+        {
+          "id": "023b3574",
+          "amount": 19.25,
+          "category": "insurance",
+          "description": "prorperty insurance august 2025"
+        },
+        {
+          "id": "076e2589",
+          "amount": 78,
+          "category": "insurance",
+          "description": "life insurance august 2025"
+        },
+        {
+          "id": "9c022af9",
+          "amount": 50,
+          "category": "crypto",
+          "description": "eth"
+        }
+      ]
+    },
+    "july": {
+      "expense": [
+        {
+          "id": "13b6b6a4",
+          "amount": 53.4,
+          "category": "food",
+          "description": "groceries"
+        },
+        {
+          "id": "273a9a82",
+          "amount": 432,
+          "category": "renovation",
+          "description": "fence"
+        },
+        {
+          "id": "36d6dcaf",
+          "amount": 45,
+          "category": "food",
+          "description": "burgers"
+        },
+        {
+          "id": "45863f2e",
+          "amount": 12.35,
+          "category": "food",
+          "description": "sandwitch"
+        },
+        {
+          "id": "5af73139",
+          "amount": 100,
+          "category": "travel",
+          "description": "rent a car gas"
+        },
+        {
+          "id": "6aa85586",
+          "amount": 52,
+          "category": "food",
+          "description": "groceries"
+        }
+      ],
+      "income": [
+        {
+          "id": "0c644f95",
+          "amount": 1500,
+          "category": "salary",
+          "description": "income from employment"
+        }
+      ],
+      "investment": [
+        {
+          "id": "1da0ffdb",
+          "amount": 78,
+          "category": "insurance",
+          "description": "life insurance monthly payment"
+        },
+        {
+          "id": "2cd6d09c",
+          "amount": 19.25,
+          "category": "insurance",
+          "description": "property insurance monthly payment"
+        },
+        {
+          "id": "32640254",
+          "amount": 100,
+          "category": "funds",
+          "description": "ibkr etf investment"
+        }
+      ]
+    }
+  }
+}
