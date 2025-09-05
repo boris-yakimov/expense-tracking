@@ -3,6 +3,8 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -15,6 +17,9 @@ func main() {
 	config := loadConfigFromEnvVars()
 	SetGlobalConfig(config)
 
+	// set up graceful shutdown handler to make sure database re-encryption happens on exit
+	setupGracefulShutdown(config)
+
 	tui = tview.NewApplication()
 	tui.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
 		screen.Clear()
@@ -22,20 +27,28 @@ func main() {
 		return false
 	})
 
-	if err := loginForm(); err != nil {
-		fmt.Fprintf(os.Stderr, "login failed: %v\n", err)
-		os.Exit(1)
-	}
-
-	// DB stuff should happen only  after successful login
+	// DB stuff should happen only after successful login
 	// initialize db only if using SQLite storage
 	if config.StorageType == StorageSQLite {
-		// TODO: decrypt the db file before openning connection to it
+		// database decryption happens in login.go after successful authentication, here we just initialize the db connection pool without actually connecting to the db
 		if err := initDb(config.SQLitePath); err != nil {
 			fmt.Fprintf(os.Stderr, "failed to initialize DB with err: \n\n%v", err)
 			os.Exit(1)
 		}
-		defer closeDb()
+		defer func() {
+			// make sure database is encrypted on shutdown of the TUI
+			if userPassword != "" {
+				if err := encryptDatabase(config.SQLitePath); err != nil {
+					fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+				}
+			}
+			closeDb() // cleanup db connections
+		}()
+	}
+
+	if err := loginForm(); err != nil {
+		fmt.Fprintf(os.Stderr, "login failed: %v\n", err)
+		os.Exit(1)
 	}
 
 	// option to migrate data from JSON to SQLite
@@ -55,5 +68,23 @@ func main() {
 		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
 		os.Exit(1)
 	}
-	// TODO: make sure the db gets always re-encrypted before after
+}
+
+// sets up signal handling to ensure database encryption on exit
+// TODO: undertsand how this works
+func setupGracefulShutdown(config *Config) {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+
+	go func() {
+		<-c
+		// encrypt database before exiting
+		if userPassword != "" && config.StorageType == StorageSQLite {
+			if err := encryptDatabase(config.SQLitePath); err != nil {
+				fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+			}
+		}
+		clearUserPassword()
+		os.Exit(0)
+	}()
 }

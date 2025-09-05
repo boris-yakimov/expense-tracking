@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"os"
 	"strconv"
 
 	_ "github.com/mattn/go-sqlite3"
@@ -11,7 +12,15 @@ import (
 var db *sql.DB
 
 func initDb(dbFilePath string) error {
-	// TODO: decrypt the db file before openning connection to it
+	// check if database file exists, if not create an empty one
+	if _, err := os.Stat(dbFilePath); os.IsNotExist(err) {
+		file, err := os.Create(dbFilePath)
+		if err != nil {
+			return fmt.Errorf("unable to create database file: %w", err)
+		}
+		file.Close()
+	}
+
 	var err error
 	db, err = sql.Open("sqlite3", dbFilePath)
 	if err != nil {

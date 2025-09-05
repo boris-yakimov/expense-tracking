@@ -12,9 +12,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// TODO: when a user authenticates successfully the same password should be used to decrypt the database
-// an additional Salt is added to the password and than this is used as key for the crypto/aes library to use to encrypt the data
-// salt can be backed up somewhere, password should not be stored in code or file, only typed during login, once typed the password goes into memory and is used for said encryption key
 func loginForm() error {
 	passHashInDb, err := getHashedPassword()
 	if err != nil {
@@ -43,9 +40,20 @@ func loginForm() error {
 			entered := passwordInputField.GetText()
 
 			if isValid := validatePassword(entered, passHashInDb); isValid {
-				// TODO: when a valid password is provided decrypt the data from DB
+				// store password in memory to derive an encryption key from it
+				setUserPassword(entered)
+
+				// TODO: why are we storing the decrypted db as a file, shouldn't it be only in memory ?
+				// decrypt the database before proceeding
+				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
+					showErrorModal(fmt.Sprintf("failed to decrypt database: %s\n", err), formWithMessage, passwordInputField)
+					clearUserPassword() // remove pass from memory on error
+					return
+				}
+
 				if err := mainMenu(); err != nil {
 					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+					clearUserPassword() // remove pass from memory on error
 				}
 			} else {
 				message.SetText("Wrong password. Try again.")
