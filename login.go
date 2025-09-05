@@ -62,9 +62,10 @@ func loginForm() error {
 				clearUserPassword() // remove pass from memory on error
 			}
 		}).
+		// TODO: pressing enter on the quit button does nothing at the moment
 		AddButton("Quit", func() {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}))
 
 	form.SetButtonsAlign(tview.AlignCenter)
@@ -101,8 +102,8 @@ func loginForm() error {
 
 	root.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}
 		return event
 	})
@@ -147,8 +148,8 @@ func setPasswordForm() {
 			}
 		}).
 		AddButton("Quit", func() {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}))
 	form.SetButtonsAlign(tview.AlignCenter)
 
@@ -188,8 +189,8 @@ func setPasswordForm() {
 
 	root.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc {
+			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
-			os.Exit(0)
 		}
 		return event
 	})

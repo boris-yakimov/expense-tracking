@@ -56,6 +56,11 @@ func main() {
 		if userPassword != "" {
 			if err := encryptDatabase(config.SQLitePath); err != nil {
 				fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+			} else {
+				// remove unencrypted database file after successful encryption
+				if err := os.Remove(config.SQLitePath); err != nil {
+					fmt.Fprintf(os.Stderr, "warning: failed to remove plaintext database: %v\n", err)
+				}
 			}
 		}
 	}
@@ -69,10 +74,18 @@ func setupGracefulShutdown(config *Config) {
 
 	go func() {
 		<-c
-		// encrypt database before exiting
-		if userPassword != "" && config.StorageType == StorageSQLite {
-			if err := encryptDatabase(config.SQLitePath); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+		// close db and encrypt database before exiting
+		if config.StorageType == StorageSQLite {
+			closeDb()
+			if userPassword != "" {
+				if err := encryptDatabase(config.SQLitePath); err != nil {
+					fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+				} else {
+					// remove unencrypted database file after successful encryption
+					if err := os.Remove(config.SQLitePath); err != nil {
+						fmt.Fprintf(os.Stderr, "warning: failed to remove plaintext database: %v\n", err)
+					}
+				}
 			}
 		}
 		clearUserPassword()
