@@ -38,8 +38,8 @@ func loginForm() error {
 			// if encrypted file exists, decrypt with provided password
 			if _, err := os.Stat(encFile); err == nil {
 				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
-					// TODO: how do we handle cases where the password is correct but there is a different decryption error ?
 
+					// TODO: how do we handle cases where the password is correct but there is a different decryption error ?
 					// wrong password or other decrypt error; keep on login
 					message.SetText("Wrong password. Try again.")
 					passwordInputField.SetText("")
@@ -74,7 +74,6 @@ func loginForm() error {
 			}
 
 		}).
-		// TODO: pressing enter on the quit button does nothing at the moment
 		AddButton("Quit", func() {
 			// allow main() to run post-Run() cleanup (encrypt + remove plaintext)
 			tui.Stop()
