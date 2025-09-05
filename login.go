@@ -11,7 +11,9 @@ import (
 )
 
 func loginForm() error {
-	// First-run detection without touching DB: if neither plaintext nor encrypted DB exists, prompt to set password
+	// TODO: should add a message to let the user know that the TUI things he is starting from scratch, i.e. new password, new transactions file, etc - mainly to cover cases where the user might have moved their DB file and are trying to run the app but they forgot to copy the DB file, this way they will know why they are getting prompted to set a new password
+
+	// first-run detection without touching DB: if neither plaintext nor encrypted DB exists, prompt to set password
 	if _, err := os.Stat(globalConfig.SQLitePath); os.IsNotExist(err) {
 		if _, encErr := os.Stat(encFile); os.IsNotExist(encErr) {
 			setPasswordForm()

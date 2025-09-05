@@ -193,11 +193,6 @@ func decryptDatabase(dbPath string) error {
 	return nil
 }
 
-func isDatabaseEncrypted() bool {
-	_, err := os.Stat(encFile)
-	return !os.IsNotExist(err)
-}
-
 // encrypts transaction data using AES-GCM
 func encryptTransactions(key, plainText []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
