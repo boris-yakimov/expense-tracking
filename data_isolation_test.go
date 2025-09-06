@@ -146,7 +146,6 @@ func TestNoActualDataModification(t *testing.T) {
 		TestStyleTable(t)
 		TestStyleList(t)
 		TestVimNavigation(t)
-		TestExitShortcuts(t)
 		TestAddInitialPassword(t)
 		TestSetupGracefulShutdown(t)
 		TestSignalHandling(t)
