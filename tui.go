@@ -7,6 +7,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// handles creating the main menu list of options in the TUI
 func mainMenu() error {
 	var frame *tview.Frame
 	var menu *tview.List
@@ -58,6 +59,7 @@ func generateControlsFooter() string {
 	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
 }
 
+// TODO: not sure if I should keep this yet
 // shows DB encryption status
 func generateDbStatusLine() string {
 	if _, err := os.Stat(globalConfig.SQLitePath); err == nil && userPassword != "" {
@@ -69,7 +71,7 @@ func generateDbStatusLine() string {
 	return "[yellow]DB status:[-] unknown"
 }
 
-// pop-up for error messages
+// handles creating a pop-up for error messages in the TUI
 func showErrorModal(msg string, previous tview.Primitive, focus tview.Primitive) {
 	modal := tview.NewModal().
 		SetText(msg).

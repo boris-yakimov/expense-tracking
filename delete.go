@@ -6,6 +6,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// creates a TUI form with required fiields to delete an existing transaction
 func formDeleteTransaction() error {
 	var transactionId string
 	var transactionType string
@@ -66,6 +67,7 @@ func formDeleteTransaction() error {
 	return nil
 }
 
+// handles deleting an existing transaction to storage (db or json)
 func handleDeleteTransaction(transactionType, transactionId string) error {
 	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
@@ -111,6 +113,7 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 	return fmt.Errorf("\ndid not match any transaction by id %s, please run list %s or show-total and confirm the transaction id that you want to delete\n", transactionId, txType)
 }
 
+// helper to remove a transaction at a specific index
 func removeTransactionAtIndex(transactions []Transaction, index int) []Transaction {
 	if index < 0 || index >= len(transactions) {
 		return transactions // index out of range return original

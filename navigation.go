@@ -4,6 +4,7 @@ import (
 	"github.com/gdamore/tcell/v2"
 )
 
+// helper to handle vim-like motions when navigating the TUI
 func vimNavigation(event *tcell.EventKey) *tcell.EventKey {
 	// rewrite the j/k call to a up or down arrow call instead to simulate vim motions
 	switch event.Key() {
@@ -18,6 +19,7 @@ func vimNavigation(event *tcell.EventKey) *tcell.EventKey {
 	return event
 }
 
+// helper to handle exit events - ESC, q, Q
 func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
 		mainMenu()

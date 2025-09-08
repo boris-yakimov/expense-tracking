@@ -8,6 +8,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// Creates a TUI form with prompt for logi. On initial login provides a form set a password. On subsequent attempts, prompts for password to login with. The same password is also used to generate an encryption key that is then used for encrypting/decrypting the database.
 func loginForm() error {
 	// TODO: should add a message to let the user know that the TUI things he is starting from scratch, i.e. new password, new transactions file, etc - mainly to cover cases where the user might have moved their DB file and are trying to run the app but they forgot to copy the DB file, this way they will know why they are getting prompted to set a new password
 
@@ -123,6 +124,7 @@ func loginForm() error {
 	return nil
 }
 
+// creates the TUI form for setting a new password
 func setNewPasswordForm() {
 	passwordInputField := styleInputField(tview.NewInputField().
 		SetLabel("Enter Password: ").
@@ -232,6 +234,7 @@ func setNewPasswordForm() {
 	tui.SetRoot(root, true).SetFocus(passwordInputField)
 }
 
+// helper to check if newly set password is adequate and stores it in memory for later use in generating an encryption key
 func addInitialPassword(providedPass string) error {
 	if providedPass == "" {
 		return fmt.Errorf("password cannot be empty")

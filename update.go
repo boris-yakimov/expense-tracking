@@ -15,6 +15,7 @@ type UpdateTransactionRequest struct {
 	Description string
 }
 
+// creates a TUI form with required fields to update an existing transaction
 func formUpdateTransaction() error {
 	var transactionId string
 	var transactionType string
@@ -165,6 +166,7 @@ func formUpdateTransaction() error {
 	return nil
 }
 
+// handles updating an existing transaction in storage (db or json)
 func handleUpdateTransaction(req UpdateTransactionRequest) error {
 	txType, err := normalizeTransactionType(req.Type)
 	if err != nil {

@@ -9,6 +9,7 @@ type PnLResult struct {
 	Percent float64
 }
 
+// calculates the p&l for a specific month
 func calculateMonthPnL(month, year string) (PnLResult, error) {
 	var incomeTotal float64
 	var spendTotal float64
@@ -49,6 +50,7 @@ func calculateMonthPnL(month, year string) (PnLResult, error) {
 	return pnl, nil
 }
 
+// calculates the p&l for a specific month
 func calculateYearPnL(year string) (PnLResult, error) {
 	var incomeTotal float64
 	var spendTotal float64

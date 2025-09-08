@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// load transactions from json file
 func loadTransactionsFromJsonFile() (TransactionHistory, error) {
 	file, err := os.Open(globalConfig.JSONFilePath)
 	if os.IsNotExist(err) {
@@ -22,6 +23,7 @@ func loadTransactionsFromJsonFile() (TransactionHistory, error) {
 	return transactions, err
 }
 
+// save transactions to json file
 func saveTransactionsToJsonFile(transactions TransactionHistory) error {
 	file, err := os.Create(globalConfig.JSONFilePath)
 	if err != nil {

@@ -106,6 +106,7 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 // year -> month -> transcation type (expense, income, or investment) -> transaction
 type TransactionHistory map[string]map[string]map[string][]Transaction
 
+// load transactions from storage (db or json)
 func LoadTransactions() (TransactionHistory, error) {
 	if globalConfig == nil {
 		globalConfig = DefaultConfig()
@@ -121,6 +122,7 @@ func LoadTransactions() (TransactionHistory, error) {
 	}
 }
 
+// load transactions to storage (db or json)
 func SaveTransactions(transactions TransactionHistory) error {
 	if globalConfig == nil {
 		globalConfig = DefaultConfig()

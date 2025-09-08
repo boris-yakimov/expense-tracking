@@ -34,6 +34,7 @@ func DefaultConfig() *Config {
 
 type StorageType string
 
+// determine storage type and storage paths from env vars
 func loadConfigFromEnvVars() *Config {
 	config := DefaultConfig() // sqlite
 

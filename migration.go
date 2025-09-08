@@ -5,7 +5,7 @@ import (
 	"strconv"
 )
 
-// migrate data from json file to sqlite
+// migrates data from json file to sqlite
 func migrateJsonToDb() error {
 	history, err := loadTransactionsFromJsonFile()
 	if err != nil {

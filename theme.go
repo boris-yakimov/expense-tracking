@@ -55,6 +55,7 @@ func styleForm(form *tview.Form) *tview.Form {
 	return form
 }
 
+// helper to style grid type objects in the TUI
 func styleGrid(grid *tview.Grid) *tview.Grid {
 	grid.SetBackgroundColor(theme.BackgroundColor)
 	grid.SetBorderColor(theme.BorderColor)
@@ -64,6 +65,7 @@ func styleGrid(grid *tview.Grid) *tview.Grid {
 	return grid
 }
 
+// helper to style tables in the TUI
 func styleTable(table *tview.Table) *tview.Table {
 	table.SetBackgroundColor(theme.BackgroundColor)
 	table.SetBorderColor(theme.BorderColor)
@@ -73,6 +75,7 @@ func styleTable(table *tview.Table) *tview.Table {
 	return table
 }
 
+// helper to style lists in the TUI
 func styleList(list *tview.List) *tview.List {
 	list.SetBackgroundColor(theme.BackgroundColor)
 	list.SetBorderColor(theme.BorderColor)
@@ -83,6 +86,7 @@ func styleList(list *tview.List) *tview.List {
 	return list
 }
 
+// helper to style flex type objects in the TUI
 func styleFlex(flex *tview.Flex) *tview.Flex {
 	flex.SetBackgroundColor(theme.BackgroundColor)
 	flex.SetBorderColor(theme.BorderColor)
@@ -91,6 +95,7 @@ func styleFlex(flex *tview.Flex) *tview.Flex {
 	return flex
 }
 
+// helper to style textView objects in the TUI
 func styleTextView(textView *tview.TextView) *tview.TextView {
 	textView.SetBackgroundColor(theme.FieldBackgroundColor)
 	textView.SetBorderColor(theme.BorderColor)

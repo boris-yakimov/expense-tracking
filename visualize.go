@@ -8,6 +8,7 @@ import (
 	"github.com/rivo/tview"
 )
 
+// creates a TUI window to show list of available months with transactions
 func showMonthSelector() error {
 	months, err := getMonthsWithTransactions()
 	if err != nil {
@@ -74,6 +75,7 @@ func showMonthSelector() error {
 	return nil
 }
 
+// populates the 3 TUI wndows in the list transactions section with details for the selected month and year
 func showTransactionsForMonth(month, year string) error {
 	transactions, err := LoadTransactions()
 	if err != nil {
@@ -106,7 +108,6 @@ func showTransactionsForMonth(month, year string) error {
 		SetTextAlign(tview.AlignCenter).
 		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate")
 
-	// TODO: explore options to redesign grid into a flex
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3, 2).
 		SetColumns(0, 0, 0).
@@ -142,6 +143,7 @@ func showTransactionsForMonth(month, year string) error {
 	return nil
 }
 
+// creates a grid in the TUI to visualize and structure a list of transactions
 func gridVisualizeTransactions() error {
 	transactions, err := LoadTransactions()
 	if err != nil {

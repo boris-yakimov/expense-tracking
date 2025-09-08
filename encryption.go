@@ -152,7 +152,6 @@ func encryptDatabase(dbPath string) error {
 	return nil
 }
 
-// TODO: why are we storing the decrypted db as a file, shouldn't it be only in memory ?
 // decrypts the SQLite database file
 func decryptDatabase(dbPath string) error {
 	if userPassword == "" {

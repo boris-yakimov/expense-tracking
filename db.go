@@ -48,22 +48,6 @@ func initDb(dbFilePath string) error {
 		return fmt.Errorf("prep transactions db table err: %w", err)
 	}
 
-	// TODO: no longer required since password verification happens by trying to decrypt the db with it
-
-	// // the expecation is that we maintain only one auth password at the moment
-	// prepAuthTable := `
-	// 	CREATE TABLE IF NOT EXISTS authentication (
-	// 		id INT PRIMARY KEY DEFAULT 1,
-	// 		password_hash TEXT NOT NULL,
-	// 		created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-	//   );
-	// `
-	//
-	// _, err = db.Exec(prepAuthTable)
-	// if err != nil {
-	// 	return fmt.Errorf("prep auth db table err: %w", err)
-	// }
-
 	return nil
 }
 

@@ -19,6 +19,7 @@ type AddTransactionRequest struct {
 	Year        string
 }
 
+// creates a TUI form with required fiields to add a new transaction
 func formAddTransaction() error {
 	var transactionType string
 	var category string
@@ -166,6 +167,7 @@ func formAddTransaction() error {
 	return nil
 }
 
+// handles adding a new transaction to storage (db or json)
 func handleAddTransaction(req AddTransactionRequest) error {
 	txType, err := normalizeTransactionType(req.Type)
 	if err != nil {
@@ -254,6 +256,7 @@ func handleAddTransaction(req AddTransactionRequest) error {
 	return nil
 }
 
+// creates a randomly generated transaction id that will be assined on each new transaction
 func generateTransactionId() (id string, err error) {
 	bytes := make([]byte, 4) // 4 bytes = 8 hex characters
 	_, err = rand.Read(bytes)
