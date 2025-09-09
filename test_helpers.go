@@ -311,7 +311,7 @@ func setupTestEncryption(t *testing.T) (string, string) {
 }
 
 // testEncryptDatabase encrypts a database file using test-specific paths
-func testEncryptDatabase(t *testing.T, dbPath, testEncFile, testSaltFile string) error {
+func testEncryptDatabase(_ *testing.T, dbPath, testEncFile, testSaltFile string) error {
 	if userPassword == "" {
 		return fmt.Errorf("user password not set")
 	}
@@ -343,7 +343,7 @@ func testEncryptDatabase(t *testing.T, dbPath, testEncFile, testSaltFile string)
 }
 
 // testDecryptDatabase decrypts a database file using test-specific paths
-func testDecryptDatabase(t *testing.T, dbPath, testEncFile, testSaltFile string) error {
+func testDecryptDatabase(_ *testing.T, dbPath, testEncFile, testSaltFile string) error {
 	if userPassword == "" {
 		return fmt.Errorf("user password not set")
 	}

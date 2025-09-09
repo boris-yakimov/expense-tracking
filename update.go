@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
 	"github.com/rivo/tview"
 )
@@ -36,9 +37,13 @@ func formUpdateTransaction() error {
 		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
 			// extract ID from the selected option (format: "ID: 12345678 | ...")
 			if len(selectedOption) > 4 {
-				// TODO: this should be done better
-				transactionId = selectedOption[4:12] // extract ID from position 4-12
+				parts := strings.SplitN(selectedOption, "|", 2)
+				if len(parts) > 0 {
+					idPart := strings.TrimSpace(parts[0]) // "ID: 12345678"
+					transactionId = strings.TrimPrefix(idPart, "ID: ")
+				}
 			}
+
 			// get transaction type after user selects an ID
 			var err error
 			transactionType, err = getTransactionTypeById(transactionId)
