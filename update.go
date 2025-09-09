@@ -227,8 +227,6 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 	if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
 		return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 	}
-	// TODO: seems to appear in the frame next to the helper menu, figure out what is a better place for this to appear in
-	fmt.Printf("transaction successully updated")
 
 	return nil
 }

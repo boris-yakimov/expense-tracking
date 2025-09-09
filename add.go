@@ -251,8 +251,6 @@ func handleAddTransaction(req AddTransactionRequest) error {
 		return fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 
-	// TODO: seems to appear in the frame next to the helper menu, figure out what is a better place for this to appear in
-	fmt.Printf(" successfully added %s €%.2f | %s | %s\n", txType, txAmount, req.Category, req.Description)
 	return nil
 }
 

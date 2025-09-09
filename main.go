@@ -54,14 +54,15 @@ func main() {
 }
 
 // sets up signal handling to ensure database encryption on exit
-// TODO: undertsand how this works
 func setupGracefulShutdown(config *Config) {
 	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // Interrupt = ctrl+c ; SIGTERM when process is killed
 
+	// since this runs inside the goroutine, the shutdown logic happens asynchronously when triggered.
 	go func() {
-		<-c
-		// close db and encrypt database before exiting
+		<-c // blocks until a signal is received
+
+		// close db and re-encrypt database before exiting
 		if config.StorageType == StorageSQLite {
 			closeDb()
 			if userPassword != "" {
@@ -75,7 +76,7 @@ func setupGracefulShutdown(config *Config) {
 				}
 			}
 		}
-		clearUserPassword()
+		clearUserPassword() // clear password from memory
 		os.Exit(0)
 	}()
 }
