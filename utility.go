@@ -36,7 +36,6 @@ func validDescriptionInputFormat(description string) bool {
 	return matched
 }
 
-// TODO: do i still need this ?
 // helper to make sure transaction types are standardized - lowercase and matching the expected name as in the db
 func normalizeTransactionType(t string) (string, error) {
 	switch t {
@@ -84,7 +83,6 @@ func listOfAllowedCategories(transactionType string) (categories []string, err e
 	return categories, nil
 }
 
-// TODO: this seems to be duplicated bello, check which of the 2 functions is used in the latest tui
 // helper to provide a list of allowed transaction types
 func listOfAllowedTransactionTypes() (categories []string, err error) {
 	var transactionTypes []string
@@ -184,27 +182,6 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 	fmt.Println()
 
 	return true, nil
-}
-
-// TODO: this seems function seems to be duplicated above check which one is used
-// helper to show list of allowed categories
-func showAllowedCategories(transactionType string) error {
-	fmt.Println("\nallowed categories are: ")
-
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(w, "\nCategory\tDescription")
-	fmt.Fprintln(w, "--------\t-----------")
-
-	txType, err := normalizeTransactionType(transactionType)
-	if err != nil {
-		return fmt.Errorf(" show allowed categories err: %w", err)
-	}
-
-	for key, val := range allowedTransactionCategories[txType] {
-		fmt.Fprintf(w, "%s\t%s\n", key, val)
-	}
-	w.Flush()
-	return nil
 }
 
 // helper to get a list of months that have transactions - also  make sure these are sorted with newest to oldest month/year

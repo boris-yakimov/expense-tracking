@@ -125,7 +125,7 @@ func TestShowAllowedCategories(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.name, func(t *testing.T) {
-			err := showAllowedCategories(c.transactionType)
+			_, err := listOfAllowedCategories(c.transactionType)
 
 			if (err != nil) != c.expectedError {
 				t.Errorf("showAllowedCategories(%q) error = %v; expected error = %v",
