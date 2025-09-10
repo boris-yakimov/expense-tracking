@@ -10,8 +10,6 @@ import (
 
 // Creates a TUI form with prompt for logi. On initial login provides a form set a password. On subsequent attempts, prompts for password to login with. The same password is also used to generate an encryption key that is then used for encrypting/decrypting the database.
 func loginForm() error {
-	// TODO: should add a message to let the user know that the TUI things he is starting from scratch, i.e. new password, new transactions file, etc - mainly to cover cases where the user might have moved their DB file and are trying to run the app but they forgot to copy the DB file, this way they will know why they are getting prompted to set a new password
-
 	// first-run for encryption: if no encrypted DB exists, prompt to set a password
 	if _, err := os.Stat(encFile); os.IsNotExist(err) {
 		setNewPasswordForm()
@@ -194,15 +192,20 @@ func setNewPasswordForm() {
 		SetTextAlign(tview.AlignCenter))
 
 	// just a spacer that can be used to structure the UI, using this instead of nil because it also inherits theme styling
-	topSpacer := tview.NewBox()
+	formSpacer := tview.NewBox()
+	disclaimerMsg := styleTextView(tview.NewTextView().
+		SetText("A new transaction DB will be created and your password will be used to encrypt its contents.").
+		SetWrap(true))
 
-	// form + message - vertical alignment
+	// disclaimer + form + message - vertical alignment
 	formWithMessage = styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(topSpacer, 1, 0, false).
-		AddItem(infoMsg, 1, 1, false).
-		AddItem(form, 0, 1, true).
-		AddItem(message, 1, 0, false))
+		AddItem(formSpacer, 1, 0, false).    // 1 row on top
+		AddItem(disclaimerMsg, 2, 0, false). // 2 rows after disclaimer
+		AddItem(formSpacer, 2, 0, false).    // 1 row before info message
+		AddItem(infoMsg, 1, 1, false).       // 1 row after info message
+		AddItem(form, 7, 0, true).           // the form spans 7 rows - including password and repeat password fields and buttons for ok and cancel bellow
+		AddItem(message, 0, 1, false))       // dynamic size of field that contains error message (such as repeat password doesn't match)
 
 	formWithMessage.SetBorder(true).
 		SetTitle("Expense Tracking Tool").
