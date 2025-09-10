@@ -44,12 +44,9 @@ func migrateJsonToDb() error {
 		}
 
 		for month, types := range months {
-			m, ok := monthOrder[month]
-			if !ok {
-				return fmt.Errorf("invalid month key %s: %w", month, err)
-			}
 
 			for txType, list := range types {
+
 				for _, tr := range list {
 					_, err = stmt.Exec(
 						tr.Id,
@@ -57,8 +54,8 @@ func migrateJsonToDb() error {
 						txType,
 						tr.Category,
 						tr.Description,
-						y, // integer year
-						m, // integer month
+						y,     // integer, e.g. 2025
+						month, // string, e.g. August
 					)
 					if err != nil {
 						return fmt.Errorf("failed to insert transaction %s: %w", tr.Id, err)

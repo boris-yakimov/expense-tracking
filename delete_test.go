@@ -20,7 +20,7 @@ func TestHandleDeleteTransaction(t *testing.T) {
 
 			// Initialize with some test data
 			year := time.Now().Format("2006")
-			month := time.Now().Format("01")
+			month := time.Now().Format("january")
 
 			testTransactions := TransactionHistory{
 				year: {

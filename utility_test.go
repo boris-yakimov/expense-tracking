@@ -1,6 +1,7 @@
 package main
 
 import (
+	"slices"
 	"testing"
 )
 
@@ -154,15 +155,8 @@ func TestListOfAllowedTransactionTypes(t *testing.T) {
 	// Check that expected transaction types are present
 	expectedTypes := []string{"expense", "income", "investment"}
 	for _, expectedType := range expectedTypes {
-		found := false
-		for _, txType := range transactionTypes {
-			if txType == expectedType {
-				found = true
-				break
-			}
-		}
-		if !found {
-			t.Errorf("Expected transaction type %q to be in allowed types", expectedType)
+		if !slices.Contains(transactionTypes, expectedType) {
+			t.Errorf("Expected transaction type %q to be in the list", expectedType)
 		}
 	}
 }
@@ -198,7 +192,7 @@ func TestGetListOfDetailedTransactions(t *testing.T) {
 			// Test with some data
 			testTransactions := TransactionHistory{
 				"2023": {
-					"01": {
+					"january": {
 						"expense": []Transaction{
 							{Id: "1", Amount: 10.0, Category: "food", Description: "test food"},
 						},
@@ -254,7 +248,7 @@ func TestGetTransactionTypeById(t *testing.T) {
 			// Test with some data
 			testTransactions := TransactionHistory{
 				"2023": {
-					"01": {
+					"january": {
 						"expense": []Transaction{
 							{Id: "12345678", Amount: 10.0, Category: "food", Description: "test food"},
 						},
@@ -350,19 +344,19 @@ func TestGetMonthsWithTransactions(t *testing.T) {
 			// Test with some data
 			testTransactions := TransactionHistory{
 				"2023": {
-					"01": {
+					"january": {
 						"expense": []Transaction{
 							{Id: "1", Amount: 10.0, Category: "food", Description: "test food"},
 						},
 					},
-					"02": {
+					"february": {
 						"income": []Transaction{
 							{Id: "2", Amount: 1000.0, Category: "salary", Description: "test salary"},
 						},
 					},
 				},
 				"2024": {
-					"03": {
+					"march": {
 						"expense": []Transaction{
 							{Id: "3", Amount: 20.0, Category: "transport", Description: "test transport"},
 						},
@@ -383,16 +377,9 @@ func TestGetMonthsWithTransactions(t *testing.T) {
 			}
 
 			// Verify expected months are present
-			expectedMonths := []string{"01 2023", "02 2023", "03 2024"}
+			expectedMonths := []string{"january 2023", "february 2023", "march 2024"}
 			for _, expectedMonth := range expectedMonths {
-				found := false
-				for _, month := range months {
-					if month == expectedMonth {
-						found = true
-						break
-					}
-				}
-				if !found {
+				if !slices.Contains(months, expectedMonth) {
 					t.Errorf("Expected month %q to be in months list", expectedMonth)
 				}
 			}
@@ -430,19 +417,19 @@ func TestDetermineLatestMonthAndYear(t *testing.T) {
 			// Test with some data
 			testTransactions := TransactionHistory{
 				"2023": {
-					"01": {
+					"january": {
 						"expense": []Transaction{
 							{Id: "1", Amount: 10.0, Category: "food", Description: "test food"},
 						},
 					},
-					"06": {
+					"june": {
 						"income": []Transaction{
 							{Id: "2", Amount: 1000.0, Category: "salary", Description: "test salary"},
 						},
 					},
 				},
 				"2024": {
-					"03": {
+					"march": {
 						"expense": []Transaction{
 							{Id: "3", Amount: 20.0, Category: "transport", Description: "test transport"},
 						},
@@ -458,8 +445,8 @@ func TestDetermineLatestMonthAndYear(t *testing.T) {
 			if err != nil {
 				t.Errorf("Expected no error with test data, got %v", err)
 			}
-			if month != "03" || year != "2024" {
-				t.Errorf("Expected latest month '03' and year '2024', got %q, %q", month, year)
+			if month != "march" || year != "2024" {
+				t.Errorf("Expected latest month 'march' and year '2024', got %q, %q", month, year)
 			}
 		})
 	}

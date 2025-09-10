@@ -118,7 +118,7 @@ func TestSaveTransactionsToDb(t *testing.T) {
 	// Test saving transactions
 	testTransactions := TransactionHistory{
 		"2023": {
-			"01": {
+			"january": {
 				"expense": []Transaction{
 					{Id: "1", Amount: 10.0, Category: "food", Description: "test"},
 				},
@@ -160,7 +160,7 @@ func TestSaveTransactionsToDbInvalidData(t *testing.T) {
 	// Test saving transactions with invalid year
 	invalidTransactions := TransactionHistory{
 		"invalid_year": {
-			"01": {
+			"january": {
 				"expense": []Transaction{
 					{Id: "1", Amount: 10.0, Category: "food", Description: "test"},
 				},

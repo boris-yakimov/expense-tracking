@@ -35,7 +35,7 @@ func TestLoadTransactionsFromJsonFile(t *testing.T) {
 	// Test loading from existing file with data
 	testTransactions := TransactionHistory{
 		"2023": {
-			"01": {
+			"january": {
 				"expense": []Transaction{
 					{Id: "1", Amount: 10.0, Category: "food", Description: "test"},
 				},
@@ -77,7 +77,7 @@ func TestSaveTransactionsToJsonFile(t *testing.T) {
 	// Test saving transactions
 	testTransactions := TransactionHistory{
 		"2023": {
-			"01": {
+			"january": {
 				"expense": []Transaction{
 					{Id: "1", Amount: 10.0, Category: "food", Description: "test"},
 				},

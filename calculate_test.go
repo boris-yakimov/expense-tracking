@@ -20,7 +20,7 @@ func TestCalculateMonthPnL(t *testing.T) {
 
 			// Get current month and year for testing
 			year := time.Now().Format("2006")
-			month := time.Now().Format("01")
+			month := time.Now().Format("january")
 
 			cases := []struct {
 				name            string
@@ -178,7 +178,7 @@ func TestCalculateYearPnL(t *testing.T) {
 					name: "year with multiple months",
 					transactions: TransactionHistory{
 						year: {
-							"01": {
+							"january": {
 								"income": {
 									{Id: "1", Amount: 1000.00, Category: "salary", Description: "jan salary"},
 								},
@@ -186,7 +186,7 @@ func TestCalculateYearPnL(t *testing.T) {
 									{Id: "2", Amount: 300.00, Category: "food", Description: "jan food"},
 								},
 							},
-							"02": {
+							"february": {
 								"income": {
 									{Id: "3", Amount: 1000.00, Category: "salary", Description: "feb salary"},
 								},
@@ -205,7 +205,7 @@ func TestCalculateYearPnL(t *testing.T) {
 					name: "year with only expenses",
 					transactions: TransactionHistory{
 						year: {
-							"01": {
+							"january": {
 								"expense": {
 									{Id: "1", Amount: 500.00, Category: "food", Description: "food"},
 								},

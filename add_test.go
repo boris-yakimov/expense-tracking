@@ -26,7 +26,7 @@ func TestHandleAddTransaction(t *testing.T) {
 
 			// Get current month and year for testing
 			year := time.Now().Format("2006")
-			month := time.Now().Format("01")
+			month := time.Now().Format("january")
 
 			cases := []struct {
 				name            string

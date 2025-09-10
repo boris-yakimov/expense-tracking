@@ -30,7 +30,7 @@ func TestLoadTransactions(t *testing.T) {
 			// Test loading storage with data
 			testTransactions := TransactionHistory{
 				"2023": {
-					"01": {
+					"january": {
 						"expense": []Transaction{
 							{Id: "1", Amount: 10.0, Category: "food", Description: "test"},
 						},
@@ -52,7 +52,7 @@ func TestLoadTransactions(t *testing.T) {
 			}
 
 			// Verify the loaded data
-			if tx, ok := transactions["2023"]["01"]["expense"]; !ok || len(tx) != 1 {
+			if tx, ok := transactions["2023"]["january"]["expense"]; !ok || len(tx) != 1 {
 				t.Errorf("Expected one expense transaction, got %v", transactions)
 			}
 		})
@@ -159,7 +159,7 @@ func TestSaveTransactions(t *testing.T) {
 
 			transactions := TransactionHistory{
 				"2023": {
-					"01": {
+					"january": {
 						"expense": []Transaction{
 							{Id: "1", Amount: 10.0, Category: "food", Description: "test"},
 						},
@@ -201,7 +201,7 @@ func TestCreateTransactionsTable(t *testing.T) {
 			// Save test data first
 			transactions := TransactionHistory{
 				"2023": {
-					"01": {
+					"january": {
 						"expense": []Transaction{
 							{Id: "1", Amount: 10.0, Category: "food", Description: "test"},
 						},
@@ -220,7 +220,7 @@ func TestCreateTransactionsTable(t *testing.T) {
 				t.Fatalf("Failed to load test data: %v", err)
 			}
 
-			table := createTransactionsTable("expense", "01", "2023", loadedTransactions)
+			table := createTransactionsTable("expense", "january", "2023", loadedTransactions)
 			if table == nil {
 				t.Errorf("Expected table to be created")
 			}

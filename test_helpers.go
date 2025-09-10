@@ -60,7 +60,12 @@ func setupTestDb(t *testing.T) {
 			category 		TEXT NOT NULL,
 			description TEXT,
 			year 				INTEGER NOT NULL,
-			month 			INTEGER NOT NULL CHECK (month BETWEEN 1 and 12)
+			month 			TEXT NOT NULL CHECK (
+				month IN (
+            'january','february','march','april','may','june',
+            'july','august','september','october','november','december'
+				)
+			)
 		);
 	`
 
@@ -244,13 +249,9 @@ func saveTransactionsToTestDb(transactions TransactionHistory) error {
 		}
 
 		for month, types := range months {
-			m, err := strconv.Atoi(month)
-			if err != nil {
-				tx.Rollback()
-				return fmt.Errorf("invalid month key %q: %w", month, err)
-			}
 
 			for txType, list := range types {
+
 				for _, tr := range list {
 					_, err = sqlStatement.Exec(
 						tr.Id,
@@ -258,8 +259,8 @@ func saveTransactionsToTestDb(transactions TransactionHistory) error {
 						txType,
 						tr.Category,
 						tr.Description,
-						y,
-						m,
+						y,     // integer, e.g. 2025
+						month, // string, e.g. August
 					)
 					if err != nil {
 						tx.Rollback()

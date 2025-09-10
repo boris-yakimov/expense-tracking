@@ -39,7 +39,12 @@ func initDb(dbFilePath string) error {
 			category 		TEXT NOT NULL,
 			description TEXT,
 			year 				INTEGER NOT NULL,
-			month 			INTEGER NOT NULL CHECK (month BETWEEN 1 and 12)
+			month 			TEXT NOT NULL CHECK (
+				month IN (
+            'january','february','march','april','may','june',
+            'july','august','september','october','november','december'
+				)
+			)
 		);
 	`
 
@@ -71,9 +76,9 @@ func loadTransactionsFromDb() (TransactionHistory, error) {
 
 	for rows.Next() {
 		var (
-			id, txType, category, description string
-			amount                            float64
-			year, month                       int
+			id, txType, category, description, month string
+			amount                                   float64
+			year                                     int
 		)
 
 		if err := rows.Scan(&id, &amount, &txType, &category, &description, &year, &month); err != nil {
@@ -81,16 +86,15 @@ func loadTransactionsFromDb() (TransactionHistory, error) {
 		}
 
 		y := fmt.Sprintf("%d", year)
-		m := fmt.Sprintf("%02d", month)
 
 		if _, ok := transactions[y]; !ok {
 			transactions[y] = make(map[string]map[string][]Transaction)
 		}
-		if _, ok := transactions[y][m]; !ok {
-			transactions[y][m] = make(map[string][]Transaction)
+		if _, ok := transactions[y][month]; !ok {
+			transactions[y][month] = make(map[string][]Transaction)
 		}
 
-		transactions[y][m][txType] = append(transactions[y][m][txType], Transaction{
+		transactions[y][month][txType] = append(transactions[y][month][txType], Transaction{
 			Id:          id,
 			Amount:      amount,
 			Category:    category,
@@ -137,13 +141,9 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 		}
 
 		for month, types := range months {
-			m, err := strconv.Atoi(month)
-			if err != nil {
-				sqlTx.Rollback()
-				return fmt.Errorf("invalid month key %q: %w", month, err)
-			}
 
 			for txType, list := range types {
+
 				for _, tr := range list {
 					_, err = sqlStatement.Exec(
 						tr.Id,
@@ -151,8 +151,8 @@ func saveTransactionsToDb(transactions TransactionHistory) error {
 						txType,
 						tr.Category,
 						tr.Description,
-						y,
-						m,
+						y,     // integer, e.g. 2025
+						month, // string, e.g. August
 					)
 					if err != nil {
 						sqlTx.Rollback()
