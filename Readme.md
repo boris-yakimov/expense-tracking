@@ -1,15 +1,38 @@
-## expense tracking CLI tool
+# expense tracking CLI tool
 Track your expenses in the terminal
 
-![Recording](assets/recording.gif)
+![Recording](assets/login.gif)
 
-## Authentication and encryption
+## Authentication & Encryption Overview
 
-On initial login you get prompted to set an initial password. The password is stored encrypted (using bcrypt) inside the SQLite database. On subsequent logins you are prompted to enter the same password. Only one password can be set at a time.
+This project uses **password-based encryption** to protect the SQLite database that stores expense tracking data.  
+The system is designed so that the database on disk is stored **encrypted**. It is only decrypted into plaintext form at runtime after the user successfully authenticates and than re-encrypted back after exit(re-encryption also happens if the program is crashed).
 
-The same authentication password is used for encryption of the database at rest with AES-GCM (with an additional salt and random number on top of our password). The encryption/decryption of the transaction data is handled by the expense tracking tool automatically.
+---
 
-It is safe to backup your db/transactions.enc file in a separate location as it is fully encrypted.
+### 🔑 Authentication Flow
+
+1. **First Run**
+   - When the program starts, it checks if an encrypted database file (`encFile`) exists.
+   - If not, the user is prompted to create a new password via the **Set New Password** form.
+   - That password is stored in memory and used to derive an encryption key.
+
+2. **Subsequent Runs**
+   - On startup, the **Login Form** asks the user to enter their password.
+   - The entered password is stored temporarily in memory (`userPassword`).
+   - That password is used to derive an encryption key and attempt decryption of the database file.
+
+---
+
+### 🔒 Encryption Details
+
+- **Algorithm:** AES-GCM (Galois/Counter Mode)
+  - Provides both confidentiality and integrity (authenticates ciphertext).
+- **Key Derivation:** A function (`deriveEncryptionKey`) derives a cryptographic key from the user’s password.  
+  - This ensures that the actual AES key is never stored or hardcoded.
+- **File Format:**
+  - Each encrypted file begins with a random **nonce** (generated during encryption).
+  - The nonce is followed by the AES-GCM ciphertext (which also contains the authentication tag).
 
 ## Storage Configuration
 
@@ -38,6 +61,7 @@ EXPENSE_STORAGE_TYPE=json ./expense-tracker
 EXPENSE_SQLITE_PATH=/path/to/my/database.db ./expense-tracker
 ```
 
+TODO: json option is to be re-evaluated in the future, I am not sure i should maintain this as an option at all, SQLite seems the better approach and currently encryption is only handled for sqlite storage
 **Use custom JSON path:**
 ```bash
 EXPENSE_STORAGE_TYPE=json EXPENSE_JSON_PATH=/path/to/my/data.json ./expense-tracker

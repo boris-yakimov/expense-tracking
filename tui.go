@@ -55,19 +55,21 @@ func mainMenu() error {
 	return nil
 }
 
+// creates a footer for the TUI that shows navingation options
 func generateControlsFooter() string {
 	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
 }
 
-// TODO: not sure if I should keep this yet
 // shows DB encryption status
 func generateDbStatusLine() string {
 	if _, err := os.Stat(globalConfig.SQLitePath); err == nil && userPassword != "" {
 		return "[green]DB status:[-] decrypted for session"
 	}
+
 	if _, err := os.Stat(encFile); err == nil {
 		return "[cyan]DB status:[-] encrypted"
 	}
+
 	return "[yellow]DB status:[-] unknown"
 }
 
