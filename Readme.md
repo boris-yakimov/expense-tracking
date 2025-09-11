@@ -1,7 +1,7 @@
 # expense tracking CLI tool
 Track your expenses in the terminal
 
-![Recording](assets/login.gif)
+![Recording](assets/tui-recording.gif)
 
 ## Authentication & Encryption Overview
 
