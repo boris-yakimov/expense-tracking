@@ -147,9 +147,9 @@ func loadTransactionsFromTestDb() (TransactionHistory, error) {
 
 	for rows.Next() {
 		var (
-			id, txType, category, description string
-			amount                            float64
-			year, month                       int
+			id, txType, category, description, month string
+			amount                                   float64
+			year                                     int
 		)
 
 		if err := rows.Scan(&id, &amount, &txType, &category, &description, &year, &month); err != nil {
@@ -157,16 +157,15 @@ func loadTransactionsFromTestDb() (TransactionHistory, error) {
 		}
 
 		y := fmt.Sprintf("%d", year)
-		m := fmt.Sprintf("%02d", month)
 
 		if _, ok := transactions[y]; !ok {
 			transactions[y] = make(map[string]map[string][]Transaction)
 		}
-		if _, ok := transactions[y][m]; !ok {
-			transactions[y][m] = make(map[string][]Transaction)
+		if _, ok := transactions[y][month]; !ok {
+			transactions[y][month] = make(map[string][]Transaction)
 		}
 
-		transactions[y][m][txType] = append(transactions[y][m][txType], Transaction{
+		transactions[y][month][txType] = append(transactions[y][month][txType], Transaction{
 			Id:          id,
 			Amount:      amount,
 			Category:    category,
