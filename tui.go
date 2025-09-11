@@ -1,60 +1,62 @@
 package main
 
 import (
-	"fmt"
+	// "fmt"
 	"os"
 
 	"github.com/rivo/tview"
 )
 
+// TODO: login to go directly to list transactions
 // handles creating the main menu list of options in the TUI
-func mainMenu() error {
-	var frame *tview.Frame
-	var menu *tview.List
-
-	menu = styleList(tview.NewList().
-		AddItem("list transactions", "", 'l', func() {
-			if err := gridVisualizeTransactions(); err != nil {
-				showErrorModal(fmt.Sprintf("list error:\n\n%s", err), frame, menu)
-				return
-			}
-		}).
-		AddItem("add a new transaction", "", 'a', func() {
-			if err := formAddTransaction(); err != nil {
-				showErrorModal(fmt.Sprintf("add error:\n\n%s", err), frame, menu)
-				return
-			}
-		}).
-		AddItem("delete a transaction", "", 'd', func() {
-			if err := formDeleteTransaction(); err != nil {
-				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), frame, menu)
-				return
-			}
-		}).
-		AddItem("update a transaction", "", 'u', func() {
-			if err := formUpdateTransaction(); err != nil {
-				showErrorModal(fmt.Sprintf("update error:\n\n%s", err), frame, menu)
-				return
-			}
-		}).
-		AddItem("quit", "", 'q', func() {
-			tui.Stop()
-		}))
-
-	menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
-
-	// navigation help and db status line
-	frame = tview.NewFrame(menu).
-		AddText(generateDbStatusLine(), false, tview.AlignLeft, theme.FieldTextColor).
-		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
-
-	// Add vim-like navigation with j and k keys
-	menu.SetInputCapture(vimNavigation)
-
-	tui.SetRoot(frame, true).SetFocus(menu)
-	return nil
-}
-
+//
+//	func mainMenu() error {
+//		var frame *tview.Frame
+//		var menu *tview.List
+//
+//		menu = styleList(tview.NewList().
+//			AddItem("list transactions", "", 'l', func() {
+//				if err := gridVisualizeTransactions(); err != nil {
+//					showErrorModal(fmt.Sprintf("list error:\n\n%s", err), frame, menu)
+//					return
+//				}
+//			}).
+//			AddItem("add a new transaction", "", 'a', func() {
+//				if err := formAddTransaction(); err != nil {
+//					showErrorModal(fmt.Sprintf("add error:\n\n%s", err), frame, menu)
+//					return
+//				}
+//			}).
+//			AddItem("delete a transaction", "", 'd', func() {
+//				if err := formDeleteTransaction(); err != nil {
+//					showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), frame, menu)
+//					return
+//				}
+//			}).
+//			AddItem("update a transaction", "", 'u', func() {
+//				if err := formUpdateTransaction(); err != nil {
+//					showErrorModal(fmt.Sprintf("update error:\n\n%s", err), frame, menu)
+//					return
+//				}
+//			}).
+//			AddItem("quit", "", 'q', func() {
+//				tui.Stop()
+//			}))
+//
+//		menu.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+//
+//		// navigation help and db status line
+//		frame = tview.NewFrame(menu).
+//			AddText(generateDbStatusLine(), false, tview.AlignLeft, theme.FieldTextColor).
+//			AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+//
+//		// Add vim-like navigation with j and k keys
+//		menu.SetInputCapture(vimNavigation)
+//
+//		tui.SetRoot(frame, true).SetFocus(menu)
+//		return nil
+//	}
+//
 // creates a footer for the TUI that shows navingation options
 func generateControlsFooter() string {
 	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"

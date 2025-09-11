@@ -51,7 +51,9 @@ func formDeleteTransaction() error {
 			}
 		}).
 		AddButton("Cancel", func() {
-			mainMenu()
+			// TODO: login to go directly to list transactions
+			// mainMenu() // go back to menu
+			gridVisualizeTransactions() // go back to list of transactions
 		}))
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)

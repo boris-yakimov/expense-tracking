@@ -74,8 +74,14 @@ func loginForm() error {
 				}
 			}
 
-			if err := mainMenu(); err != nil {
-				showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+			// TODO: login to go directly to list transactions
+			// if err := mainMenu(); err != nil {
+			// 	showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+			// 	clearUserPassword() // remove pass from memory on error
+			// 	return
+			// }
+			if err := gridVisualizeTransactions(); err != nil {
+				showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), formWithMessage, passwordInputField)
 				clearUserPassword() // remove pass from memory on error
 				return
 			}
@@ -177,8 +183,14 @@ func setNewPasswordForm() {
 					}
 				}
 
-				if err := mainMenu(); err != nil {
-					showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+				// TODO: login to go directly to list transactions
+				// if err := mainMenu(); err != nil {
+				// 	showErrorModal(fmt.Sprintf("failed to initialize main menu: %s\n", err), formWithMessage, passwordInputField)
+				// 	clearUserPassword() // remove pass from memory on error
+				// 	return
+				// }
+				if err := gridVisualizeTransactions(); err != nil {
+					showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), formWithMessage, passwordInputField)
 					clearUserPassword() // remove pass from memory on error
 					return
 				}

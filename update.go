@@ -144,7 +144,9 @@ func formUpdateTransaction() error {
 				return
 			}
 
-			mainMenu() // go back to menu
+			// TODO: login to go directly to list transactions
+			// mainMenu() // go back to menu
+			gridVisualizeTransactions() // go back to list of transactions
 		}).
 		AddButton("Clear", func() {
 			typeDropdown.SetCurrentOption(0)
@@ -154,7 +156,9 @@ func formUpdateTransaction() error {
 			transactionType = "expense"
 		}).
 		AddButton("Cancel", func() {
-			mainMenu()
+			// TODO: login to go directly to list transactions
+			// mainMenu() // go back to menu
+			gridVisualizeTransactions() // go back to list of transactions
 		}))
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)

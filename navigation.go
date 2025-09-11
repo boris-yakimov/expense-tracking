@@ -22,8 +22,10 @@ func vimNavigation(event *tcell.EventKey) *tcell.EventKey {
 // helper to handle exit events - ESC, q, Q
 func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 	if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-		mainMenu()
-		return nil // key event consumed
+		// TODO: login to go directly to list transactions
+		// mainMenu() // go back to menu
+		gridVisualizeTransactions() // go back to list of transactions
+		return nil                  // key event consumed
 	}
 	return event
 }
