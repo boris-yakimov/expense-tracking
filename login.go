@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"os"
 
@@ -36,13 +37,20 @@ func loginForm() error {
 
 			// if encrypted file exists, decrypt with provided password
 			if _, err := os.Stat(encFile); err == nil {
+
 				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
 
-					// TODO: how do we handle cases where the password is correct but there is a different decryption error ?
-					// wrong password or other decrypt error; keep on login
-					message.SetText("Wrong password. Try again.")
-					passwordInputField.SetText("")
-					clearUserPassword() // remove pass from memory on error
+					if errors.Is(err, ErrWrongPassword) {
+						// wrong password, stay on login prompt
+						message.SetText("Wrong password. Try again.")
+						passwordInputField.SetText("")
+						clearUserPassword() // remove pass from memory on error
+						return
+					}
+
+					// some other unexpected error occured - corrupted file, permision issues, etc
+					showErrorModal(fmt.Sprintf("Decryption failed: %s", err), formWithMessage, passwordInputField)
+					clearUserPassword()
 					return
 				}
 			}

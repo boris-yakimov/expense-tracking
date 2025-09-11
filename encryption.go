@@ -5,6 +5,7 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/sha256"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -152,6 +153,8 @@ func encryptDatabase(dbPath string) error {
 	return nil
 }
 
+var ErrWrongPassword = errors.New("wrong password")
+
 // decrypts the SQLite database file
 func decryptDatabase(dbPath string) error {
 	if userPassword == "" {
@@ -175,6 +178,10 @@ func decryptDatabase(dbPath string) error {
 
 	decryptedData, err := decryptTransactions(key, encryptedData)
 	if err != nil {
+		// when decryption fails due to wrong password, return ErrWrongPassword
+		if errors.Is(err, ErrWrongPassword) {
+			return ErrWrongPassword
+		}
 		return fmt.Errorf("failed to decrypt database: %w", err)
 	}
 
@@ -238,7 +245,8 @@ func decryptTransactions(key, cipherText []byte) ([]byte, error) {
 	// decrypt and verify
 	plainText, err := gcm.Open(nil, nonce, data, nil)
 	if err != nil {
-		return nil, fmt.Errorf("failed to decrypt: %w", err)
+		// map AES-GCM authentication failure to wrong password
+		return nil, ErrWrongPassword
 	}
 
 	return plainText, nil
