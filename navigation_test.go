@@ -9,28 +9,28 @@ import (
 func TestVimNavigation(t *testing.T) {
 	// Test 'j' key (move down)
 	event := tcell.NewEventKey(tcell.KeyRune, 'j', tcell.ModNone)
-	result := vimNavigation(event)
+	result := vimMotions(event)
 	if result.Key() != tcell.KeyDown {
 		t.Errorf("Expected 'j' key to be converted to KeyDown, got %v", result.Key())
 	}
 
 	// Test 'k' key (move up)
 	event = tcell.NewEventKey(tcell.KeyRune, 'k', tcell.ModNone)
-	result = vimNavigation(event)
+	result = vimMotions(event)
 	if result.Key() != tcell.KeyUp {
 		t.Errorf("Expected 'k' key to be converted to KeyUp, got %v", result.Key())
 	}
 
 	// Test other rune keys (should pass through unchanged)
 	event = tcell.NewEventKey(tcell.KeyRune, 'a', tcell.ModNone)
-	result = vimNavigation(event)
+	result = vimMotions(event)
 	if result.Key() != tcell.KeyRune || result.Rune() != 'a' {
 		t.Errorf("Expected 'a' key to pass through unchanged")
 	}
 
 	// Test non-rune keys (should pass through unchanged)
 	event = tcell.NewEventKey(tcell.KeyEnter, 0, tcell.ModNone)
-	result = vimNavigation(event)
+	result = vimMotions(event)
 	if result.Key() != tcell.KeyEnter {
 		t.Errorf("Expected Enter key to pass through unchanged")
 	}

@@ -53,7 +53,7 @@ func formUpdateTransaction() error {
 			}
 		})
 		// j/k navigation inside dropdown
-		idDropDown.SetInputCapture(vimNavigation)
+		idDropDown.SetInputCapture(vimMotions)
 	}
 
 	var categoryDropdown *tview.DropDown
@@ -89,7 +89,7 @@ func formUpdateTransaction() error {
 	typeDropdown.SetCurrentOption(0)
 
 	// j/k navigation inside dropdown
-	typeDropdown.SetInputCapture(vimNavigation)
+	typeDropdown.SetInputCapture(vimMotions)
 
 	if _, opt := typeDropdown.GetCurrentOption(); opt != "" {
 		transactionType = opt
@@ -111,7 +111,7 @@ func formUpdateTransaction() error {
 		})
 
 		// j/k navigation inside dropdown
-		categoryDropdown.SetInputCapture(vimNavigation)
+		categoryDropdown.SetInputCapture(vimMotions)
 	}
 	categoryDropdown.SetCurrentOption(0)
 

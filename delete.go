@@ -39,7 +39,7 @@ func formDeleteTransaction() error {
 		})
 
 		// j/k navigation inside dropdown
-		idDropDown.SetInputCapture(vimNavigation)
+		idDropDown.SetInputCapture(vimMotions)
 	}
 
 	form = styleForm(tview.NewForm().

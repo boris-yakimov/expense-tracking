@@ -58,7 +58,7 @@ func formAddTransaction() error {
 		}))
 	typeDropdown.SetCurrentOption(0)
 	// j/k navigation inside dropdown
-	typeDropdown.SetInputCapture(vimNavigation)
+	typeDropdown.SetInputCapture(vimMotions)
 
 	if _, opt := typeDropdown.GetCurrentOption(); opt != "" {
 		transactionType = opt
@@ -80,7 +80,7 @@ func formAddTransaction() error {
 		})
 
 		// j/k navigation inside dropdown
-		categoryDropdown.SetInputCapture(vimNavigation)
+		categoryDropdown.SetInputCapture(vimMotions)
 	}
 	categoryDropdown.SetCurrentOption(0)
 
@@ -103,7 +103,7 @@ func formAddTransaction() error {
 		})
 
 		// j/k navigation inside dropdown
-		periodDropdown.SetInputCapture(vimNavigation)
+		periodDropdown.SetInputCapture(vimMotions)
 	}
 	periodDropdown.SetCurrentOption(0)
 

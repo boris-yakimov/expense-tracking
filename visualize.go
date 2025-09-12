@@ -66,7 +66,7 @@ func showMonthSelector() error {
 			return nil // key event consumed
 		}
 		// handle j/k events to navigate up or down
-		return vimNavigation(event)
+		return vimMotions(event)
 	})
 
 	tui.SetRoot(frame, true).SetFocus(list)
@@ -104,7 +104,9 @@ func showTransactionsForMonth(month, year string) error {
 	helpFooter := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
-		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate")
+		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   " +
+			"[cyan]j/k[-] or [cyan]↑/↓[-]: navigate rows   " +
+			"[magenta]h/l[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
 
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3, 2).
@@ -134,7 +136,7 @@ func showTransactionsForMonth(month, year string) error {
 			return nil // key event consumed
 		}
 		// handle j/k events to navigate up or down
-		return vimNavigation(event)
+		return vimMotions(event)
 	})
 
 	tui.SetRoot(grid, true).SetFocus(grid)
@@ -186,7 +188,9 @@ func gridVisualizeTransactions() error {
 		SetTextAlign(tview.AlignCenter).
 		// TODO: separate helper function that does this
 		// TODO: helper at the bottom of list transactions to show all options - a, d, e/u, j/k, tab, q, etc
-		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate")
+		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   " +
+			"[cyan]j/k[-] or [cyan]↑/↓[-]: navigate rows   " +
+			"[magenta]h/l[-] [magenta]←/→[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
 
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3, 2).
@@ -207,12 +211,27 @@ func gridVisualizeTransactions() error {
 	// start with focus on incomeTable
 	tui.SetRoot(grid, true).SetFocus(tables[currentTable])
 
-	// Handle input capture for month selection and exit
-	// TODO: should I pull this into a helper function
+	// handle input capture for navigation,
 	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		// handle exit events
+		// handle exit event
 		if ev := exitShortcuts(event); ev == nil {
-			return nil // key event consumed
+			tui.Stop()
+			return nil // consume key event so nothing else see it
+		}
+
+		// handle j/k event to navigate up or down and h/l to navigate between tables
+		event = vimMotions(event)
+
+		// table switching with Tab / Shifit+Tab or arrow keys
+		switch event.Key() {
+		case tcell.KeyTAB, tcell.KeyRight:
+			currentTable = (currentTable + 1) % len(tables) // % len(tables) wraps back to 0 when we reach the end of list of tables to prevenet out of bounds errors
+			tui.SetFocus(tables[currentTable])
+			return nil
+		case tcell.KeyBacktab, tcell.KeyLeft: // Shift + Tab
+			currentTable = (currentTable - 1 + len(tables)) % len(tables) // add +len(tables to prevent out of bounds when on first index and trying pressing to go back, if we don't do this we get index -1, when we do this we get 0-1+len(tables) which takes us to the last elemet of the table list instead of to -1
+			tui.SetFocus(tables[currentTable])
+			return nil
 		}
 
 		// handle list months event
@@ -224,22 +243,8 @@ func gridVisualizeTransactions() error {
 			return nil // key event consumed
 		}
 
-		// table switching with Tab
-		switch event.Key() {
-		case tcell.KeyTAB:
-			currentTable = (currentTable + 1) % len(tables)
-			tui.SetFocus(tables[currentTable])
-			return nil
-		case tcell.KeyBacktab: // Shift + Tab
-			currentTable = (currentTable - 1) % len(tables)
-			tui.SetFocus(tables[currentTable])
-			return nil
-		}
-
-		// handle j/k events to navigate up or down
-		return vimNavigation(event)
+		return event
 	})
 
-	tui.SetRoot(grid, true).SetFocus(grid)
 	return nil
 }
