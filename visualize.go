@@ -238,7 +238,6 @@ func gridVisualizeTransactions() error {
 			return nil // key event consumed
 		}
 
-		// TODO: pressing a opens addTransaction form which than triggers handleAddTransaction()
 		if event.Key() == tcell.KeyRune && event.Rune() == 'a' {
 			currentTableType := ""
 			switch currentTable {
@@ -258,7 +257,21 @@ func gridVisualizeTransactions() error {
 		// TODO: pressing e or u opens updateTransaction form which than triggers handleUpdateTransaction() in which ever txType we were tabbed into (it gets automatically selected)
 		// TODO: the update transaction window should show only the previously selected option and fields to change it, there should be no dropdowns to select other transactions in this window, only to change the current one
 		if event.Key() == tcell.KeyRune && (event.Rune() == 'e' || event.Rune() == 'u') {
-			if err := formUpdateTransaction(); err != nil {
+			row, col := tables[currentTable].GetSelection()
+			cell := tables[currentTable].GetCell(row, col)
+			txId, _ := cell.GetReference().(string)
+
+			currentTableType := ""
+			switch currentTable {
+			case 0:
+				currentTableType = "income"
+			case 1:
+				currentTableType = "expense"
+			case 2:
+				currentTableType = "investment"
+			}
+
+			if err := formUpdateTransaction(txId, currentTableType); err != nil {
 				showErrorModal(fmt.Sprintf("update error:\n\n%s", err), nil, grid)
 				return nil
 			}

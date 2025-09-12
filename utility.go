@@ -142,6 +142,28 @@ func getTransactionTypeById(txId string) (txType string, err error) {
 	return "", fmt.Errorf("transaction ID %s could not be found in transaction list", txId)
 }
 
+// helper to get a all details of a single trasnaction by its ID and return it
+func getTransactionById(id string) (*Transaction, error) {
+	transactions, err := LoadTransactions()
+	if err != nil {
+		return nil, fmt.Errorf("unable to load transactions: %w", err)
+	}
+
+	for _, months := range transactions {
+		for _, types := range months {
+			for _, txs := range types {
+				for i := range txs {
+					if txs[i].Id == id {
+						return &txs[i], nil
+					}
+				}
+			}
+		}
+	}
+
+	return nil, fmt.Errorf("transaction with ID %s not found", id)
+}
+
 // helper to enforce the character limit of the description field
 func enforceCharLimit(textToCheck string, lastChar rune) bool {
 	return len(textToCheck) <= DescriptionMaxCharLength

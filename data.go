@@ -97,10 +97,14 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 	}
 
 	for r, tx := range txList {
-		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)))
-		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
-		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
-		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
+		// store transaction ID inside the first cell's reference, will not be visible in the TUI
+		table.SetCell(r+1, 0, tview.NewTableCell(tx.Id).SetReference(tx.Id)
+
+		// populate the rest
+		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)))
+		table.SetCell(r+1, 2, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
+		table.SetCell(r+1, 3, tview.NewTableCell(tx.Category))
+		table.SetCell(r+1, 4, tview.NewTableCell(tx.Description))
 	}
 
 	// make sure selection always starts on the first row

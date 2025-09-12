@@ -60,8 +60,6 @@ func formAddTransaction(currentTableType string) error {
 				}
 			}
 		}))
-	// TODO: check
-	// typeDropdown.SetCurrentOption(indexOf(allowedTransactionTypes, transactionType))
 	typeDropdown.SetCurrentOption(0)
 	// j/k navigation inside dropdown
 	typeDropdown.SetInputCapture(vimMotions)
@@ -147,8 +145,6 @@ func formAddTransaction(currentTableType string) error {
 				return
 			}
 
-			// TODO: login to go directly to list transactions
-			// mainMenu() // go back to menu
 			gridVisualizeTransactions() // go back to list of transactions
 		}).
 		AddButton("Clear", func() {
@@ -159,8 +155,6 @@ func formAddTransaction(currentTableType string) error {
 			transactionType = "expense"
 		}).
 		AddButton("Cancel", func() {
-			// TODO: login to go directly to list transactions
-			// mainMenu() // go back to menu
 			gridVisualizeTransactions() // go back to list of transactions
 		}))
 

@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"strconv"
-	"strings"
 
 	"github.com/rivo/tview"
 )
@@ -17,87 +16,47 @@ type UpdateTransactionRequest struct {
 }
 
 // creates a TUI form with required fields to update an existing transaction
-func formUpdateTransaction() error {
-	var transactionId string
-	var transactionType string
+func formUpdateTransaction(transactionId, transactionType string) error {
+	// fetch transaction data by id
+	tx, err := getTransactionById(transactionId)
+	if err != nil {
+		return fmt.Errorf("could not get transaction by id %s: %w", transactionId, err)
+	}
 
 	var form *tview.Form
 	var frame *tview.Frame
 
-	idDropDown := styleDropdown(tview.NewDropDown().
-		SetLabel("Transaction To Update"))
-
-	{
-		// show detailed transaction information so user knows what they are deleting
-		opts, err := getListOfDetailedTransactions()
-		if err != nil {
-			showErrorModal(fmt.Sprintf("get a list of detailed transactions err:\n\n%s", err), frame, form)
-			return err
-		}
-		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
-			// extract ID from the selected option (format: "ID: 12345678 | ...")
-			if len(selectedOption) > 4 {
-				parts := strings.SplitN(selectedOption, "|", 2)
-				if len(parts) > 0 {
-					idPart := strings.TrimSpace(parts[0]) // "ID: 12345678"
-					transactionId = strings.TrimPrefix(idPart, "ID: ")
-				}
-			}
-
-			// get transaction type after user selects an ID
-			var err error
-			transactionType, err = getTransactionTypeById(transactionId)
-			if err != nil {
-				showErrorModal(fmt.Sprintf("error getting transaction type by id: %s, err:\n\n%s", transactionId, err), frame, form)
-				return
-			}
-		})
-		// j/k navigation inside dropdown
-		idDropDown.SetInputCapture(vimMotions)
-	}
-
-	var categoryDropdown *tview.DropDown
-	var category string
-
+	// transaction type dropdown (pre-populated with currently selected type)
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
 		showErrorModal(fmt.Sprintf("get a list of allowed transaction types err:\n\n%s", err), frame, form)
-		return err
 	}
 
 	typeDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Transaction Type").
 		SetOptions(allowedTransactionTypes, func(selectedOption string, index int) {
 			transactionType = selectedOption
-			if categoryDropdown != nil {
-				opts, err := listOfAllowedCategories(transactionType)
-				if err != nil {
-					showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
-					return
-				}
-				categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
-					category = selectedOption
-				})
-				if len(opts) > 0 {
-					categoryDropdown.SetCurrentOption(0)
-					category = opts[0]
-				} else {
-					category = ""
-				}
-			}
 		}))
-	typeDropdown.SetCurrentOption(0)
+
+	// pre-select transaction type in dropdown
+	for i, opt := range allowedTransactionTypes {
+		if opt == transactionType {
+			typeDropdown.SetCurrentOption(i)
+			transactionType = opt
+			break
+		}
+	}
 
 	// j/k navigation inside dropdown
 	typeDropdown.SetInputCapture(vimMotions)
 
-	if _, opt := typeDropdown.GetCurrentOption(); opt != "" {
-		transactionType = opt
-	}
+	// pre-populated amount from selected transaction
+	amountField := styleInputField(tview.NewInputField().
+		SetLabel("Amount").
+		SetText(fmt.Sprintf("%.2f", tx.Amount)))
 
-	amountField := styleInputField(tview.NewInputField().SetLabel("Amount"))
-
-	categoryDropdown = styleDropdown(tview.NewDropDown().
+	// category dropwon (pre-populated with current category)
+	categoryDropdown := styleDropdown(tview.NewDropDown().
 		SetLabel("Category"))
 	// scope boundary to isolate opts and err from leaking in the rest of the function
 	{
@@ -107,35 +66,41 @@ func formUpdateTransaction() error {
 			return err
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
-			category = selectedOption
+			tx.Category = selectedOption
 		})
+
+		for i, opt := range opts {
+			if opt == tx.Category {
+				categoryDropdown.SetCurrentOption(i)
+				break
+			}
+		}
 
 		// j/k navigation inside dropdown
 		categoryDropdown.SetInputCapture(vimMotions)
 	}
-	categoryDropdown.SetCurrentOption(0)
 
+	// description field (pre-populated with current description)
 	descriptionField := styleInputField(tview.NewInputField().
 		SetLabel("Description").
+		SetText(tx.Description).
 		SetAcceptanceFunc(enforceCharLimit),
 	)
 
 	form = styleForm(tview.NewForm().
-		AddFormItem(idDropDown).
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
 		AddFormItem(categoryDropdown).
 		AddFormItem(descriptionField).
 		AddButton("Update", func() {
 			amount := amountField.GetText()
-
 			description := descriptionField.GetText()
 
 			var updateReq = UpdateTransactionRequest{
 				Type:        transactionType,
 				Id:          transactionId,
 				Amount:      amount,
-				Category:    category,
+				Category:    tx.Category,
 				Description: description,
 			}
 
@@ -144,8 +109,6 @@ func formUpdateTransaction() error {
 				return
 			}
 
-			// TODO: login to go directly to list transactions
-			// mainMenu() // go back to menu
 			gridVisualizeTransactions() // go back to list of transactions
 		}).
 		AddButton("Clear", func() {
@@ -153,11 +116,9 @@ func formUpdateTransaction() error {
 			amountField.SetText("")
 			categoryDropdown.SetCurrentOption(0)
 			descriptionField.SetText("")
-			transactionType = "expense"
+			transactionType = transactionType
 		}).
 		AddButton("Cancel", func() {
-			// TODO: login to go directly to list transactions
-			// mainMenu() // go back to menu
 			gridVisualizeTransactions() // go back to list of transactions
 		}))
 
