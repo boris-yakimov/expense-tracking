@@ -141,6 +141,13 @@ func showTransactionsForMonth(month, year string) error {
 	return nil
 }
 
+// TODO: tab to move from income to expenses to investments
+// TODO: pressing e or u opens updateTransaction form which than triggers handleUpdateTransaction() in which ever txType we were tabbed into (it gets automatically selected)
+// TODO: pressing d prompts for confirmation to delete it and calls  handleDeleteTransaction()
+// TODO: pressing a opens addTransaction form which than triggers handleAddTransaction()
+// TODO: press e or a to work as a modal isntead of a separate screen
+// TODO: modal in the bottom right that shows a temp message for a few sec with info like - successfully added, deleted, updated transactions, etc
+
 // creates a grid in the TUI to visualize and structure a list of transactions
 func gridVisualizeTransactions() error {
 	transactions, err := LoadTransactions()
@@ -177,6 +184,8 @@ func gridVisualizeTransactions() error {
 	helpFooter := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
+		// TODO: separate helper function that does this
+		// TODO: helper at the bottom of list transactions to show all options - a, d, e/u, j/k, tab, q, etc
 		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate")
 
 	grid := styleGrid(tview.NewGrid().
@@ -191,7 +200,15 @@ func gridVisualizeTransactions() error {
 		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
+	// keep a list of tables for focus switching in the TUI
+	tables := []*tview.Table{incomeTable, expenseTable, investmentTable}
+	currentTable := 0 // index of which table is currently in focus
+
+	// start with focus on incomeTable
+	tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+
 	// Handle input capture for month selection and exit
+	// TODO: should I pull this into a helper function
 	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
@@ -206,6 +223,19 @@ func gridVisualizeTransactions() error {
 			}
 			return nil // key event consumed
 		}
+
+		// table switching with Tab
+		switch event.Key() {
+		case tcell.KeyTAB:
+			currentTable = (currentTable + 1) % len(tables)
+			tui.SetFocus(tables[currentTable])
+			return nil
+		case tcell.KeyBacktab: // Shift + Tab
+			currentTable = (currentTable - 1) % len(tables)
+			tui.SetFocus(tables[currentTable])
+			return nil
+		}
+
 		// handle j/k events to navigate up or down
 		return vimNavigation(event)
 	})

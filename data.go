@@ -74,7 +74,9 @@ type Transaction struct {
 
 // helper to build a table for a specific transaction type for visualization in the TUI
 func createTransactionsTable(txType, month, year string, transactions TransactionHistory) *tview.Table {
-	table := tview.NewTable()
+	table := tview.NewTable().
+		SetSelectable(true, false). // enable row selection
+		SetFixed(1, 0)              // make header row fixed
 	table.SetBorder(false)
 	table.SetTitle(capitalize(txType)).SetBorder(true)
 
@@ -100,6 +102,12 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
 		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
 	}
+
+	// make sure selection always starts on the first row
+	if table.GetRowCount() > 1 {
+		table.Select(1, 0)
+	}
+
 	return table
 }
 
