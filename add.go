@@ -19,9 +19,13 @@ type AddTransactionRequest struct {
 	Year        string
 }
 
+// TODO: evaluate if category should not become = "income", "expenses", investments
+//       and transaction type should not be     = "food", "groceries", "insurance"
+// come to think of it, it sounds more adequate for categories to be the larger thing and types to be a subset of category rather than the other way around, like it is now
+
 // creates a TUI form with required fiields to add a new transaction
-func formAddTransaction() error {
-	var transactionType string
+func formAddTransaction(currentTableType string) error {
+	var transactionType string = currentTableType // prefill with currently selected table
 	var category string
 	var categoryDropdown *tview.DropDown
 
@@ -56,6 +60,8 @@ func formAddTransaction() error {
 				}
 			}
 		}))
+	// TODO: check
+	// typeDropdown.SetCurrentOption(indexOf(allowedTransactionTypes, transactionType))
 	typeDropdown.SetCurrentOption(0)
 	// j/k navigation inside dropdown
 	typeDropdown.SetInputCapture(vimMotions)
@@ -158,7 +164,7 @@ func formAddTransaction() error {
 			gridVisualizeTransactions() // go back to list of transactions
 		}))
 
-	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+	form.SetBorder(true).SetTitle("Add Transaction").SetTitleAlign(tview.AlignCenter)
 
 	// navigation help
 	frame = tview.NewFrame(form).
@@ -167,7 +173,20 @@ func formAddTransaction() error {
 	// back to mainMenu on ESC or q key press
 	form.SetInputCapture(exitShortcuts)
 
-	tui.SetRoot(frame, true).SetFocus(form)
+	// center the modal
+	modal := styleFlex(tview.NewFlex().
+		AddItem(nil, 0, 1, false).
+		AddItem(frame, 60, 1, true). // width fixed
+		AddItem(nil, 0, 1, false))
+
+	centeredModal := styleFlex(tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).
+		AddItem(modal, 20, 1, true). // enough to fit all the fields of the form on the screen
+		AddItem(nil, 0, 1, false))
+
+	tui.SetRoot(centeredModal, true).SetFocus(form)
+	// tui.SetRoot(frame, true).SetFocus(form)
 	return nil
 }
 

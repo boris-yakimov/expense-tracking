@@ -106,7 +106,7 @@ func showTransactionsForMonth(month, year string) error {
 		SetTextAlign(tview.AlignCenter).
 		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   " +
 			"[cyan]j/k[-] or [cyan]↑/↓[-]: navigate rows   " +
-			"[magenta]h/l[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
+			"[magenta]h/l[-] or [magenta]←/→[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
 
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3, 2).
@@ -142,13 +142,6 @@ func showTransactionsForMonth(month, year string) error {
 	tui.SetRoot(grid, true).SetFocus(grid)
 	return nil
 }
-
-// TODO: tab to move from income to expenses to investments
-// TODO: pressing e or u opens updateTransaction form which than triggers handleUpdateTransaction() in which ever txType we were tabbed into (it gets automatically selected)
-// TODO: pressing d prompts for confirmation to delete it and calls  handleDeleteTransaction()
-// TODO: pressing a opens addTransaction form which than triggers handleAddTransaction()
-// TODO: press e or a to work as a modal isntead of a separate screen
-// TODO: modal in the bottom right that shows a temp message for a few sec with info like - successfully added, deleted, updated transactions, etc
 
 // creates a grid in the TUI to visualize and structure a list of transactions
 func gridVisualizeTransactions() error {
@@ -190,7 +183,7 @@ func gridVisualizeTransactions() error {
 		// TODO: helper at the bottom of list transactions to show all options - a, d, e/u, j/k, tab, q, etc
 		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   " +
 			"[cyan]j/k[-] or [cyan]↑/↓[-]: navigate rows   " +
-			"[magenta]h/l[-] [magenta]←/→[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
+			"[magenta]h/l[-] or [magenta]←/→[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
 
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3, 2).
@@ -203,6 +196,8 @@ func gridVisualizeTransactions() error {
 		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
 		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+
+	// TODO: modal in the bottom right that shows a temp message for a few sec with info like - successfully added, deleted, updated transactions, etc
 
 	// keep a list of tables for focus switching in the TUI
 	tables := []*tview.Table{incomeTable, expenseTable, investmentTable}
@@ -241,6 +236,42 @@ func gridVisualizeTransactions() error {
 				return nil
 			}
 			return nil // key event consumed
+		}
+
+		// TODO: pressing a opens addTransaction form which than triggers handleAddTransaction()
+		if event.Key() == tcell.KeyRune && event.Rune() == 'a' {
+			currentTableType := ""
+			switch currentTable {
+			case 0:
+				currentTableType = "income"
+			case 1:
+				currentTableType = "expense"
+			case 2:
+				currentTableType = "investment"
+			}
+			if err := formAddTransaction(currentTableType); err != nil {
+				showErrorModal(fmt.Sprintf("add error:\n\n%s", err), nil, grid)
+				return nil
+			}
+		}
+
+		// TODO: pressing e or u opens updateTransaction form which than triggers handleUpdateTransaction() in which ever txType we were tabbed into (it gets automatically selected)
+		// TODO: the update transaction window should show only the previously selected option and fields to change it, there should be no dropdowns to select other transactions in this window, only to change the current one
+		if event.Key() == tcell.KeyRune && (event.Rune() == 'e' || event.Rune() == 'u') {
+			if err := formUpdateTransaction(); err != nil {
+				showErrorModal(fmt.Sprintf("update error:\n\n%s", err), nil, grid)
+				return nil
+			}
+		}
+
+		// TODO: pressing d prompts for confirmation to delete it and calls  handleDeleteTransaction()
+		// TODO: maybe there is no need to show a separate form window at all, just provide details of the selected transaction and yes or no to confirm deletion its deletion
+		// TODO: how do i fetch transaction ID from selected row ?
+		if event.Key() == tcell.KeyRune && event.Rune() == 'd' {
+			if err := formDeleteTransaction(); err != nil {
+				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), nil, grid)
+				return nil
+			}
 		}
 
 		return event
