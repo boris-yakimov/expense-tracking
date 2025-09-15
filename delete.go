@@ -8,8 +8,6 @@ import (
 
 // creates a TUI form with required fiields to delete an existing transaction
 func formDeleteTransaction(transactionId, transactionType string) error {
-	// var transactionId string
-	// var transactionType string
 	tx, err := getTransactionById(transactionId)
 	if err != nil {
 		return fmt.Errorf("could not get transaction by id %s: %w", transactionId, err)
@@ -17,9 +15,6 @@ func formDeleteTransaction(transactionId, transactionType string) error {
 
 	var frame *tview.Frame
 	var modal *tview.Modal
-
-	// TODO: to become a middle of the screen modal pop of yes or no to delete the currently selected transaction
-	// TODO: pop-up should show the details of what you are deleting
 
 	txDetails := fmt.Sprintf("ID %s | Amount %.2f | Category %s | Description %s", tx.Id, tx.Amount, tx.Category, tx.Description)
 
@@ -33,9 +28,9 @@ func formDeleteTransaction(transactionId, transactionType string) error {
 					showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, modal)
 					return
 				}
-				gridVisualizeTransactions() // go back to list of transactions
+				gridVisualizeTransactions("", "") // go back to list of transactions
 			case "Cancel":
-				gridVisualizeTransactions() // go back to list of transactions
+				gridVisualizeTransactions("", "") // go back to list of transactions
 			}
 		}))
 

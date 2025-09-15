@@ -29,13 +29,13 @@ func generateDbStatusLine() string {
 
 // handles creating a pop-up for error messages in the TUI
 func showErrorModal(msg string, previous tview.Primitive, focus tview.Primitive) {
-	modal := tview.NewModal().
+	modal := styleModal(tview.NewModal().
 		SetText(msg).
 		AddButtons([]string{"OK"}).
 		SetDoneFunc(func(_ int, _ string) {
 			// on presssing OK -  set focus back to the previous screen
 			tui.SetRoot(previous, true).SetFocus(focus)
-		})
+		}))
 	// back to mainMenu on ESC or q key press
 	modal.SetInputCapture(exitShortcuts)
 	// set focus to the error

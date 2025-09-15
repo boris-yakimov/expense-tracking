@@ -148,7 +148,7 @@ func formAddTransaction(currentTableType string) error {
 				return
 			}
 
-			gridVisualizeTransactions() // go back to list of transactions
+			gridVisualizeTransactions("", "") // go back to list of transactions
 		}).
 		AddButton("Clear", func() {
 			typeDropdown.SetCurrentOption(0)
@@ -158,7 +158,7 @@ func formAddTransaction(currentTableType string) error {
 			transactionType = "expense"
 		}).
 		AddButton("Cancel", func() {
-			gridVisualizeTransactions() // go back to list of transactions
+			gridVisualizeTransactions("", "") // go back to list of transactions
 		}))
 
 	form.SetBorder(true).SetTitle("Add Transaction").SetTitleAlign(tview.AlignCenter)

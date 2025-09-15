@@ -109,7 +109,7 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 				return
 			}
 
-			gridVisualizeTransactions() // go back to list of transactions
+			gridVisualizeTransactions("", "") // go back to list of transactions
 		}).
 		AddButton("Clear", func() {
 			typeDropdown.SetCurrentOption(0)
@@ -118,7 +118,7 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 			descriptionField.SetText("")
 		}).
 		AddButton("Cancel", func() {
-			gridVisualizeTransactions() // go back to list of transactions
+			gridVisualizeTransactions("", "") // go back to list of transactions
 		}))
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
