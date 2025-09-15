@@ -116,7 +116,6 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 			amountField.SetText("")
 			categoryDropdown.SetCurrentOption(0)
 			descriptionField.SetText("")
-			transactionType = transactionType
 		}).
 		AddButton("Cancel", func() {
 			gridVisualizeTransactions() // go back to list of transactions

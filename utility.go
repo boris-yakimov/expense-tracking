@@ -142,7 +142,7 @@ func getTransactionTypeById(txId string) (txType string, err error) {
 	return "", fmt.Errorf("transaction ID %s could not be found in transaction list", txId)
 }
 
-// helper to get a all details of a single trasnaction by its ID and return it
+// helper to get all details of a single trasnaction by its ID and return it
 func getTransactionById(id string) (*Transaction, error) {
 	transactions, err := LoadTransactions()
 	if err != nil {

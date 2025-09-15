@@ -104,3 +104,13 @@ func styleTextView(textView *tview.TextView) *tview.TextView {
 
 	return textView
 }
+
+// helper to style modal objects in the TUI
+func styleModal(modal *tview.Modal) *tview.Modal {
+	modal.SetBorderColor(theme.BorderColor)
+	modal.SetTitleColor(theme.TitleColor)
+	modal.SetBackgroundColor(theme.BackgroundColor)
+	modal.SetTextColor(theme.FieldTextColor)
+
+	return modal
+}

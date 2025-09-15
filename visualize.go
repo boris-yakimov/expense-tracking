@@ -127,6 +127,8 @@ func showTransactionsForMonth(month, year string) error {
 			return nil // key event consumed
 		}
 
+		// TODO: when a month is selected with the 'm' option than vim motions (and TAB, etc) start to nagivate the whole frame instead of inside the tables
+
 		// handle list months event
 		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
 			if err := showMonthSelector(); err != nil {
@@ -281,7 +283,21 @@ func gridVisualizeTransactions() error {
 		// TODO: maybe there is no need to show a separate form window at all, just provide details of the selected transaction and yes or no to confirm deletion its deletion
 		// TODO: how do i fetch transaction ID from selected row ?
 		if event.Key() == tcell.KeyRune && event.Rune() == 'd' {
-			if err := formDeleteTransaction(); err != nil {
+			row, col := tables[currentTable].GetSelection()
+			cell := tables[currentTable].GetCell(row, col)
+			txId, _ := cell.GetReference().(string)
+
+			currentTableType := ""
+			switch currentTable {
+			case 0:
+				currentTableType = "income"
+			case 1:
+				currentTableType = "expense"
+			case 2:
+				currentTableType = "investment"
+			}
+
+			if err := formDeleteTransaction(txId, currentTableType); err != nil {
 				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), nil, grid)
 				return nil
 			}

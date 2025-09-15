@@ -23,6 +23,9 @@ type AddTransactionRequest struct {
 //       and transaction type should not be     = "food", "groceries", "insurance"
 // come to think of it, it sounds more adequate for categories to be the larger thing and types to be a subset of category rather than the other way around, like it is now
 
+// TODO: pressing a when expenses are selected still defaults to income being the selected option from the dropdown menu
+// need to make sure that on whichever table we press a we will get this is the selected option in tx Types
+
 // creates a TUI form with required fiields to add a new transaction
 func formAddTransaction(currentTableType string) error {
 	var transactionType string = currentTableType // prefill with currently selected table

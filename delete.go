@@ -7,65 +7,48 @@ import (
 )
 
 // creates a TUI form with required fiields to delete an existing transaction
-func formDeleteTransaction() error {
-	var transactionId string
-	var transactionType string
-
-	var frame *tview.Frame
-	var form *tview.Form
-
-	idDropDown := styleDropdown(tview.NewDropDown().
-		SetLabel("Transaction List"))
-
-	{
-		// show detailed transaction information so user knows what they are deleting
-		opts, err := getListOfDetailedTransactions()
-		if err != nil {
-			showErrorModal(fmt.Sprintf("get detailed transactions err: \n\n%s", err), frame, form)
-			return err
-		}
-		idDropDown.SetOptions(opts, func(selectedOption string, index int) {
-			// extract ID from the selected option (format: "ID: 12345678 | ...")
-			if len(selectedOption) > 4 {
-				transactionId = selectedOption[4:12] // extract ID from position 4-12
-			}
-			// get transaction type after user selects an ID
-			var err error
-			transactionType, err = getTransactionTypeById(transactionId)
-			if err != nil {
-				showErrorModal(fmt.Sprintf("error getting transaction type:\n\n%s", err), frame, form)
-				return
-			}
-		})
-
-		// j/k navigation inside dropdown
-		idDropDown.SetInputCapture(vimMotions)
+func formDeleteTransaction(transactionId, transactionType string) error {
+	// var transactionId string
+	// var transactionType string
+	tx, err := getTransactionById(transactionId)
+	if err != nil {
+		return fmt.Errorf("could not get transaction by id %s: %w", transactionId, err)
 	}
 
-	form = styleForm(tview.NewForm().
-		AddFormItem(idDropDown).
-		AddButton("Delete", func() {
-			if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
-				showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, form)
-				return
+	var frame *tview.Frame
+	var modal *tview.Modal
+
+	// TODO: to become a middle of the screen modal pop of yes or no to delete the currently selected transaction
+	// TODO: pop-up should show the details of what you are deleting
+
+	txDetails := fmt.Sprintf("ID %s | Amount %.2f | Category %s | Description %s", tx.Id, tx.Amount, tx.Category, tx.Description)
+
+	modal = styleModal(tview.NewModal().
+		SetText(fmt.Sprintf("Deleting transaction \n\n%s", txDetails)).
+		AddButtons([]string{"Delete", "Cancel"}).
+		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
+			switch buttonLabel {
+			case "Delete":
+				if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
+					showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, modal)
+					return
+				}
+				gridVisualizeTransactions() // go back to list of transactions
+			case "Cancel":
+				gridVisualizeTransactions() // go back to list of transactions
 			}
-		}).
-		AddButton("Cancel", func() {
-			// TODO: login to go directly to list transactions
-			// mainMenu() // go back to menu
-			gridVisualizeTransactions() // go back to list of transactions
 		}))
 
-	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+	modal.SetTitle("Confirm deletion")
 
 	// navigation help
-	frame = tview.NewFrame(form).
+	frame = tview.NewFrame(modal).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to mainMenu on ESC or q key press
-	form.SetInputCapture(exitShortcuts)
+	modal.SetInputCapture(exitShortcuts)
 
-	tui.SetRoot(frame, true).SetFocus(form)
+	tui.SetRoot(frame, true).SetFocus(modal)
 	return nil
 }
 
@@ -96,11 +79,6 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 
 					if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
 						return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
-					}
-
-					_, err = listTransactionsByMonth(txType, month, year)
-					if err != nil {
-						return fmt.Errorf("unable to list remaining transactions: %w", err)
 					}
 
 					return nil
