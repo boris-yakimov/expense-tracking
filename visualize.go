@@ -109,7 +109,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 		return fmt.Errorf("unable to calculate pnl: %w", err)
 	}
 	if displayMonth != "" && displayYear != "" {
-		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%", calculatedPnl.Amount, calculatedPnl.Percent)
+		footerText = fmt.Sprintf("Income: €%.2f | Expenses: €%.2f | Investments: €%.2f \n\nP&L Result: €%.2f | %.1f%%", calculatedPnl.incomeTotal, calculatedPnl.expenseTotal, calculatedPnl.investmentTotal, calculatedPnl.pnlAmount, calculatedPnl.pnlPercent)
 	}
 
 	// build tx table for each tx type
@@ -119,14 +119,26 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 
 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
 	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
-	helpFooter := tview.NewTextView().
+	helpLeftFooter := tview.NewTextView().
 		SetDynamicColors(true).
-		SetTextAlign(tview.AlignCenter).
+		SetTextAlign(tview.AlignLeft).
 		// TODO: separate helper function that does this
 		// TODO: helper at the bottom of list transactions to show all options - a, d, e/u, j/k, tab, q, etc
-		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   " +
-			"[cyan]j/k[-] or [cyan]↑/↓[-]: navigate rows   " +
-			"[magenta]h/l[-] or [magenta]←/→[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
+		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [yellow]m[-]: select month  [yellow]TAB[-]: next table")
+
+	helpRightFooter := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignRight).
+		// TODO: separate helper function that does this
+		// TODO: helper at the bottom of list transactions to show all options - a, d, e/u, j/k, tab, q, etc
+		SetText("[green]j/k[-] or [green]↑/↓[-]: navigate up and down  " +
+			"[green]h/l[-] or [green]←/→[-] navigate left and right")
+
+	// nested footer grid with 2 columns
+	footerGrid := styleGrid(tview.NewGrid().
+		SetColumns(0, 0). // left + right
+		AddItem(helpLeftFooter, 0, 0, 1, 1, 0, 0, false).
+		AddItem(helpRightFooter, 0, 1, 1, 1, 0, 0, false))
 
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3, 2).
@@ -135,9 +147,9 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 		AddItem(header, 0, 0, 1, 3, 0, 0, false).
 		AddItem(incomeTable, 1, 0, 1, 1, 0, 0, false).
 		AddItem(expenseTable, 1, 1, 1, 1, 0, 0, false).
-		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false)).
+		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false).
 		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
-		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
+		AddItem(footerGrid, 3, 0, 1, 3, 0, 0, false))
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// TODO: modal in the bottom right that shows a temp message for a few sec with info like - successfully added, deleted, updated transactions, etc
