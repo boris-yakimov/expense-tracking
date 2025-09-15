@@ -28,7 +28,7 @@ func showMonthSelector() error {
 			if len(parts) == 2 {
 				selectedMonth := parts[0]
 				selectedYear := parts[1]
-				if err := showTransactionsForMonth(selectedMonth, selectedYear); err != nil {
+				if err := gridVisualizeTransactions(selectedMonth, selectedYear); err != nil {
 					showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), nil, list)
 					return
 				}
@@ -38,7 +38,8 @@ func showMonthSelector() error {
 
 	// go back to previous month
 	list.AddItem("back to current month", "", 'b', func() {
-		if err := gridVisualizeTransactions(); err != nil {
+		// TODO: is passing around ("". "") the best way to do that, seems a bit wierd
+		if err := gridVisualizeTransactions("", ""); err != nil {
 			showErrorModal(fmt.Sprintf("error showing current transactions:\n\n%s", err), nil, list)
 			return
 		}
@@ -50,7 +51,7 @@ func showMonthSelector() error {
 	frame := tview.NewFrame(list).
 		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
-	// Handle input capture for month selection and exit
+	// handle input capture for month selection and exit
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
@@ -73,108 +74,121 @@ func showMonthSelector() error {
 	return nil
 }
 
-// populates the 3 TUI wndows in the list transactions section with details for the selected month and year
-func showTransactionsForMonth(month, year string) error {
+// TODO: this should no longer be required, we can render the table using gridVisualizeTransactions
+//
+// // populates the 3 TUI wndows in the list transactions section with details for the selected month and year
+// func showTransactionsForMonth(month, year string) error {
+// 	transactions, err := LoadTransactions()
+// 	if err != nil {
+// 		return fmt.Errorf("unable to load transactions file: %w", err)
+// 	}
+//
+// 	var headerText string
+// 	if year != "" && month != "" {
+// 		headerText = fmt.Sprintf("%s %s", capitalize(month), year)
+// 	}
+//
+// 	var calculatedPnl PnLResult
+// 	var footerText string
+// 	if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
+// 		return fmt.Errorf("unable to calculate pnl: %w", err)
+// 	}
+// 	if year != "" && month != "" {
+// 		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%", calculatedPnl.Amount, calculatedPnl.Percent)
+// 	}
+//
+// 	// build tx table for each tx type
+// 	incomeTable := styleTable(createTransactionsTable("income", month, year, transactions))
+// 	expenseTable := styleTable(createTransactionsTable("expense", month, year, transactions))
+// 	investmentTable := styleTable(createTransactionsTable("investment", month, year, transactions))
+//
+// 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
+// 	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
+// 	helpFooter := tview.NewTextView().
+// 		SetDynamicColors(true).
+// 		SetTextAlign(tview.AlignCenter).
+// 		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   " +
+// 			"[cyan]j/k[-] or [cyan]↑/↓[-]: navigate rows   " +
+// 			"[magenta]h/l[-] or [magenta]←/→[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
+//
+// 	grid := styleGrid(tview.NewGrid().
+// 		SetRows(3, 0, 3, 2).
+// 		SetColumns(0, 0, 0).
+// 		SetBorders(true).
+// 		AddItem(header, 0, 0, 1, 3, 0, 0, false).
+// 		AddItem(incomeTable, 1, 0, 1, 1, 0, 0, false).
+// 		AddItem(expenseTable, 1, 1, 1, 1, 0, 0, false).
+// 		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false)).
+// 		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
+// 		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
+// 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+//
+// 	// Handle input capture for month selection and exit
+// 	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+// 		// handle exit events
+// 		if ev := exitShortcuts(event); ev == nil {
+// 			return nil // key event consumed
+// 		}
+//
+// 		// TODO: when a month is selected with the 'm' option than vim motions (and TAB, etc) start to nagivate the whole frame instead of inside the tables
+//
+// 		// handle list months event
+// 		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
+// 			if err := showMonthSelector(); err != nil {
+// 				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, grid)
+// 				return nil
+// 			}
+// 			return nil // key event consumed
+// 		}
+// 		// handle j/k events to navigate up or down
+// 		return vimMotions(event)
+// 	})
+//
+// 	tui.SetRoot(grid, true).SetFocus(grid)
+// 	return nil
+// }
+
+// creates a grid in the TUI to visualize and structure a list of transactions for a specific month and year
+// if a month and year is provided will use it, otherwise will take the latest month
+func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
+	var displayMonth string
+	var displayYear string
+	var err error
+
+	// if a month has been selected when rendering the grid use it, otherwise take the latest month
+	if selectedMonth != "" || selectedYear != "" {
+		displayMonth = selectedMonth
+		displayYear = selectedYear
+	} else {
+		displayMonth, displayYear, err = determineLatestMonthAndYear()
+		if err != nil {
+			return fmt.Errorf("unable to determine last month or year: %w", err)
+		}
+	}
+
 	transactions, err := LoadTransactions()
 	if err != nil {
 		return fmt.Errorf("unable to load transactions file: %w", err)
 	}
 
 	var headerText string
-	if year != "" && month != "" {
-		headerText = fmt.Sprintf("%s %s", capitalize(month), year)
+	if displayMonth != "" && displayYear != "" {
+		headerText = fmt.Sprintf("%s %s", capitalize(displayMonth), displayYear)
 	}
 
 	var calculatedPnl PnLResult
 	var footerText string
-	if calculatedPnl, err = calculateMonthPnL(month, year); err != nil {
+	if calculatedPnl, err = calculateMonthPnL(displayMonth, displayYear); err != nil {
 		return fmt.Errorf("unable to calculate pnl: %w", err)
 	}
-	if year != "" && month != "" {
+	if displayMonth != "" && displayYear != "" {
 		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%", calculatedPnl.Amount, calculatedPnl.Percent)
 	}
 
 	// build tx table for each tx type
-	incomeTable := styleTable(createTransactionsTable("income", month, year, transactions))
-	expenseTable := styleTable(createTransactionsTable("expense", month, year, transactions))
-	investmentTable := styleTable(createTransactionsTable("investment", month, year, transactions))
-
-	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
-	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
-	helpFooter := tview.NewTextView().
-		SetDynamicColors(true).
-		SetTextAlign(tview.AlignCenter).
-		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [green]m[-]: select month   " +
-			"[cyan]j/k[-] or [cyan]↑/↓[-]: navigate rows   " +
-			"[magenta]h/l[-] or [magenta]←/→[-] or [magenta]Tab/Shift+Tab[-]: switch tables")
-
-	grid := styleGrid(tview.NewGrid().
-		SetRows(3, 0, 3, 2).
-		SetColumns(0, 0, 0).
-		SetBorders(true).
-		AddItem(header, 0, 0, 1, 3, 0, 0, false).
-		AddItem(incomeTable, 1, 0, 1, 1, 0, 0, false).
-		AddItem(expenseTable, 1, 1, 1, 1, 0, 0, false).
-		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false)).
-		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
-		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false)
-	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
-
-	// Handle input capture for month selection and exit
-	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
-		// handle exit events
-		if ev := exitShortcuts(event); ev == nil {
-			return nil // key event consumed
-		}
-
-		// TODO: when a month is selected with the 'm' option than vim motions (and TAB, etc) start to nagivate the whole frame instead of inside the tables
-
-		// handle list months event
-		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
-			if err := showMonthSelector(); err != nil {
-				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, grid)
-				return nil
-			}
-			return nil // key event consumed
-		}
-		// handle j/k events to navigate up or down
-		return vimMotions(event)
-	})
-
-	tui.SetRoot(grid, true).SetFocus(grid)
-	return nil
-}
-
-// creates a grid in the TUI to visualize and structure a list of transactions
-func gridVisualizeTransactions() error {
-	transactions, err := LoadTransactions()
-	if err != nil {
-		return fmt.Errorf("unable to load transactions file: %w", err)
-	}
-
-	latestMonth, latestYear, err := determineLatestMonthAndYear()
-	if err != nil {
-		return fmt.Errorf("unable to determine last month or year: %w", err)
-	}
-
-	var headerText string
-	if latestYear != "" && latestMonth != "" {
-		headerText = fmt.Sprintf("%s %s", capitalize(latestMonth), latestYear)
-	}
-
-	var calculatedPnl PnLResult
-	var footerText string
-	if calculatedPnl, err = calculateMonthPnL(latestMonth, latestYear); err != nil {
-		return fmt.Errorf("unable to calculate pnl: %w", err)
-	}
-	if latestYear != "" && latestMonth != "" {
-		footerText = fmt.Sprintf("P&L Result: €%.2f | %.1f%%", calculatedPnl.Amount, calculatedPnl.Percent)
-	}
-
-	// build tx table for each tx type
-	incomeTable := styleTable(createTransactionsTable("income", latestMonth, latestYear, transactions))
-	expenseTable := styleTable(createTransactionsTable("expense", latestMonth, latestYear, transactions))
-	investmentTable := styleTable(createTransactionsTable("investment", latestMonth, latestYear, transactions))
+	incomeTable := styleTable(createTransactionsTable("income", displayMonth, displayYear, transactions))
+	expenseTable := styleTable(createTransactionsTable("expense", displayMonth, displayYear, transactions))
+	investmentTable := styleTable(createTransactionsTable("investment", displayMonth, displayYear, transactions))
 
 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
 	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
