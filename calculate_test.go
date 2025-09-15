@@ -136,13 +136,13 @@ func TestCalculateMonthPnL(t *testing.T) {
 					}
 
 					if !c.expectedError {
-						if result.Amount != c.expectedAmount {
+						if result.pnlAmount != c.expectedAmount {
 							t.Errorf("calculateMonthPnL(%q, %q) amount = %f; expected amount = %f",
-								c.month, c.year, result.Amount, c.expectedAmount)
+								c.month, c.year, result.pnlAmount, c.expectedAmount)
 						}
-						if result.Percent != c.expectedPercent {
+						if result.pnlPercent != c.expectedPercent {
 							t.Errorf("calculateMonthPnL(%q, %q) percent = %f; expected percent = %f",
-								c.month, c.year, result.Percent, c.expectedPercent)
+								c.month, c.year, result.pnlPercent, c.expectedPercent)
 						}
 					}
 				})
@@ -244,13 +244,13 @@ func TestCalculateYearPnL(t *testing.T) {
 					}
 
 					if !c.expectedError {
-						if result.Amount != c.expectedAmount {
+						if result.pnlAmount != c.expectedAmount {
 							t.Errorf("calculateYearPnL(%q) amount = %f; expected amount = %f",
-								c.year, result.Amount, c.expectedAmount)
+								c.year, result.pnlAmount, c.expectedAmount)
 						}
-						if result.Percent != c.expectedPercent {
+						if result.pnlPercent != c.expectedPercent {
 							t.Errorf("calculateYearPnL(%q) percent = %f; expected percent = %f",
-								c.year, result.Percent, c.expectedPercent)
+								c.year, result.pnlPercent, c.expectedPercent)
 						}
 					}
 				})
