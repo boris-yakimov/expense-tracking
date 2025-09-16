@@ -4,8 +4,10 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/rivo/tview"
 )
@@ -113,6 +115,21 @@ func formAddTransaction(currentTableType string) error {
 			showErrorModal(fmt.Sprintf("unable to get months with transactions: err:\n\n%s", err), frame, form)
 			return err
 		}
+
+		// make sure the current month is in the list
+		now := time.Now()
+		currentMonth := fmt.Sprintf("%s %s", strings.ToLower(now.Month().String()), strconv.Itoa(now.Year()))
+		if !slices.Contains(opts, currentMonth) {
+			opts = append(opts, currentMonth)
+		}
+
+		// make sure the previous month is also in the list
+		prev := now.AddDate(0, -1, 0)
+		previousMonth := fmt.Sprintf("%s %s", strings.ToLower(prev.Month().String()), strconv.Itoa(prev.Year()))
+		if !slices.Contains(opts, previousMonth) {
+			opts = append(opts, previousMonth)
+		}
+
 		periodDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			monthAndYear = selectedOption
 		})
@@ -122,15 +139,6 @@ func formAddTransaction(currentTableType string) error {
 	}
 	periodDropdown.SetCurrentOption(0)
 
-	// parse the selected month and year
-	parts := strings.SplitN(monthAndYear, " ", 2)
-	if len(parts) != 2 {
-		showErrorModal(fmt.Sprintf("invalid period format: %s", monthAndYear), frame, form)
-		return fmt.Errorf("invalid month or year %s", monthAndYear)
-	}
-	month := parts[0]
-	year := parts[1]
-
 	form = styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
@@ -139,8 +147,16 @@ func formAddTransaction(currentTableType string) error {
 		AddFormItem(periodDropdown).
 		AddButton("Add", func() {
 			amount := amountField.GetText()
-
 			description := descriptionField.GetText()
+
+			// parse the selected month and year
+			parts := strings.SplitN(monthAndYear, " ", 2)
+			if len(parts) != 2 {
+				showErrorModal(fmt.Sprintf("invalid period format: %s", monthAndYear), frame, form)
+				return
+			}
+			month := parts[0]
+			year := parts[1]
 
 			var addReq = AddTransactionRequest{
 				Type:        transactionType,

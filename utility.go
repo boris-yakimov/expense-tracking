@@ -206,7 +206,7 @@ func listTransactionsByMonth(transactionType, month, year string) (success bool,
 	return true, nil
 }
 
-// helper to get a list of months that have transactions - also  make sure these are sorted with newest to oldest month/year
+// helper to get a list of months that have transactions - also make sure these are sorted with newest to oldest month/year
 func getMonthsWithTransactions() (months []string, err error) {
 	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
