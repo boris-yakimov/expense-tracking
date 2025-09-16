@@ -123,22 +123,31 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignLeft).
 		// TODO: separate helper function that does this
-		// TODO: helper at the bottom of list transactions to show all options - a, d, e/u, j/k, tab, q, etc
-		SetText("[yellow]ESC[-]/[yellow]q[-]: back   [yellow]m[-]: select month  [yellow]TAB[-]: next table")
+		SetText("[yellow]ESC[-]/[yellow]q[-]: back  " +
+			"[yellow]m[-]: select month  " +
+			"[yellow]TAB[-]: next table")
+
+	helpCenterFooter := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignCenter).
+		// TODO: separate helper function that does this
+		SetText("[green]a[-]: add  " +
+			"[red]d[-]: delete  " +
+			"[yellow]e/u[-]: update")
 
 	helpRightFooter := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignRight).
 		// TODO: separate helper function that does this
-		// TODO: helper at the bottom of list transactions to show all options - a, d, e/u, j/k, tab, q, etc
-		SetText("[green]j/k[-] or [green]↑/↓[-]: navigate up and down  " +
-			"[green]h/l[-] or [green]←/→[-] navigate left and right")
+		SetText("[green]j/k[-] or [green]↑/↓[-]: move up and down  " +
+			"[green]h/l[-] or [green]←/→[-]: move left and right")
 
 	// nested footer grid with 2 columns
 	footerGrid := styleGrid(tview.NewGrid().
 		SetColumns(0, 0). // left + right
 		AddItem(helpLeftFooter, 0, 0, 1, 1, 0, 0, false).
-		AddItem(helpRightFooter, 0, 1, 1, 1, 0, 0, false))
+		AddItem(helpCenterFooter, 0, 1, 1, 1, 0, 0, false).
+		AddItem(helpRightFooter, 0, 2, 1, 1, 0, 0, false))
 
 	grid := styleGrid(tview.NewGrid().
 		SetRows(3, 0, 3, 2).
@@ -184,6 +193,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 
 		// handle list months event
 		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
+			// TODO: months in this list do not appear sorted
 			if err := showMonthSelector(); err != nil {
 				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, grid)
 				return nil
