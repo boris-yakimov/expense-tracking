@@ -109,7 +109,7 @@ func styleTextView(textView *tview.TextView) *tview.TextView {
 func styleModal(modal *tview.Modal) *tview.Modal {
 	modal.SetBorderColor(theme.BorderColor)
 	modal.SetTitleColor(theme.TitleColor)
-	modal.SetBackgroundColor(theme.BackgroundColor)
+	modal.SetBackgroundColor(theme.FieldBackgroundColor)
 	modal.SetTextColor(theme.FieldTextColor)
 
 	return modal

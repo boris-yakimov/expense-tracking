@@ -13,35 +13,59 @@ func formDeleteTransaction(transactionId, transactionType string) error {
 		return fmt.Errorf("could not get transaction by id %s: %w", transactionId, err)
 	}
 
-	var frame *tview.Frame
-	var modal *tview.Modal
-
 	txDetails := fmt.Sprintf("ID %s | Amount %.2f | Category %s | Description %s", tx.Id, tx.Amount, tx.Category, tx.Description)
 
-	modal = styleModal(tview.NewModal().
-		SetText(fmt.Sprintf("Deleting transaction \n\n%s", txDetails)).
-		AddButtons([]string{"Delete", "Cancel"}).
-		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			if buttonLabel == "Delete" {
-				if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
-					showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, modal)
-					return
-				}
+	var form *tview.Form
+	var frame *tview.Frame
+
+	form = styleForm(tview.NewForm().
+		AddButton("Delete", func() {
+			if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
+				showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, form)
+				return
 			}
-			// for cancel or any other button press (including ESC/q), just go back to transaction list
+			gridVisualizeTransactions("", "")
+		}).
+		AddButton("Cancel", func() {
 			gridVisualizeTransactions("", "")
 		}))
 
-	modal.SetTitle("Confirm deletion")
+	form.SetTitle("Delete Transaction").
+		SetTitleAlign(tview.AlignCenter).
+		SetBorder(true)
+
+	detailtsTextView := styleTextView(tview.NewTextView().
+		SetText(txDetails).
+		SetRegions(true))
+	form.AddFormItem(detailtsTextView)
+
+	form.SetButtonsAlign(tview.AlignCenter)
 
 	// navigation help
-	frame = tview.NewFrame(modal).
+	frame = tview.NewFrame(form).
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
-	// back to mainMenu on ESC or q key press
-	modal.SetInputCapture(exitShortcuts)
+	// horizontal centering
+	modal := styleFlex(tview.NewFlex().
+		AddItem(nil, 0, 1, false).   // left spacer
+		AddItem(frame, 90, 1, true). // form width fixed to fit text
+		AddItem(nil, 0, 1, false))   // right spacer
 
-	tui.SetRoot(frame, true).SetFocus(modal)
+	// vertical centering (height = 0 lets it fit content)
+	centeredModal := styleFlex(tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).   // top spacer
+		AddItem(modal, 15, 1, true). // enough to fit all the fields of the form on the screen
+		AddItem(nil, 0, 1, false))   // bottom spacer
+
+	tui.SetRoot(centeredModal, true).SetFocus(form)
+
+	// TODO: search for main menu in all files and replace it with transaction list
+
+	// back to transactions list on ESC or q key press
+	form.SetInputCapture(exitShortcuts)
+
+	tui.SetRoot(centeredModal, true).SetFocus(form)
 	return nil
 }
 
