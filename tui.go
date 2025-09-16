@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "fmt"
 	"os"
 
 	"github.com/rivo/tview"
@@ -36,7 +35,7 @@ func showErrorModal(msg string, previous tview.Primitive, focus tview.Primitive)
 			// on presssing OK -  set focus back to the previous screen
 			tui.SetRoot(previous, true).SetFocus(focus)
 		}))
-	// back to mainMenu on ESC or q key press
+	// back to list of transactions on ESC or q key press
 	modal.SetInputCapture(exitShortcuts)
 	// set focus to the error
 	tui.SetRoot(modal, true).SetFocus(modal)

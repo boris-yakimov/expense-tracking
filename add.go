@@ -156,7 +156,10 @@ func formAddTransaction(currentTableType string) error {
 				return
 			}
 
-			gridVisualizeTransactions("", "") // go back to list of transactions
+			_, err := gridVisualizeTransactions("", "") // go back to list of transactions
+			if err != nil {
+				showErrorModal("failed to return back to transactions list from add menu", frame, form)
+			}
 		}).
 		AddButton("Clear", func() {
 			typeDropdown.SetCurrentOption(0)
@@ -191,7 +194,6 @@ func formAddTransaction(currentTableType string) error {
 		AddItem(nil, 0, 1, false))
 
 	tui.SetRoot(centeredModal, true).SetFocus(form)
-	// tui.SetRoot(frame, true).SetFocus(form)
 	return nil
 }
 

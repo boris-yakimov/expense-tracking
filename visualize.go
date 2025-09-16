@@ -29,7 +29,7 @@ func showMonthSelector() error {
 				selectedMonth := parts[0]
 				selectedYear := parts[1]
 				// go back to grid of visualized transactions but for the selected month and year
-				if err := gridVisualizeTransactions(selectedMonth, selectedYear); err != nil {
+				if _, err := gridVisualizeTransactions(selectedMonth, selectedYear); err != nil {
 					showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), nil, list)
 					return
 				}
@@ -40,7 +40,7 @@ func showMonthSelector() error {
 	// go back to previous month
 	list.AddItem("back to current month", "", 'b', func() {
 		// TODO: is passing around ("". "") the best way to do that, seems a bit wierd
-		if err := gridVisualizeTransactions("", ""); err != nil {
+		if _, err := gridVisualizeTransactions("", ""); err != nil {
 			showErrorModal(fmt.Sprintf("error showing current transactions:\n\n%s", err), nil, list)
 			return
 		}
@@ -77,7 +77,7 @@ func showMonthSelector() error {
 
 // creates a grid in the TUI to visualize and structure a list of transactions for a specific month and year
 // if a month and year is provided will use it, otherwise will take the latest month
-func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
+func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primitive, error) {
 	var displayMonth string
 	var displayYear string
 	var err error
@@ -89,13 +89,13 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 	} else {
 		displayMonth, displayYear, err = determineLatestMonthAndYear()
 		if err != nil {
-			return fmt.Errorf("unable to determine last month or year: %w", err)
+			return nil, fmt.Errorf("unable to determine last month or year: %w", err)
 		}
 	}
 
 	transactions, err := LoadTransactions()
 	if err != nil {
-		return fmt.Errorf("unable to load transactions file: %w", err)
+		return nil, fmt.Errorf("unable to load transactions file: %w", err)
 	}
 
 	var headerText string
@@ -106,7 +106,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 	var calculatedPnl PnLResult
 	var footerText string
 	if calculatedPnl, err = calculateMonthPnL(displayMonth, displayYear); err != nil {
-		return fmt.Errorf("unable to calculate pnl: %w", err)
+		return nil, fmt.Errorf("unable to calculate pnl: %w", err)
 	}
 	if displayMonth != "" && displayYear != "" {
 		footerText = fmt.Sprintf("Income: €%.2f | Expenses: €%.2f | Investments: €%.2f \n\nP&L Result: €%.2f | %.1f%%", calculatedPnl.incomeTotal, calculatedPnl.expenseTotal, calculatedPnl.investmentTotal, calculatedPnl.pnlAmount, calculatedPnl.pnlPercent)
@@ -151,8 +151,6 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
 		AddItem(footerGrid, 3, 0, 1, 3, 0, 0, false))
 	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
-
-	// TODO: modal in the bottom right that shows a temp message for a few sec with info like - successfully added, deleted, updated transactions, etc
 
 	// keep a list of tables for focus switching in the TUI
 	tables := []*tview.Table{incomeTable, expenseTable, investmentTable}
@@ -209,8 +207,6 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 			}
 		}
 
-		// TODO: pressing e or u opens updateTransaction form which than triggers handleUpdateTransaction() in which ever txType we were tabbed into (it gets automatically selected)
-		// TODO: the update transaction window should show only the previously selected option and fields to change it, there should be no dropdowns to select other transactions in this window, only to change the current one
 		if event.Key() == tcell.KeyRune && (event.Rune() == 'e' || event.Rune() == 'u') {
 			row, col := tables[currentTable].GetSelection()
 			cell := tables[currentTable].GetCell(row, col)
@@ -232,9 +228,6 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 			}
 		}
 
-		// TODO: pressing d prompts for confirmation to delete it and calls  handleDeleteTransaction()
-		// TODO: maybe there is no need to show a separate form window at all, just provide details of the selected transaction and yes or no to confirm deletion its deletion
-		// TODO: how do i fetch transaction ID from selected row ?
 		if event.Key() == tcell.KeyRune && event.Rune() == 'd' {
 			row, col := tables[currentTable].GetSelection()
 			cell := tables[currentTable].GetCell(row, col)
@@ -259,5 +252,5 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) error {
 		return event
 	})
 
-	return nil
+	return grid, nil
 }
