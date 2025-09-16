@@ -231,7 +231,6 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 		if event.Key() == tcell.KeyRune && event.Rune() == 'd' {
 			row, col := tables[currentTable].GetSelection()
 			cell := tables[currentTable].GetCell(row, col)
-			// TODO: fails after I removed the duplicate ID
 			txId, _ := cell.GetReference().(string)
 
 			currentTableType := ""

@@ -98,7 +98,8 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 
 	// populate table
 	for r, tx := range txList {
-		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)))
+		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)).
+			SetReference(tx.Id)) // setting a reference for transaction IDs that will later be used when trying to match specific transaction IDs during update and delete operations
 		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
 		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
 		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
