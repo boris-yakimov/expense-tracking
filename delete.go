@@ -22,16 +22,14 @@ func formDeleteTransaction(transactionId, transactionType string) error {
 		SetText(fmt.Sprintf("Deleting transaction \n\n%s", txDetails)).
 		AddButtons([]string{"Delete", "Cancel"}).
 		SetDoneFunc(func(buttonIndex int, buttonLabel string) {
-			switch buttonLabel {
-			case "Delete":
+			if buttonLabel == "Delete" {
 				if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
 					showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, modal)
 					return
 				}
-				gridVisualizeTransactions("", "") // go back to list of transactions
-			case "Cancel":
-				gridVisualizeTransactions("", "") // go back to list of transactions
 			}
+			// for cancel or any other button press (including ESC/q), just go back to transaction list
+			gridVisualizeTransactions("", "")
 		}))
 
 	modal.SetTitle("Confirm deletion")
