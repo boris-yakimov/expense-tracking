@@ -192,7 +192,7 @@ func formAddTransaction(currentTableType string) error {
 
 	// navigation help
 	frame = tview.NewFrame(form).
-		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to mainMenu on ESC or q key press
 	form.SetInputCapture(exitShortcuts)
@@ -206,7 +206,7 @@ func formAddTransaction(currentTableType string) error {
 	centeredModal := styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(nil, 0, 1, false).
-		AddItem(modal, 20, 1, true). // enough to fit all the fields of the form on the screen
+		AddItem(modal, 19, 1, true). // enough to fit all the fields of the form on the screen
 		AddItem(nil, 0, 1, false))
 
 	tui.SetRoot(centeredModal, true).SetFocus(form)

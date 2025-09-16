@@ -1,29 +1,30 @@
 package main
 
 import (
-	"os"
-
 	"github.com/rivo/tview"
 )
 
 // creates a footer for the TUI that shows navingation options
-// TODO: to be unitified with the updated approach from gridVisualizeTransactions()
-func generateControlsFooter() string {
+func generateCombinedControlsFooter() string {
 	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
+	// return generateWindowNavigationFooter() + generateTransactionNavigationFooter()
 }
 
-// shows DB encryption status
-// TODO: to be moved to to list transactions or maybe removed altogether if it gets too cluttered
-func generateDbStatusLine() string {
-	if _, err := os.Stat(globalConfig.SQLitePath); err == nil && userPassword != "" {
-		return "[green]DB status:[-] decrypted for session"
-	}
+func generateWindowNavigationFooter() string {
+	return "[yellow]ESC[-]/[yellow]q[-]: back  " +
+		"[yellow]m[-]: select month  " +
+		"[yellow]TAB[-]: next table"
+}
 
-	if _, err := os.Stat(encFile); err == nil {
-		return "[cyan]DB status:[-] encrypted"
-	}
+func generateTransactionCrudFooter() string {
+	return "[green]a[-]: add  " +
+		"[red]d[-]: delete  " +
+		"[yellow]e/u[-]: update"
+}
 
-	return "[yellow]DB status:[-] unknown"
+func generateTransactionNavigationFooter() string {
+	return "[green]j/k[-] or [green]↑/↓[-]: move up and down  " +
+		"[green]h/l[-] or [green]←/→[-]: move left and right"
 }
 
 // handles creating a pop-up for error messages in the TUI

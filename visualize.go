@@ -50,7 +50,7 @@ func showMonthSelector() error {
 
 	// navigation help
 	frame := tview.NewFrame(list).
-		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// handle input capture for month selection and exit
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -122,25 +122,17 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 	helpLeftFooter := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignLeft).
-		// TODO: separate helper function that does this
-		SetText("[yellow]ESC[-]/[yellow]q[-]: back  " +
-			"[yellow]m[-]: select month  " +
-			"[yellow]TAB[-]: next table")
+		SetText(generateWindowNavigationFooter())
 
 	helpCenterFooter := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
-		// TODO: separate helper function that does this
-		SetText("[green]a[-]: add  " +
-			"[red]d[-]: delete  " +
-			"[yellow]e/u[-]: update")
+		SetText(generateTransactionCrudFooter())
 
 	helpRightFooter := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignRight).
-		// TODO: separate helper function that does this
-		SetText("[green]j/k[-] or [green]↑/↓[-]: move up and down  " +
-			"[green]h/l[-] or [green]←/→[-]: move left and right")
+		SetText(generateTransactionNavigationFooter())
 
 	// nested footer grid with 2 columns
 	footerGrid := styleGrid(tview.NewGrid().

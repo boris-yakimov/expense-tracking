@@ -36,7 +36,7 @@ func formDeleteTransaction(transactionId, transactionType string) error {
 
 	// navigation help
 	frame = tview.NewFrame(modal).
-		AddText(generateControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to mainMenu on ESC or q key press
 	modal.SetInputCapture(exitShortcuts)
