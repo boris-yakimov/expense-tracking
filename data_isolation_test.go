@@ -298,10 +298,6 @@ func TestDatabaseFileProtection(t *testing.T) {
 		// Test visualization with test storage
 		TestListTransactionsByMonth(t)
 		TestShowAllowedCategories(t)
-
-		// Test TUI components
-		// TODO: login to go directly to list transactions
-		// TestMainMenu(t)
 	})
 
 	// Verify that actual db files were not modified

@@ -174,7 +174,7 @@ func formAddTransaction(currentTableType string) error {
 
 			_, err := gridVisualizeTransactions("", "") // go back to list of transactions
 			if err != nil {
-				showErrorModal("failed to return back to transactions list from add menu", frame, form)
+				showErrorModal("failed to return back to transactions list from add form", frame, form)
 			}
 		}).
 		AddButton("Clear", func() {
@@ -194,7 +194,7 @@ func formAddTransaction(currentTableType string) error {
 	frame = tview.NewFrame(form).
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
-	// back to mainMenu on ESC or q key press
+	// back to list of transactions on ESC or q key press
 	form.SetInputCapture(exitShortcuts)
 
 	// center the modal

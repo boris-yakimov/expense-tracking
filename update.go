@@ -127,7 +127,7 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 	frame = tview.NewFrame(form).
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
-	// back to mainMenu on ESC or q key press
+	// back to list of transactions on ESC or q key press
 	form.SetInputCapture(exitShortcuts)
 
 	modal := styleFlex(tview.NewFlex().

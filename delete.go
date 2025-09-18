@@ -60,8 +60,6 @@ func formDeleteTransaction(transactionId, transactionType string) error {
 
 	tui.SetRoot(centeredModal, true).SetFocus(form)
 
-	// TODO: search for main menu in all files and replace it with transaction list
-
 	// back to transactions list on ESC or q key press
 	form.SetInputCapture(exitShortcuts)
 

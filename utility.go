@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"unicode"
 
@@ -218,6 +220,30 @@ func getMonthsWithTransactions() (months []string, err error) {
 			months = append(months, fmt.Sprintf("%s %s", m, y))
 		}
 	}
+
+	// sort year (descending), than month (descending)
+	sort.Slice(months, func(i, j int) bool {
+		// split the parts of each element in the list of months "year month" becomes []string{"year", "month"}
+		partsI := strings.Split(months[i], " ")
+		partsJ := strings.Split(months[j], " ")
+		if len(partsI) != 2 || len(partsJ) != 2 {
+			// if the string doesn't split in exactly 2 parts, fallback to plain string comparison (this is not expected happen)
+			return months[i] > months[j] // reverse order comparison, i.e. Sep 2025 will come before Aug 2025
+		}
+
+		// parse year and convert it to integer for comparison
+		yearI, _ := strconv.Atoi(partsI[1])
+		yearJ, _ := strconv.Atoi(partsJ[1])
+		if yearI != yearJ {
+			return yearI > yearJ // newest year first (if the years are different, whichever is larger should come first)
+		}
+
+		// compare month
+		// make sure month is lowercase for lookup in the monthOrder map
+		monthI := monthOrder[strings.ToLower(partsI[0])]
+		monthJ := monthOrder[strings.ToLower(partsJ[0])]
+		return monthI > monthJ // if the years are the same, compare months, larger month number comes earlier in the list - sep (9) comes before aug (8)
+	})
 
 	return months, nil
 }
