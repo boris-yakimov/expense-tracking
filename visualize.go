@@ -38,20 +38,26 @@ func showMonthSelector() error {
 		})
 	}
 
-	// go back to previous month
-	list.AddItem("back to current month", "", 'b', func() {
-		// TODO: is passing around ("". "") the best way to do that, seems a bit wierd
-		if _, err := gridVisualizeTransactions("", ""); err != nil {
-			showErrorModal(fmt.Sprintf("error showing current transactions:\n\n%s", err), nil, list)
-			return
-		}
-	})
-
-	list.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+	list.SetTitle("Select Month").
+		SetTitleAlign(tview.AlignCenter).
+		SetBorder(true)
 
 	// navigation help
 	frame := tview.NewFrame(list).
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+	//
+	// horizontal centering
+	modal := styleFlex(tview.NewFlex().
+		AddItem(nil, 0, 1, false).   // left spacer
+		AddItem(frame, 60, 1, true). // form width fixed to fit text
+		AddItem(nil, 0, 1, false))   // right spacer
+
+	// vertical centering (height = 0 lets it fit content)
+	centeredModal := styleFlex(tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).  // top spacer
+		AddItem(modal, 0, 1, true). // enough to fit the text
+		AddItem(nil, 0, 1, false))  // bottom spacer
 
 	// handle input capture for month selection and exit
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -72,7 +78,7 @@ func showMonthSelector() error {
 		return vimMotions(event)
 	})
 
-	tui.SetRoot(frame, true).SetFocus(list)
+	tui.SetRoot(centeredModal, true).SetFocus(list)
 	return nil
 }
 
