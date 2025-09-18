@@ -21,10 +21,6 @@ type AddTransactionRequest struct {
 	Year        string
 }
 
-// TODO: evaluate if category should not become = "income", "expenses", investments
-//       and transaction type should not be     = "food", "groceries", "insurance"
-// come to think of it, it sounds more adequate for categories to be the larger thing and types to be a subset of category rather than the other way around, like it is now
-
 // creates a TUI form with required fiields to add a new transaction
 func formAddTransaction(currentTableType string) error {
 	var transactionType string

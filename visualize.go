@@ -10,7 +10,6 @@ import (
 
 // creates a TUI window to show list of available months with transactions
 func showMonthSelector() error {
-	// TODO: refactor this to use a modal same as add, update, delete
 	months, err := getMonthsWithTransactions()
 	if err != nil {
 		return fmt.Errorf("unable to get months with transactions: %w", err)
