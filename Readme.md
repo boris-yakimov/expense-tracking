@@ -3,6 +3,44 @@ Track your expenses in the terminal
 
 ![Recording](assets/tui-recording.gif)
 
+## Installation 
+
+Download a release from https://github.com/boris-yakimov/expense-tracking/releases
+Or directly download the latest release 
+
+Linux x86
+```
+wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
+  | grep "browser_download_url" \
+  | grep "expense-tracking-linux-amd64" \
+  | cut -d '"' -f 4 \
+  | xargs wget
+
+chmod +x expense-tracking-linux-amd64 
+
+# TODO: to make the db location configurable
+mkdir db/
+./expense-tracking-linux-amd64
+```
+
+Linux ARM
+```
+wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
+  | grep "browser_download_url" \
+  | grep "expense-tracking-linux-amd64" \
+  | cut -d '"' -f 4 \
+  | xargs wget
+
+chmod +x expense-tracking-linux-amd64 
+
+# TODO: to make the db location configurable
+mkdir db/
+./expense-tracking-linux-amd64
+```
+
+Windows
+TODO: to be added
+
 ## Authentication & Encryption Overview
 
 This project uses **password-based encryption** to protect the SQLite database that stores expense tracking data.  
