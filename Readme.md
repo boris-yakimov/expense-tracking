@@ -5,11 +5,11 @@ Track your expenses in the terminal
 
 ## Installation 
 
-Download a release from https://github.com/boris-yakimov/expense-tracking/releases
-Or directly download the latest release 
+Download a release from https://github.com/boris-yakimov/expense-tracking/releases  
 
+Or directly download the latest release in your terminal
 Linux x86
-```
+```sh
 wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
   | grep "browser_download_url" \
   | grep "expense-tracking-linux-amd64" \
@@ -20,11 +20,12 @@ chmod +x expense-tracking-linux-amd64
 
 # TODO: to make the db location configurable
 mkdir db/
+# TODO: steps to add PATH 
 ./expense-tracking-linux-amd64
 ```
 
 Linux ARM
-```
+```sh
 wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
   | grep "browser_download_url" \
   | grep "expense-tracking-linux-amd64" \
@@ -35,11 +36,13 @@ chmod +x expense-tracking-linux-amd64
 
 # TODO: to make the db location configurable
 mkdir db/
+# TODO: steps to add PATH 
 ./expense-tracking-linux-amd64
 ```
 
-Windows
-TODO: to be added
+Windows  
+TODO: powershell  
+TODO: cmd  
 
 ## Authentication & Encryption Overview
 
