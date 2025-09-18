@@ -20,6 +20,18 @@ func main() {
 	// set up graceful shutdown handler to make sure database re-encryption happens even if the tui gets killed
 	setupGracefulShutdown(config)
 
+	// TODO: the transactions.db/.enc should be created in the user's home dir as .transactions.db/.enc
+	// TODO: log file to be creaeted in user's home dir .expense-tracking.log
+	// TODO: path to database file and log should be configurable
+	// TODO: update all places where we do a print or error modal, or success modal, etc to generate an event in the log as well
+	// TODO: evaluate option to either keep and encrypt JSON or remove the JSON option altogether
+
+	// log file is created in the user's home directory
+	if err := createLogFileIfNotPresent(config.LogFilePath); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create log file: %v\n", err)
+		os.Exit(1)
+	}
+
 	tui = tview.NewApplication()
 	tui.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
 		screen.Clear()

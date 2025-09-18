@@ -28,16 +28,16 @@ Linux ARM
 ```sh
 wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
   | grep "browser_download_url" \
-  | grep "expense-tracking-linux-amd64" \
+  | grep "expense-tracking-linux-arm64" \
   | cut -d '"' -f 4 \
   | xargs wget
 
-chmod +x expense-tracking-linux-amd64 
+chmod +x expense-tracking-linux-arm64 
 
 # TODO: to make the db location configurable
 mkdir db/
 # TODO: steps to add PATH 
-./expense-tracking-linux-amd64
+./expense-tracking-linux-arm64
 ```
 
 Windows  

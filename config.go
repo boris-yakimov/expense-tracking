@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"os"
+	"path/filepath"
 )
 
 const (
@@ -16,6 +18,7 @@ type Config struct {
 	StorageType  StorageType
 	SQLitePath   string
 	JSONFilePath string
+	LogFilePath  string
 }
 
 func SetGlobalConfig(config *Config) {
@@ -29,6 +32,7 @@ func DefaultConfig() *Config {
 		StorageType:  StorageSQLite,
 		SQLitePath:   "db/transactions.db",
 		JSONFilePath: "db/transactions.json",
+		LogFilePath:  ".expense-tracking.log",
 	}
 }
 
@@ -55,4 +59,26 @@ func loadConfigFromEnvVars() *Config {
 	}
 
 	return config
+}
+
+func createLogFileIfNotPresent(logFilePath string) error {
+	homeDir, err := os.UserHomeDir()
+	if err != nil {
+		return fmt.Errorf("error getting user's home directory: %w", err)
+	}
+
+	// log file is created in the user's home directory
+	logFilePath = filepath.Join(homeDir, logFilePath)
+
+	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
+		// log file does not exist, so create it
+		logFile, err := os.Create(logFilePath)
+		if err != nil {
+			return fmt.Errorf("unable to create log file %s , err: %w", logFilePath, err)
+		}
+
+		defer logFile.Close()
+	}
+
+	return nil
 }
