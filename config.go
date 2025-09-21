@@ -61,24 +61,20 @@ func loadConfigFromEnvVars() *Config {
 	return config
 }
 
-func createLogFileIfNotPresent(logFilePath string) error {
+func createLogFileIfNotPresent(logFilePath string) (logFile *os.File, err error) {
 	homeDir, err := os.UserHomeDir()
 	if err != nil {
-		return fmt.Errorf("error getting user's home directory: %w", err)
+		return nil, fmt.Errorf("error getting user's home directory: %w", err)
 	}
+
+	// TODO: update this to work on windows as well
 
 	// log file is created in the user's home directory
 	logFilePath = filepath.Join(homeDir, logFilePath)
 
-	if _, err := os.Stat(logFilePath); os.IsNotExist(err) {
-		// log file does not exist, so create it
-		logFile, err := os.Create(logFilePath)
-		if err != nil {
-			return fmt.Errorf("unable to create log file %s , err: %w", logFilePath, err)
-		}
-
-		defer logFile.Close()
+	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		return nil, fmt.Errorf("unable to open log file for writing %s, err: %w", logFilePath, err)
 	}
-
-	return nil
+	return logFile, nil
 }

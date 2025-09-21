@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
+	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -11,11 +13,22 @@ import (
 )
 
 var tui *tview.Application
+var logFile *os.File
 
 func main() {
+	var err error
 	// load configuration
 	config := loadConfigFromEnvVars()
 	SetGlobalConfig(config)
+
+	// log file is created in the user's home directory
+	if logFile, err = createLogFileIfNotPresent(config.LogFilePath); err != nil {
+		fmt.Fprintf(os.Stderr, "failed to create log file: %v\n", err)
+		os.Exit(1)
+	}
+
+	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
+	log.SetFlags(log.LstdFlags | log.Lshortfile) // timestamps + file:line info
 
 	// set up graceful shutdown handler to make sure database re-encryption happens even if the tui gets killed
 	setupGracefulShutdown(config)
@@ -26,12 +39,6 @@ func main() {
 	// TODO: update all places where we do a print or error modal, or success modal, etc to generate an event in the log as well
 	// TODO: evaluate option to either keep and encrypt JSON or remove the JSON option altogether
 
-	// log file is created in the user's home directory
-	if err := createLogFileIfNotPresent(config.LogFilePath); err != nil {
-		fmt.Fprintf(os.Stderr, "failed to create log file: %v\n", err)
-		os.Exit(1)
-	}
-
 	tui = tview.NewApplication()
 	tui.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
 		screen.Clear()
@@ -40,12 +47,12 @@ func main() {
 	})
 
 	if err := loginForm(); err != nil {
-		fmt.Fprintf(os.Stderr, "login failed: %v\n", err)
+		log.Printf("login form failed to start: %s\n", err)
 		os.Exit(1)
 	}
 
 	if err := tui.Run(); err != nil {
-		fmt.Fprintf(os.Stderr, "tui failed: %v\n", err)
+		log.Printf("tui failed to start: %s\n", err)
 		os.Exit(1)
 	}
 
@@ -54,11 +61,11 @@ func main() {
 		closeDb()
 		if userPassword != "" {
 			if err := encryptDatabase(config.SQLitePath); err != nil {
-				fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+				log.Printf("failed to encrypt database on shutdown: %s\n", err)
 			} else {
 				// remove unencrypted database file after successful encryption
 				if err := os.Remove(config.SQLitePath); err != nil {
-					fmt.Fprintf(os.Stderr, "warning: failed to remove plaintext database: %v\n", err)
+					log.Printf("warning: failed to remove plaintext database: %s\n", err)
 				}
 			}
 		}
@@ -79,16 +86,24 @@ func setupGracefulShutdown(config *Config) {
 			closeDb()
 			if userPassword != "" {
 				if err := encryptDatabase(config.SQLitePath); err != nil {
-					fmt.Fprintf(os.Stderr, "failed to encrypt database on shutdown: %v\n", err)
+					log.Printf("failed to encrypt database on shutdown: %s\n", err)
 				} else {
 					// remove unencrypted database file after successful encryption
 					if err := os.Remove(config.SQLitePath); err != nil {
-						fmt.Fprintf(os.Stderr, "warning: failed to remove plaintext database: %v\n", err)
+						log.Printf("warning: failed to remove plaintext database: %s\n", err)
 					}
 				}
 			}
 		}
 		clearUserPassword() // clear password from memory
-		os.Exit(0)
+		if logFile != nil {
+			if err := logFile.Sync(); err != nil {
+				log.Printf("failed to sync log file: %s\n", err)
+			}
+			if err := logFile.Close(); err != nil {
+				log.Printf("failed to close log file: %s\n", err)
+			}
+		}
+		// os.Exit(0)
 	}()
 }
