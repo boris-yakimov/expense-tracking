@@ -61,15 +61,18 @@ func TestLoadTransactions(t *testing.T) {
 
 func TestConfigSystem(t *testing.T) {
 	// Test default config
-	config := DefaultConfig()
+	config, err := DefaultConfig()
+	if err != nil {
+		t.Errorf("Failed to use default config, err: %v", err)
+	}
 	if config.StorageType != StorageSQLite {
 		t.Errorf("Expected default storage type to be SQLite, got %s", config.StorageType)
 	}
-	if config.SQLitePath != "db/transactions.db" {
-		t.Errorf("Expected default SQLite path to be 'db/transactions.db', got %s", config.SQLitePath)
+	if config.SQLitePath != "test_data/transactions.db" {
+		t.Errorf("Expected default SQLite path to be 'test_data/transactions.db', got %s", config.SQLitePath)
 	}
-	if config.JSONFilePath != "db/transactions.json" {
-		t.Errorf("Expected default JSON path to be 'db/transactions.json', got %s", config.JSONFilePath)
+	if config.JSONFilePath != "test_data/transactions.json" {
+		t.Errorf("Expected default JSON path to be 'test_data/transactions.json', got %s", config.JSONFilePath)
 	}
 
 	// Test loading config from environment
@@ -80,7 +83,11 @@ func TestConfigSystem(t *testing.T) {
 		os.Unsetenv("EXPENSE_JSON_PATH")
 	}()
 
-	envConfig := loadConfigFromEnvVars()
+	envConfig, err := loadConfigFromEnvVars()
+	if err != nil {
+		t.Errorf("Failed to load config from env var, err %v", err)
+	}
+
 	if envConfig.StorageType != StorageJSONFile {
 		t.Errorf("Expected storage type from env to be JSON, got %s", envConfig.StorageType)
 	}
@@ -106,7 +113,10 @@ func TestSetGlobalConfig(t *testing.T) {
 func TestLoadConfigFromEnvVars(t *testing.T) {
 	// Test with no environment variables
 	os.Clearenv()
-	config := loadConfigFromEnvVars()
+	config, err := loadConfigFromEnvVars()
+	if err != nil {
+		t.Errorf("Failed to load config from env var, err %v", err)
+	}
 	if config.StorageType != StorageSQLite {
 		t.Errorf("Expected default storage type to be SQLite, got %s", config.StorageType)
 	}
@@ -116,7 +126,10 @@ func TestLoadConfigFromEnvVars(t *testing.T) {
 	os.Setenv("EXPENSE_SQLITE_PATH", "custom.db")
 	defer os.Clearenv()
 
-	config = loadConfigFromEnvVars()
+	config, err = loadConfigFromEnvVars()
+	if err != nil {
+		t.Errorf("Failed to load config from env var, err %v", err)
+	}
 	if config.StorageType != StorageSQLite {
 		t.Errorf("Expected storage type to be SQLite, got %s", config.StorageType)
 	}
@@ -128,7 +141,10 @@ func TestLoadConfigFromEnvVars(t *testing.T) {
 	os.Setenv("EXPENSE_STORAGE_TYPE", "json")
 	os.Setenv("EXPENSE_JSON_PATH", "custom.json")
 
-	config = loadConfigFromEnvVars()
+	config, err = loadConfigFromEnvVars()
+	if err != nil {
+		t.Errorf("Failed to load config from env var, err %v", err)
+	}
 	if config.StorageType != StorageJSONFile {
 		t.Errorf("Expected storage type to be JSON, got %s", config.StorageType)
 	}
@@ -138,7 +154,10 @@ func TestLoadConfigFromEnvVars(t *testing.T) {
 
 	// Test with invalid storage type
 	os.Setenv("EXPENSE_STORAGE_TYPE", "invalid")
-	config = loadConfigFromEnvVars()
+	config, err = loadConfigFromEnvVars()
+	if err != nil {
+		t.Errorf("Failed to load config from env var, err %v", err)
+	}
 	if config.StorageType != StorageSQLite {
 		t.Errorf("Expected invalid storage type to default to SQLite, got %s", config.StorageType)
 	}

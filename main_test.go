@@ -76,7 +76,10 @@ func TestMainFunctionDependencies(t *testing.T) {
 	// without panicking due to missing dependencies
 
 	// Test loadConfigFromEnvVars
-	config := loadConfigFromEnvVars()
+	config, err := loadConfigFromEnvVars()
+	if err != nil {
+		t.Errorf("Failed to load config from env var, err %v", err)
+	}
 	if config == nil {
 		t.Errorf("Expected loadConfigFromEnvVars to return non-nil config")
 	}

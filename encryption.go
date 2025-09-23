@@ -17,15 +17,6 @@ import (
 // global var to store the user's password in memory for encryption key derivation
 var userPassword string
 
-// encryption configuration
-const (
-	encFile    = "db/transactions.enc"
-	saltFile   = "db/transactions.salt"
-	keyLen     = 32      // AES-256 key length
-	iterations = 200_000 // PBKDF2 iterations for key derivation
-	saltLen    = 16      // Salt length in bytes
-)
-
 // stores the user's password in memory to derive an encryption key from it
 func setUserPassword(password string) {
 	userPassword = password
@@ -49,14 +40,14 @@ func generateSalt() ([]byte, error) {
 
 // stores the salt to file
 func saveSalt(salt []byte) error {
-	dir := filepath.Dir(saltFile)
+	dir := filepath.Dir(globalConfig.SaltFile)
 
 	// make sure dir exists
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("failed to create salt directory: %w", err)
 	}
 
-	if err := os.WriteFile(saltFile, salt, 0600); err != nil {
+	if err := os.WriteFile(globalConfig.SaltFile, salt, 0600); err != nil {
 		return fmt.Errorf("failed to save salt: %w", err)
 	}
 
@@ -65,7 +56,7 @@ func saveSalt(salt []byte) error {
 
 // reads the salt from file
 func loadSalt() ([]byte, error) {
-	salt, err := os.ReadFile(saltFile)
+	salt, err := os.ReadFile(globalConfig.SaltFile)
 	if err != nil {
 		if os.IsNotExist(err) {
 			return nil, fmt.Errorf("salt file not found: %w", err)
@@ -83,7 +74,7 @@ func loadSalt() ([]byte, error) {
 // returns the existing salt or creates a new one
 func getOrCreateSalt() ([]byte, error) {
 	// if it exists return it
-	if _, err := os.Stat(saltFile); err == nil {
+	if _, err := os.Stat(globalConfig.SaltFile); err == nil {
 		return loadSalt()
 		// if it doesn't create it and than return it
 	} else if os.IsNotExist(err) {
@@ -140,13 +131,13 @@ func encryptDatabase(dbPath string) error {
 	}
 
 	// make sure dir exists
-	dir := filepath.Dir(encFile)
+	dir := filepath.Dir(globalConfig.EncryptedDBFile)
 	if err := os.MkdirAll(dir, 0700); err != nil {
 		return fmt.Errorf("failed to create encryption directory: %w", err)
 	}
 
 	// write the encrypted file
-	if err := os.WriteFile(encFile, encryptedData, 0600); err != nil {
+	if err := os.WriteFile(globalConfig.EncryptedDBFile, encryptedData, 0600); err != nil {
 		return fmt.Errorf("failed to write encrypted database: %w", err)
 	}
 
@@ -162,11 +153,11 @@ func decryptDatabase(dbPath string) error {
 	}
 
 	// check if encrypted file exists
-	if _, err := os.Stat(encFile); os.IsNotExist(err) {
+	if _, err := os.Stat(globalConfig.EncryptedDBFile); os.IsNotExist(err) {
 		return nil // nothing to decrypt
 	}
 
-	encryptedData, err := os.ReadFile(encFile)
+	encryptedData, err := os.ReadFile(globalConfig.EncryptedDBFile)
 	if err != nil {
 		return fmt.Errorf("failed to read encrypted database: %w", err)
 	}

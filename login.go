@@ -13,7 +13,7 @@ import (
 // Creates a TUI form with prompt for logi. On initial login provides a form set a password. On subsequent attempts, prompts for password to login with. The same password is also used to generate an encryption key that is then used for encrypting/decrypting the database.
 func loginForm() error {
 	// first-run for encryption: if no encrypted DB exists, prompt to set a password
-	if _, err := os.Stat(encFile); os.IsNotExist(err) {
+	if _, err := os.Stat(globalConfig.EncryptedDBFile); os.IsNotExist(err) {
 		setNewPasswordForm()
 		return nil // i.e. don't proceed to build the login form in the event of a first login
 	}
@@ -37,7 +37,7 @@ func loginForm() error {
 			setUserPassword(entered)
 
 			// if encrypted file exists, decrypt with provided password
-			if _, err := os.Stat(encFile); err == nil {
+			if _, err := os.Stat(globalConfig.EncryptedDBFile); err == nil {
 
 				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
 

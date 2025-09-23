@@ -118,8 +118,12 @@ type TransactionHistory map[string]map[string]map[string][]Transaction
 
 // load transactions from storage (db or json)
 func LoadTransactions() (TransactionHistory, error) {
+	var err error
 	if globalConfig == nil {
-		globalConfig = DefaultConfig()
+		globalConfig, err = DefaultConfig()
+		if err != nil {
+			return nil, fmt.Errorf("failed to load transactions, err: %w", err)
+		}
 	}
 
 	switch globalConfig.StorageType {
@@ -134,8 +138,12 @@ func LoadTransactions() (TransactionHistory, error) {
 
 // load transactions to storage (db or json)
 func SaveTransactions(transactions TransactionHistory) error {
+	var err error
 	if globalConfig == nil {
-		globalConfig = DefaultConfig()
+		globalConfig, err = DefaultConfig()
+		if err != nil {
+			return fmt.Errorf("failed to save transactions, err: %w", err)
+		}
 	}
 
 	switch globalConfig.StorageType {

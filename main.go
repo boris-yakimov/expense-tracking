@@ -18,7 +18,10 @@ var logFile *os.File
 func main() {
 	var err error
 	// load configuration
-	config := loadConfigFromEnvVars()
+	config, err := loadConfigFromEnvVars()
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "failed to load config from env var, err %v\n", err)
+	}
 	SetGlobalConfig(config)
 
 	// log file is created in the user's home directory
@@ -36,7 +39,6 @@ func main() {
 	setupGracefulShutdown(config)
 
 	// TODO: the transactions.db/.enc should be created in the user's home dir as .transactions.db/.enc
-	// TODO: log file to be creaeted in user's home dir .expense-tracking.log
 	// TODO: path to database file and log should be configurable
 	// TODO: update all places where we do a print or error modal, or success modal, etc to generate an event in the log as well
 	// TODO: evaluate option to either keep and encrypt JSON or remove the JSON option altogether

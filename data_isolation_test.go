@@ -9,9 +9,9 @@ import (
 
 func TestDataIsolation(t *testing.T) {
 	// This test ensures that running tests doesn't modify actual transaction data
-	// in the db/ directory
+	// in the test_data/ directory
 
-	// Get the current state of files in db/ directory
+	// Get the current state of files in test_data/ directory
 	dbDir := "db"
 	originalFiles := make(map[string]fileState)
 
@@ -28,7 +28,7 @@ func TestDataIsolation(t *testing.T) {
 		}
 	}
 
-	// Run a comprehensive test that would normally touch the db/ directory
+	// Run a comprehensive test that would normally touch the test_data/ directory
 	t.Run("comprehensive_test", func(t *testing.T) {
 		// Test SQLite operations
 		setupTestStorage(t, StorageSQLite)
@@ -48,13 +48,13 @@ func TestDataIsolation(t *testing.T) {
 		TestCalculateYearPnL(t)
 	})
 
-	// Verify that files in db/ directory haven't been modified
+	// Verify that files in test_data/ directory haven't been modified
 	if entries, err := os.ReadDir(dbDir); err == nil {
 		for _, entry := range entries {
 			original, exists := originalFiles[entry.Name()]
 			if !exists {
 				// New file was created - this might be okay for some files
-				t.Logf("New file created in db/ directory: %s", entry.Name())
+				t.Logf("New file created in test_data/ directory: %s", entry.Name())
 				continue
 			}
 
@@ -77,7 +77,7 @@ func TestDataIsolation(t *testing.T) {
 		}
 	}
 
-	// Verify that no test files were left in db/ directory
+	// Verify that no test files were left in test_data/ directory
 	testPatterns := []string{"test_*", "*_test*", "*.backup", "*.tmp"}
 	for _, pattern := range testPatterns {
 		matches, err := filepath.Glob(filepath.Join(dbDir, pattern))
@@ -91,7 +91,7 @@ func TestDataIsolation(t *testing.T) {
 			baseName := filepath.Base(match)
 			if baseName != "transactions.db" && baseName != "transactions.json" &&
 				baseName != "transactions.enc" && baseName != "transactions.salt" {
-				t.Errorf("Test file left in db/ directory: %s", match)
+				t.Errorf("Test file left in test_data/ directory: %s", match)
 			}
 		}
 	}
@@ -99,13 +99,13 @@ func TestDataIsolation(t *testing.T) {
 
 func TestNoActualDataModification(t *testing.T) {
 	// This test specifically ensures that the actual transaction files
-	// in db/ directory are not modified by tests
+	// in test_data/ directory are not modified by tests
 
 	dbFiles := []string{
-		"db/transactions.db",
-		"db/transactions.json",
-		"db/transactions.enc",
-		"db/transactions.salt",
+		"test_data/transactions.db",
+		"test_data/transactions.json",
+		"test_data/transactions.enc",
+		"test_data/transactions.salt",
 	}
 
 	// Record original file states
@@ -194,10 +194,10 @@ type fileState struct {
 func TestDatabaseFileProtection(t *testing.T) {
 	// This test runs at the very beginning to ensure no actual database files are touched
 	actualDbFiles := []string{
-		"db/transactions.db",
-		"db/transactions.json",
-		"db/transactions.enc",
-		"db/transactions.salt",
+		"test_data/transactions.db",
+		"test_data/transactions.json",
+		"test_data/transactions.enc",
+		"test_data/transactions.salt",
 	}
 
 	// Record original file states
@@ -333,15 +333,15 @@ func TestDatabaseFileProtection(t *testing.T) {
 
 // TestActualDatabaseFilesNeverAccessed ensures that actual database files are never accessed during tests
 func TestActualDatabaseFilesNeverAccessed(t *testing.T) {
-	// This test verifies that the actual database files in db/ directory are never accessed
+	// This test verifies that the actual database files in test_data/ directory are never accessed
 	// during normal test operations. It does this by checking that the files exist and
 	// have not been modified by any test operations.
 
 	actualDbFiles := []string{
-		"db/transactions.db",
-		"db/transactions.json",
-		"db/transactions.enc",
-		"db/transactions.salt",
+		"test_data/transactions.db",
+		"test_data/transactions.json",
+		"test_data/transactions.enc",
+		"test_data/transactions.salt",
 	}
 
 	// Record initial state
