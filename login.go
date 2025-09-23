@@ -146,6 +146,7 @@ func setNewPasswordForm() {
 		SetMaskCharacter('*'))
 
 	var formWithMessage *tview.Flex
+	var centeredModal *tview.Flex
 
 	message := styleTextView(tview.NewTextView().
 		SetText("").
@@ -160,14 +161,14 @@ func setNewPasswordForm() {
 
 			if entered == repeat {
 				if err := addInitialPassword(entered); err != nil {
-					showErrorModal(fmt.Sprintf("failed to set a new password: %v", err), formWithMessage, passwordInputField)
+					showErrorModal(fmt.Sprintf("failed to set a new password: %v", err), centeredModal, passwordInputField)
 					log.Printf("failed to set a new password: %v", err)
 					return // interrupt here
 				}
 
 				// proceed directly to app using the newly set in-memory password
 				if err := initDb(globalConfig.SQLitePath); err != nil {
-					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
+					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), centeredModal, passwordInputField)
 					log.Printf("failed to initialize DB: %s\n", err)
 					clearUserPassword() // remove pass from memory on error
 					return
@@ -176,19 +177,19 @@ func setNewPasswordForm() {
 				// optional migration from JSON to SQLite (runs only if env var is set)
 				if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
 					if globalConfig.StorageType != StorageSQLite {
-						showErrorModal("migration requires sqlite storage", formWithMessage, passwordInputField)
+						showErrorModal("migration requires sqlite storage", centeredModal, passwordInputField)
 						log.Printf("migration requires sqlite storage")
 						return
 					}
 					if err := migrateJsonToDb(); err != nil {
-						showErrorModal(fmt.Sprintf("migration failed: %v", err), formWithMessage, passwordInputField)
+						showErrorModal(fmt.Sprintf("migration failed: %v", err), centeredModal, passwordInputField)
 						log.Printf("migration failed: %v", err)
 						return
 					}
 				}
 
 				if _, err := gridVisualizeTransactions("", ""); err != nil {
-					showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), formWithMessage, passwordInputField)
+					showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
 					log.Printf("list transactions error:\n\n%s", err)
 					clearUserPassword() // remove pass from memory on error
 					return
@@ -237,7 +238,7 @@ func setNewPasswordForm() {
 		AddItem(nil, 0, 1, false))             // right spacer
 
 	// vertical centering
-	centeredModal := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
+	centeredModal = styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
 		AddItem(nil, 0, 1, false).          // top spacer
 		AddItem(initialModal, 15, 1, true). // form box automatic height
 		AddItem(nil, 0, 1, false))          // bottom spacer
