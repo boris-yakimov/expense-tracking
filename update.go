@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"strconv"
 
 	"github.com/rivo/tview"
@@ -30,6 +31,7 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
 		showErrorModal(fmt.Sprintf("get a list of allowed transaction types err:\n\n%s", err), frame, form)
+		log.Printf("get a list of allowed transaction types err:\n\n%s", err)
 	}
 
 	typeDropdown := styleDropdown(tview.NewDropDown().
@@ -63,6 +65,7 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
 			showErrorModal(fmt.Sprintf("failed to list categories err:\n\n%s", err), frame, form)
+			log.Printf("failed to list categories err:\n\n%s", err)
 			return err
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
@@ -106,6 +109,7 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 
 			if err := handleUpdateTransaction(updateReq); err != nil {
 				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), frame, form)
+				log.Printf("failed to update transaction:\n\n%s", err)
 				return
 			}
 

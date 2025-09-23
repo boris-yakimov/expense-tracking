@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/hex"
 	"fmt"
+	"log"
 	"slices"
 	"strconv"
 	"strings"
@@ -33,6 +34,7 @@ func formAddTransaction(currentTableType string) error {
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
 		showErrorModal(fmt.Sprintf("list allowed transaction types: %s, err:\n\n%s", transactionType, err), frame, form)
+		log.Printf("list allowed transaction types: %s, err:\n\n%s", transactionType, err)
 		return err
 	}
 
@@ -45,6 +47,7 @@ func formAddTransaction(currentTableType string) error {
 				if err != nil {
 					// Set empty options on error to prevent crashes
 					showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
+					log.Printf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err)
 					return
 				}
 				categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
@@ -86,6 +89,7 @@ func formAddTransaction(currentTableType string) error {
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
 			showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
+			log.Printf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err)
 			return err
 		}
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
@@ -109,6 +113,7 @@ func formAddTransaction(currentTableType string) error {
 		opts, err := getMonthsWithTransactions()
 		if err != nil {
 			showErrorModal(fmt.Sprintf("unable to get months with transactions: err:\n\n%s", err), frame, form)
+			log.Printf("unable to get months with transactions: err:\n\n%s", err)
 			return err
 		}
 
@@ -149,6 +154,7 @@ func formAddTransaction(currentTableType string) error {
 			parts := strings.SplitN(monthAndYear, " ", 2)
 			if len(parts) != 2 {
 				showErrorModal(fmt.Sprintf("invalid period format: %s", monthAndYear), frame, form)
+				log.Printf("invalid period format: %s", monthAndYear)
 				return
 			}
 			month := parts[0]
@@ -165,12 +171,14 @@ func formAddTransaction(currentTableType string) error {
 
 			if err := handleAddTransaction(addReq); err != nil {
 				showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), frame, form)
+				log.Printf("failed to add transaction:\n\n%s", err)
 				return
 			}
 
 			_, err := gridVisualizeTransactions("", "") // go back to list of transactions
 			if err != nil {
 				showErrorModal("failed to return back to transactions list from add form", frame, form)
+				log.Printf("failed to return back to transactions list from add form")
 			}
 		}).
 		AddButton("Clear", func() {

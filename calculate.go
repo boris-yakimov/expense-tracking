@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 )
 
 type PnLResult struct {
@@ -23,7 +24,7 @@ func calculateMonthPnL(month, year string) (PnLResult, error) {
 
 	for txType, txList := range transactions[year][month] {
 		if len(txList) == 0 {
-			fmt.Printf("\nno transactions of type %s for %s %s\n", txType, month, year)
+			log.Printf("\nno transactions of type %s for %s %s\n", txType, month, year)
 			continue
 		}
 
@@ -68,7 +69,7 @@ func calculateYearPnL(year string) (PnLResult, error) {
 	for month := range transactions[year] {
 		for txType, txList := range transactions[year][month] {
 			if len(txList) == 0 {
-				fmt.Printf("\nno transactions of type %s for month %s\n", txType, month)
+				log.Printf("\nno transactions of type %s for month %s\n", txType, month)
 				continue
 			}
 

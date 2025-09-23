@@ -27,7 +27,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	log.SetOutput(io.MultiWriter(os.Stdout, logFile))
+	// TODO: maybe if debug mode enabledd then logs can also be sent to stdout
+	// log.SetOutput(io.MultiWriter(os.Stdout, logFile))
+	log.SetOutput(io.MultiWriter(logFile))
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // timestamps + file:line info
 
 	// set up graceful shutdown handler to make sure database re-encryption happens even if the tui gets killed
@@ -45,6 +47,8 @@ func main() {
 		screen.Fill(' ', tcell.StyleDefault.Background(theme.BackgroundColor))
 		return false
 	})
+
+	log.Printf("Start Expense Tracking Tool")
 
 	if err := loginForm(); err != nil {
 		log.Printf("login form failed to start: %s\n", err)
@@ -70,6 +74,8 @@ func main() {
 			}
 		}
 	}
+
+	log.Printf("Exit Expense Tracking Tool")
 }
 
 // sets up signal handling to ensure database encryption on exit

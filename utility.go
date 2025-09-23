@@ -2,14 +2,11 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
 	"unicode"
-
-	"text/tabwriter"
 )
 
 var monthOrder = map[string]int{
@@ -169,43 +166,6 @@ func getTransactionById(id string) (*Transaction, error) {
 // helper to enforce the character limit of the description field
 func enforceCharLimit(textToCheck string, lastChar rune) bool {
 	return len(textToCheck) <= DescriptionMaxCharLength
-}
-
-// helper to build a list of transactions for a specific month
-func listTransactionsByMonth(transactionType, month, year string) (success bool, err error) {
-	transactions, loadFileErr := LoadTransactions()
-	if loadFileErr != nil {
-		return false, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
-	}
-
-	if len(transactions) == 0 {
-		fmt.Println("\nno transactions found")
-		return true, nil
-	}
-
-	transactionType, err = normalizeTransactionType(transactionType)
-	if err != nil {
-		return false, fmt.Errorf("transaction type error: %w", err)
-	}
-
-	// transaction type header
-	fmt.Println()
-	fmt.Printf("  %s\n", capitalize(transactionType))
-	fmt.Printf("  %s\n", strings.Repeat("-", len(transactionType)))
-
-	// transaction table format
-	w := tabwriter.NewWriter(os.Stdout, 0, 0, 4, ' ', 0)
-	fmt.Fprintln(w, "    ID\tAmount\tCategory\tDescription")
-	fmt.Fprintln(w, "    --\t------\t--------\t-----------")
-
-	for _, t := range transactions[year][month][transactionType] {
-		fmt.Fprintf(w, "    %s\t€%.2f\t%s\t%s\n", t.Id, t.Amount, t.Category, t.Description)
-	}
-
-	w.Flush()
-	fmt.Println()
-
-	return true, nil
 }
 
 // helper to get a list of months that have transactions - also make sure these are sorted with newest to oldest month/year

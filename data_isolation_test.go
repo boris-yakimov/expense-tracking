@@ -296,7 +296,6 @@ func TestDatabaseFileProtection(t *testing.T) {
 		TestDetermineLatestMonthAndYear(t)
 
 		// Test visualization with test storage
-		TestListTransactionsByMonth(t)
 		TestShowAllowedCategories(t)
 	})
 

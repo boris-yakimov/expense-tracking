@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"fmt"
+	"log"
 	"os"
 
 	"github.com/gdamore/tcell/v2"
@@ -49,7 +50,8 @@ func loginForm() error {
 					}
 
 					// some other unexpected error occured - corrupted file, permision issues, etc
-					showErrorModal(fmt.Sprintf("Decryption failed: %s", err), formWithMessage, passwordInputField)
+					showErrorModal(fmt.Sprintf("decryption failed: %s", err), formWithMessage, passwordInputField)
+					log.Printf("decryption failed: %s", err)
 					clearUserPassword()
 					return
 				}
@@ -58,6 +60,7 @@ func loginForm() error {
 			// initialize DB connection now that the DB is decrypted or already plaintext
 			if err := initDb(globalConfig.SQLitePath); err != nil {
 				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
+				log.Printf("failed to initialize DB: %s\n", err)
 				clearUserPassword() // remove pass from memory on error
 				return
 			}
@@ -66,16 +69,19 @@ func loginForm() error {
 			if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
 				if globalConfig.StorageType != StorageSQLite {
 					showErrorModal("migration requires sqlite storage", formWithMessage, passwordInputField)
+					log.Printf("migration requires sqlite storage")
 					return
 				}
 				if err := migrateJsonToDb(); err != nil {
 					showErrorModal(fmt.Sprintf("migration failed: %v", err), formWithMessage, passwordInputField)
+					log.Printf("migration failed: %v", err)
 					return
 				}
 			}
 
 			if _, err := gridVisualizeTransactions("", ""); err != nil {
 				showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), formWithMessage, passwordInputField)
+				log.Printf("list transactions error:\n\n%s", err)
 				clearUserPassword() // remove pass from memory on error
 				return
 			}
@@ -155,12 +161,14 @@ func setNewPasswordForm() {
 			if entered == repeat {
 				if err := addInitialPassword(entered); err != nil {
 					showErrorModal(fmt.Sprintf("failed to set a new password: %v", err), formWithMessage, passwordInputField)
+					log.Printf("failed to set a new password: %v", err)
 					return // interrupt here
 				}
 
 				// proceed directly to app using the newly set in-memory password
 				if err := initDb(globalConfig.SQLitePath); err != nil {
 					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), formWithMessage, passwordInputField)
+					log.Printf("failed to initialize DB: %s\n", err)
 					clearUserPassword() // remove pass from memory on error
 					return
 				}
@@ -169,16 +177,19 @@ func setNewPasswordForm() {
 				if os.Getenv("MIGRATE_TRANSACTION_DATA") == "true" {
 					if globalConfig.StorageType != StorageSQLite {
 						showErrorModal("migration requires sqlite storage", formWithMessage, passwordInputField)
+						log.Printf("migration requires sqlite storage")
 						return
 					}
 					if err := migrateJsonToDb(); err != nil {
 						showErrorModal(fmt.Sprintf("migration failed: %v", err), formWithMessage, passwordInputField)
+						log.Printf("migration failed: %v", err)
 						return
 					}
 				}
 
 				if _, err := gridVisualizeTransactions("", ""); err != nil {
 					showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), formWithMessage, passwordInputField)
+					log.Printf("list transactions error:\n\n%s", err)
 					clearUserPassword() // remove pass from memory on error
 					return
 				}
