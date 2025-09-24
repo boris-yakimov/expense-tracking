@@ -88,6 +88,8 @@ func loadConfigFromEnvVars() (*Config, error) {
 		config.JSONFilePath = jsonPath
 	}
 
+	// TODO: option for the user to select path for salt, .enc, .db (temp file), log
+
 	return config, nil
 }
 
