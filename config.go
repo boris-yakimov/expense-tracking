@@ -10,19 +10,20 @@ const (
 	StorageJSONFile StorageType = "json"
 	StorageSQLite   StorageType = "sqlite"
 
-	DescriptionMaxCharLength = 40
-	TransactionIDLength      = 8
-
-	defaultUnencryptedDb = ".transactions.db"
-	defaultEncryptedDb   = ".transactions.enc"
-	defaultSaltFile      = ".transactions.salt"
-	defaultJsonFile      = ".transactions.json"
-	defaultLogFile       = ".expense-tracking.log"
+	defaultExpenseToolDir = ".expense-tracking"
+	defaultUnencryptedDb  = "transactions.db"
+	defaultEncryptedDb    = "transactions.enc"
+	defaultSaltFile       = "transactions.salt"
+	defaultJsonFile       = "transactions.json"
+	defaultLogFile        = "expense-tracking.log"
 
 	// encryption configuration
 	keyLen     = 32      // AES-256 key length
 	iterations = 200_000 // PBKDF2 iterations for key derivation
 	saltLen    = 16      // Salt length in bytes
+
+	DescriptionMaxCharLength = 40
+	TransactionIDLength      = 8
 )
 
 type Config struct {
@@ -45,13 +46,25 @@ func DefaultConfig() (*Config, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error getting user's home directory: %w", err)
 	}
-	// TODO: should this file be moved somewhere more hidden sice it is for the temporary unencrypted file that exists only while the app is running
-	unencryptedDbFilePath := filepath.Join(homeDir, defaultUnencryptedDb)
-	encryptedDbFilePath := filepath.Join(homeDir, defaultEncryptedDb)
-	jsonFilePath := filepath.Join(homeDir, defaultJsonFile)
-	logFilePath := filepath.Join(homeDir, defaultLogFile)
-	saltFilePath := filepath.Join(homeDir, defaultSaltFile)
-	// TODO: check if those paths will also work on windows
+
+	// TODO: test if those paths will also work on windows
+	expenseToolDir := filepath.Join(homeDir, defaultExpenseToolDir)
+	if _, err := os.Stat(expenseToolDir); err != nil {
+		if os.IsNotExist(err) { // directory doesn't exist, create it
+			if err := os.Mkdir(expenseToolDir, 0755); err != nil {
+				return nil, fmt.Errorf("failed to create %s dir, err: %w", expenseToolDir, err)
+			}
+		} else { // other errors, like permission denied, etc
+			return nil, fmt.Errorf("failed to check if %s dir exists, err: %w", expenseToolDir, err)
+		}
+	}
+
+	// TODO: test if those paths will also work on windows
+	encryptedDbFilePath := filepath.Join(expenseToolDir, defaultEncryptedDb)
+	unencryptedDbFilePath := filepath.Join(expenseToolDir, defaultUnencryptedDb)
+	jsonFilePath := filepath.Join(expenseToolDir, defaultJsonFile)
+	logFilePath := filepath.Join(expenseToolDir, defaultLogFile)
+	saltFilePath := filepath.Join(expenseToolDir, defaultSaltFile)
 
 	return &Config{
 		StorageType:     StorageSQLite,
