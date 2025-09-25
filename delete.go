@@ -7,7 +7,8 @@ import (
 )
 
 // creates a TUI form with required fiields to delete an existing transaction
-func formDeleteTransaction(transactionId, transactionType string) error {
+// func formDeleteTransaction(transactionId, transactionType string) error {
+func formDeleteTransaction(transactionId, transactionType, selectedMonth, selectedYear string) error {
 	tx, err := getTransactionById(transactionId)
 	if err != nil {
 		return fmt.Errorf("could not get transaction by id %s: %w", transactionId, err)
@@ -24,10 +25,10 @@ func formDeleteTransaction(transactionId, transactionType string) error {
 				showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, form)
 				return
 			}
-			gridVisualizeTransactions("", "")
+			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
 		}).
 		AddButton("Cancel", func() {
-			gridVisualizeTransactions("", "")
+			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
 		}))
 
 	form.SetTitle("Delete Transaction").

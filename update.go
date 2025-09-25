@@ -17,7 +17,7 @@ type UpdateTransactionRequest struct {
 }
 
 // creates a TUI form with required fields to update an existing transaction
-func formUpdateTransaction(transactionId, transactionType string) error {
+func formUpdateTransaction(transactionId, transactionType, selectedMonth, selectedYear string) error {
 	// fetch transaction data by id
 	tx, err := getTransactionById(transactionId)
 	if err != nil {
@@ -113,7 +113,8 @@ func formUpdateTransaction(transactionId, transactionType string) error {
 				return
 			}
 
-			gridVisualizeTransactions("", "") // go back to list of transactions
+			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
+
 		}).
 		AddButton("Clear", func() {
 			typeDropdown.SetCurrentOption(0)

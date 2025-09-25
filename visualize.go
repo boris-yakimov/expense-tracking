@@ -234,7 +234,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 				currentTableType = "investment"
 			}
 
-			if err := formUpdateTransaction(txId, currentTableType); err != nil {
+			// month and year are passed here only for the purposes for the update transation form sending us back to the same month and year that we came from when we triggered it
+			if err := formUpdateTransaction(txId, currentTableType, displayMonth, displayYear); err != nil {
 				showErrorModal(fmt.Sprintf("update error:\n\n%s", err), nil, grid)
 				return nil
 			}
@@ -255,7 +256,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 				currentTableType = "investment"
 			}
 
-			if err := formDeleteTransaction(txId, currentTableType); err != nil {
+			// month and year are passed here only for the purposes for the delete transation form sending us back to the same month and year that we came from when we triggered it
+			if err := formDeleteTransaction(txId, currentTableType, displayMonth, displayYear); err != nil {
 				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), nil, grid)
 				return nil
 			}

@@ -140,6 +140,8 @@ func formAddTransaction(currentTableType string) error {
 	}
 	periodDropdown.SetCurrentOption(0)
 
+	// TODO: opening the add form window we always get the latest month as the default selection
+	// it will be better if the atuomatically selected month and year matches the month that we came from when we pressed 'a'
 	form = styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
@@ -175,7 +177,7 @@ func formAddTransaction(currentTableType string) error {
 				return
 			}
 
-			_, err := gridVisualizeTransactions("", "") // go back to list of transactions
+			_, err := gridVisualizeTransactions(month, year) // go back to list of transactions for the same month
 			if err != nil {
 				showErrorModal("failed to return back to transactions list from add form", frame, form)
 				log.Printf("failed to return back to transactions list from add form")
