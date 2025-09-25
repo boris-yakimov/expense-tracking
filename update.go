@@ -123,6 +123,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 			descriptionField.SetText("")
 		}).
 		AddButton("Cancel", func() {
+			// TODO: check all places where we pass nothing, like we do here, if that is expected
 			gridVisualizeTransactions("", "") // go back to list of transactions
 		}))
 
@@ -151,7 +152,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 	return nil
 }
 
-// handles updating an existing transaction in storage (db or json)
+// handles updating an existing transaction in storage
 func handleUpdateTransaction(req UpdateTransactionRequest) error {
 	txType, err := normalizeTransactionType(req.Type)
 	if err != nil {

@@ -65,6 +65,7 @@ var allowedTransactionCategories = map[string]map[string]string{
 }
 
 // minimal expense without year and date
+// TODO: maybe this format no-longer makes sense, since we no longer have the option for JSON storage at all
 type Transaction struct {
 	Id          string  `json:"id"`
 	Amount      float64 `json:"amount"`
@@ -116,7 +117,7 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 // year -> month -> transcation type (expense, income, or investment) -> transaction
 type TransactionHistory map[string]map[string]map[string][]Transaction
 
-// load transactions from storage (db or json)
+// load transactions from storage
 func LoadTransactions() (TransactionHistory, error) {
 	var err error
 	if globalConfig == nil {
@@ -126,9 +127,8 @@ func LoadTransactions() (TransactionHistory, error) {
 		}
 	}
 
+	// previously also supported JSON but was deprecated, leaving the current approach in case I want to extend with other storage options in the future
 	switch globalConfig.StorageType {
-	case StorageJSONFile:
-		return loadTransactionsFromJsonFile()
 	case StorageSQLite:
 		return loadTransactionsFromDb()
 	default:
@@ -136,7 +136,7 @@ func LoadTransactions() (TransactionHistory, error) {
 	}
 }
 
-// load transactions to storage (db or json)
+// load transactions to storage
 func SaveTransactions(transactions TransactionHistory) error {
 	var err error
 	if globalConfig == nil {
@@ -146,9 +146,8 @@ func SaveTransactions(transactions TransactionHistory) error {
 		}
 	}
 
+	// previously also supported JSON but was deprecated, leaving the current approach in case I want to extend with other storage options in the future
 	switch globalConfig.StorageType {
-	case StorageJSONFile:
-		return saveTransactionsToJsonFile(transactions)
 	case StorageSQLite:
 		return saveTransactionsToDb(transactions)
 	default:

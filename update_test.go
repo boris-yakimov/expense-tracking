@@ -12,7 +12,6 @@ func TestHandleUpdateTransaction(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {

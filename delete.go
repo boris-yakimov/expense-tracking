@@ -68,7 +68,7 @@ func formDeleteTransaction(transactionId, transactionType, selectedMonth, select
 	return nil
 }
 
-// handles deleting an existing transaction to storage (db or json)
+// handles deleting an existing transaction to storage
 func handleDeleteTransaction(transactionType, transactionId string) error {
 	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {

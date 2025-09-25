@@ -15,7 +15,6 @@ func TestSetupGracefulShutdown(t *testing.T) {
 	testConfig := &Config{
 		StorageType:       StorageSQLite,
 		UnencryptedDbFile: "test.db",
-		JSONFilePath:      "test.json",
 	}
 
 	// Test that setupGracefulShutdown doesn't panic
@@ -24,18 +23,6 @@ func TestSetupGracefulShutdown(t *testing.T) {
 	// Test that signal handler is set up by sending a signal
 	// Note: This is a basic test - in a real scenario, we'd need to test
 	// the actual signal handling behavior more thoroughly
-}
-
-func TestSetupGracefulShutdownWithJSONStorage(t *testing.T) {
-	// Create a test config with JSON storage
-	testConfig := &Config{
-		StorageType:       StorageJSONFile,
-		UnencryptedDbFile: "test.db",
-		JSONFilePath:      "test.json",
-	}
-
-	// Test that setupGracefulShutdown doesn't panic with JSON storage
-	setupGracefulShutdown(testConfig)
 }
 
 func TestSetupGracefulShutdownWithNilConfig(t *testing.T) {

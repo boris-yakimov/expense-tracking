@@ -219,7 +219,7 @@ func formAddTransaction(currentTableType string) error {
 	return nil
 }
 
-// handles adding a new transaction to storage (db or json)
+// handles adding a new transaction to storage
 func handleAddTransaction(req AddTransactionRequest) error {
 	txType, err := normalizeTransactionType(req.Type)
 	if err != nil {

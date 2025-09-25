@@ -7,14 +7,13 @@ import (
 )
 
 const (
-	StorageJSONFile StorageType = "json"
-	StorageSQLite   StorageType = "sqlite"
+	// previously also supported JSON but was deprecated, leaving the current approach in case I want to extend with other storage options in the future
+	StorageSQLite StorageType = "sqlite"
 
 	defaultExpenseToolDir = ".expense-tracking"
 	defaultUnencryptedDb  = "transactions.db"
 	defaultEncryptedDb    = "transactions.enc"
 	defaultSaltFile       = "transactions.salt"
-	defaultJsonFile       = "transactions.json"
 	defaultLogFile        = "expense-tracking.log"
 
 	// encryption configuration
@@ -29,7 +28,6 @@ const (
 type Config struct {
 	StorageType       StorageType
 	UnencryptedDbFile string
-	JSONFilePath      string
 	LogFilePath       string
 	EncryptedDBFile   string
 	SaltFile          string
@@ -62,7 +60,6 @@ func DefaultConfig() (*Config, error) {
 	// TODO: test if those paths will also work on windows
 	encryptedDbFilePath := filepath.Join(expenseToolDir, defaultEncryptedDb)
 	unencryptedDbFilePath := filepath.Join(expenseToolDir, defaultUnencryptedDb)
-	jsonFilePath := filepath.Join(expenseToolDir, defaultJsonFile)
 	logFilePath := filepath.Join(expenseToolDir, defaultLogFile)
 	saltFilePath := filepath.Join(expenseToolDir, defaultSaltFile)
 
@@ -71,7 +68,6 @@ func DefaultConfig() (*Config, error) {
 		UnencryptedDbFile: unencryptedDbFilePath,
 		EncryptedDBFile:   encryptedDbFilePath,
 		LogFilePath:       logFilePath,
-		JSONFilePath:      jsonFilePath,
 		SaltFile:          saltFilePath,
 	}, nil
 }
@@ -83,18 +79,6 @@ func loadConfigFromEnvVars() (*Config, error) {
 	config, err := DefaultConfig() // sqlite
 	if err != nil {
 		return nil, fmt.Errorf("failed to use default config, err: %w", err)
-	}
-
-	if storageType := os.Getenv("EXPENSE_STORAGE_TYPE"); storageType != "" {
-		if storageType == string(StorageJSONFile) {
-			config.StorageType = StorageJSONFile
-		} else if storageType == string(StorageSQLite) {
-			config.StorageType = StorageSQLite
-		}
-	}
-
-	if jsonPath := os.Getenv("EXPENSE_JSON_PATH"); jsonPath != "" {
-		config.JSONFilePath = jsonPath
 	}
 
 	if encryptedDbFilePath := os.Getenv("EXPENSE_ENCRYPTED_DB_PATH"); encryptedDbFilePath != "" {

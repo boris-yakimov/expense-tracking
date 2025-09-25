@@ -33,9 +33,6 @@ func TestDataIsolation(t *testing.T) {
 		// Test SQLite operations
 		setupTestStorage(t, StorageSQLite)
 
-		// Test JSON operations
-		setupTestStorage(t, StorageJSONFile)
-
 		// Test encryption operations (these now use temporary files)
 		TestEncryptDatabase(t)
 		TestDecryptDatabase(t)
@@ -89,7 +86,7 @@ func TestDataIsolation(t *testing.T) {
 		for _, match := range matches {
 			// Check if this is a test file that should be cleaned up
 			baseName := filepath.Base(match)
-			if baseName != "transactions.db" && baseName != "transactions.json" &&
+			if baseName != "transactions.db" &&
 				baseName != "transactions.enc" && baseName != "transactions.salt" {
 				t.Errorf("Test file left in test_data/ directory: %s", match)
 			}
@@ -103,7 +100,6 @@ func TestNoActualDataModification(t *testing.T) {
 
 	dbFiles := []string{
 		"test_data/transactions.db",
-		"test_data/transactions.json",
 		"test_data/transactions.enc",
 		"test_data/transactions.salt",
 	}
@@ -195,7 +191,6 @@ func TestDatabaseFileProtection(t *testing.T) {
 	// This test runs at the very beginning to ensure no actual database files are touched
 	actualDbFiles := []string{
 		"test_data/transactions.db",
-		"test_data/transactions.json",
 		"test_data/transactions.enc",
 		"test_data/transactions.salt",
 	}
@@ -251,18 +246,6 @@ func TestDatabaseFileProtection(t *testing.T) {
 		TestLoadTransactionsFromDb(t)
 		TestSaveTransactionsToDb(t)
 		TestSaveTransactionsToDbInvalidData(t)
-
-		// Test JSON operations with test storage
-		TestLoadTransactionsFromJsonFile(t)
-		TestSaveTransactionsToJsonFile(t)
-		TestLoadTransactionsFromJsonFileEmptyFile(t)
-		TestLoadTransactionsFromJsonFileInvalidJSON(t)
-
-		// Test migration with test storage
-		TestMigrateJsonToDb(t)
-		TestMigrateJsonToDbEmptyJson(t)
-		TestMigrateJsonToDbInvalidData(t)
-		TestMigrateJsonToDbInvalidMonth(t)
 
 		// Test encryption with test storage
 		TestSetUserPassword(t)
@@ -339,7 +322,6 @@ func TestActualDatabaseFilesNeverAccessed(t *testing.T) {
 
 	actualDbFiles := []string{
 		"test_data/transactions.db",
-		"test_data/transactions.json",
 		"test_data/transactions.enc",
 		"test_data/transactions.salt",
 	}
@@ -366,14 +348,6 @@ func TestActualDatabaseFilesNeverAccessed(t *testing.T) {
 	t.Run("test_storage_operations", func(t *testing.T) {
 		// Test SQLite with test storage
 		setupTestStorage(t, StorageSQLite)
-		TestHandleAddTransaction(t)
-		TestHandleDeleteTransaction(t)
-		TestHandleUpdateTransaction(t)
-		TestCalculateMonthPnL(t)
-		TestCalculateYearPnL(t)
-
-		// Test JSON with test storage
-		setupTestStorage(t, StorageJSONFile)
 		TestHandleAddTransaction(t)
 		TestHandleDeleteTransaction(t)
 		TestHandleUpdateTransaction(t)

@@ -168,7 +168,6 @@ func TestGetListOfDetailedTransactions(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {
@@ -178,10 +177,7 @@ func TestGetListOfDetailedTransactions(t *testing.T) {
 			// Test with empty storage
 			transactions, err := getListOfDetailedTransactions()
 			if err != nil {
-				// For JSON storage, empty files return EOF error, which is expected
-				if tc.storageType == StorageJSONFile && err.Error() != "unable to load transactions file: EOF" {
-					t.Errorf("Expected EOF error with empty JSON storage, got %v", err)
-				} else if tc.storageType == StorageSQLite {
+				if tc.storageType == StorageSQLite {
 					t.Errorf("Expected no error with empty SQLite storage, got %v", err)
 				}
 			}
@@ -232,7 +228,6 @@ func TestGetTransactionTypeById(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {
@@ -320,7 +315,6 @@ func TestGetMonthsWithTransactions(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {
@@ -330,10 +324,7 @@ func TestGetMonthsWithTransactions(t *testing.T) {
 			// Test with empty storage
 			months, err := getMonthsWithTransactions()
 			if err != nil {
-				// For JSON storage, empty files return EOF error, which is expected
-				if tc.storageType == StorageJSONFile && err.Error() != "unable to load transactions file: EOF" {
-					t.Errorf("Expected EOF error with empty JSON storage, got %v", err)
-				} else if tc.storageType == StorageSQLite {
+				if tc.storageType == StorageSQLite {
 					t.Errorf("Expected no error with empty SQLite storage, got %v", err)
 				}
 			}
@@ -393,7 +384,6 @@ func TestDetermineLatestMonthAndYear(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {
@@ -403,10 +393,7 @@ func TestDetermineLatestMonthAndYear(t *testing.T) {
 			// Test with empty storage
 			month, year, err := determineLatestMonthAndYear()
 			if err != nil {
-				// For JSON storage, empty files return EOF error, which is expected
-				if tc.storageType == StorageJSONFile && err.Error() != "unable to load transactions file: EOF" {
-					t.Errorf("Expected EOF error with empty JSON storage, got %v", err)
-				} else if tc.storageType == StorageSQLite {
+				if tc.storageType == StorageSQLite {
 					t.Errorf("Expected no error with empty SQLite storage, got %v", err)
 				}
 			}

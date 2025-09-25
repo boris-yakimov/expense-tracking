@@ -11,7 +11,6 @@ func TestCalculateMonthPnL(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {
@@ -157,7 +156,6 @@ func TestCalculateYearPnL(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {

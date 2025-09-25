@@ -77,14 +77,13 @@ The system is designed so that the database on disk is stored **encrypted**. It 
 
 ## Storage Configuration
 
-The expense tracking tool now supports configurable storage backends. You can choose between SQLite (default) or JSON file storage using environment variables.
+The expense tracking tool now supports configurable storage backends. Primary storage option SQLite (default). Previously a JSON file storage was also supported but is now deprecated.
 
 ### Environment Variables
 
-- `EXPENSE_STORAGE_TYPE`: Set to `"sqlite"` (default) or `"json"`
+- `EXPENSE_STORAGE_TYPE`: Set to `"sqlite"` (default) (previously JSON was supported, but was deprecated)
 - `EXPENSE_UNENCRYPTED_DB_PATH`: Path to unencrypted SQLite database file (default: `"~/.expense-tracking/transactions.db"`)
 - `EXPENSE_ENCRYPTED_DB_PATH`: Path to encrypted database file (default: `"~/.expense-tracking/transactions.enc"`)
-- `EXPENSE_JSON_PATH`: Path to JSON file (default: `"~/.expense-tracking/transactions.json"`)
 - `EXPENSE_LOG_PATH`: Path to log file (default: `"~/.expense-tracking/expense-tracking.log"`)
 - `EXPENSE_SALT_PATH`: Path to salt file (default: `"~/.expense-tracking/transactions.salt"`)
 
@@ -95,28 +94,7 @@ The expense tracking tool now supports configurable storage backends. You can ch
 ./expense-tracker
 ```
 
-**Use JSON storage:**
-```bash
-EXPENSE_STORAGE_TYPE=json ./expense-tracker
-```
-
 **Use custom SQLite path:**
 ```bash
 EXPENSE_UNENCRYPTED_DB_PATH=/path/to/my/database.db ./expense-tracker
 ```
-
-TODO: json option is to be re-evaluated in the future, I am not sure i should maintain this as an option at all, SQLite seems the better approach and currently encryption is only handled for sqlite storage
-**Use custom JSON path:**
-```bash
-EXPENSE_STORAGE_TYPE=json EXPENSE_JSON_PATH=/path/to/my/data.json ./expense-tracker
-```
-
-### Migration
-
-To migrate data from JSON to SQLite, set the `MIGRATE_TRANSACTION_DATA=true` environment variable:
-
-```bash
-MIGRATE_TRANSACTION_DATA=true ./expense-tracker
-```
-
-**Note:** Migration only works when using SQLite storage and will load data from the configured JSON file path.

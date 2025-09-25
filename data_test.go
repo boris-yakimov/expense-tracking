@@ -11,7 +11,6 @@ func TestLoadTransactions(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {
@@ -71,37 +70,16 @@ func TestConfigSystem(t *testing.T) {
 	if config.UnencryptedDbFile != "test_data/transactions.db" {
 		t.Errorf("Expected default SQLite path to be 'test_data/transactions.db', got %s", config.UnencryptedDbFile)
 	}
-	if config.JSONFilePath != "test_data/transactions.json" {
-		t.Errorf("Expected default JSON path to be 'test_data/transactions.json', got %s", config.JSONFilePath)
-	}
 
-	// Test loading config from environment
-	os.Setenv("EXPENSE_STORAGE_TYPE", "json")
-	os.Setenv("EXPENSE_JSON_PATH", "test.json")
 	defer func() {
 		os.Unsetenv("EXPENSE_STORAGE_TYPE")
-		os.Unsetenv("EXPENSE_JSON_PATH")
 	}()
-
-	envConfig, err := loadConfigFromEnvVars()
-	if err != nil {
-		t.Errorf("Failed to load config from env var, err %v", err)
-	}
-
-	if envConfig.StorageType != StorageJSONFile {
-		t.Errorf("Expected storage type from env to be JSON, got %s", envConfig.StorageType)
-	}
-	if envConfig.JSONFilePath != "test.json" {
-		t.Errorf("Expected JSON path from env to be 'test.json', got %s", envConfig.JSONFilePath)
-	}
 }
 
 func TestSetGlobalConfig(t *testing.T) {
 	// Test setting global config
 	testConfig := &Config{
-		StorageType:       StorageJSONFile,
 		UnencryptedDbFile: "test.db",
-		JSONFilePath:      "test.json",
 	}
 
 	SetGlobalConfig(testConfig)
@@ -137,19 +115,9 @@ func TestLoadConfigFromEnvVars(t *testing.T) {
 		t.Errorf("Expected SQLite path to be 'custom.db', got %s", config.UnencryptedDbFile)
 	}
 
-	// Test with JSON environment variables
-	os.Setenv("EXPENSE_STORAGE_TYPE", "json")
-	os.Setenv("EXPENSE_JSON_PATH", "custom.json")
-
 	config, err = loadConfigFromEnvVars()
 	if err != nil {
 		t.Errorf("Failed to load config from env var, err %v", err)
-	}
-	if config.StorageType != StorageJSONFile {
-		t.Errorf("Expected storage type to be JSON, got %s", config.StorageType)
-	}
-	if config.JSONFilePath != "custom.json" {
-		t.Errorf("Expected JSON path to be 'custom.json', got %s", config.JSONFilePath)
 	}
 
 	// Test with invalid storage type
@@ -169,7 +137,6 @@ func TestSaveTransactions(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {
@@ -210,7 +177,6 @@ func TestCreateTransactionsTable(t *testing.T) {
 		storageType StorageType
 	}{
 		{"SQLite", StorageSQLite},
-		{"JSON", StorageJSONFile},
 	}
 
 	for _, tc := range testCases {

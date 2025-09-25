@@ -3,7 +3,6 @@ package main
 import (
 	"crypto/sha256"
 	"database/sql"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -15,10 +14,9 @@ import (
 )
 
 var testDb *sql.DB
-var testJSONFilePath string
 var originalConfig *Config
 
-// setupTestStorage creates temporary storage for testing (either SQLite or JSON)
+// setupTestStorage creates temporary storage for testing
 func setupTestStorage(t *testing.T, storageType StorageType) {
 	// Save original config
 	originalConfig = globalConfig
@@ -26,8 +24,6 @@ func setupTestStorage(t *testing.T, storageType StorageType) {
 	switch storageType {
 	case StorageSQLite:
 		setupTestDb(t)
-	case StorageJSONFile:
-		setupTestJSON(t)
 	default:
 		t.Fatalf("Unsupported storage type for testing: %s", storageType)
 	}
@@ -78,7 +74,6 @@ func setupTestDb(t *testing.T) {
 	testConfig := &Config{
 		StorageType:       StorageSQLite,
 		UnencryptedDbFile: testDbFilePath,
-		JSONFilePath:      "",
 	}
 	SetGlobalConfig(testConfig)
 
@@ -95,38 +90,11 @@ func setupTestDb(t *testing.T) {
 	})
 }
 
-// setupTestJSON creates a temporary JSON file for testing
-func setupTestJSON(t *testing.T) {
-	// Create temporary JSON file
-	tmpJSONFile, err := os.CreateTemp("", "test_transactions_*.json")
-	if err != nil {
-		t.Fatalf("Failed to create temp JSON file: %v", err)
-	}
-	testJSONFilePath = tmpJSONFile.Name()
-	tmpJSONFile.Close()
-
-	// Set up test config for JSON
-	testConfig := &Config{
-		StorageType:       StorageJSONFile,
-		UnencryptedDbFile: "",
-		JSONFilePath:      testJSONFilePath,
-	}
-	SetGlobalConfig(testConfig)
-
-	// Clean up function
-	t.Cleanup(func() {
-		os.Remove(testJSONFilePath)
-		SetGlobalConfig(originalConfig)
-	})
-}
-
-// loadTransactionsFromTestStorage loads transactions from the current test storage (SQLite or JSON)
+// loadTransactionsFromTestStorage loads transactions from the current test storage
 func loadTransactionsFromTestStorage() (TransactionHistory, error) {
 	switch globalConfig.StorageType {
 	case StorageSQLite:
 		return loadTransactionsFromTestDb()
-	case StorageJSONFile:
-		return loadTransactionsFromTestJSON()
 	default:
 		return nil, fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 	}
@@ -180,37 +148,11 @@ func loadTransactionsFromTestDb() (TransactionHistory, error) {
 	return transactions, nil
 }
 
-// loadTransactionsFromTestJSON loads transactions from the test JSON file
-func loadTransactionsFromTestJSON() (TransactionHistory, error) {
-	file, err := os.Open(testJSONFilePath)
-	if os.IsNotExist(err) {
-		return make(TransactionHistory), nil
-	}
-	if err != nil {
-		return nil, err
-	}
-	defer file.Close()
-
-	var transactions TransactionHistory
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&transactions)
-	if err != nil {
-		// If the file exists but is empty or has EOF, return empty transactions
-		if err.Error() == "EOF" {
-			return make(TransactionHistory), nil
-		}
-		return nil, err
-	}
-	return transactions, nil
-}
-
-// saveTransactionsToTestStorage saves transactions to the current test storage (SQLite or JSON)
+// saveTransactionsToTestStorage saves transactions to the current test storage
 func saveTransactionsToTestStorage(transactions TransactionHistory) error {
 	switch globalConfig.StorageType {
 	case StorageSQLite:
 		return saveTransactionsToTestDb(transactions)
-	case StorageJSONFile:
-		return saveTransactionsToTestJSON(transactions)
 	default:
 		return fmt.Errorf("unsupported storage type for testing: %s", globalConfig.StorageType)
 	}
@@ -275,19 +217,6 @@ func saveTransactionsToTestDb(transactions TransactionHistory) error {
 	}
 
 	return nil
-}
-
-// saveTransactionsToTestJSON saves transactions to the test JSON file
-func saveTransactionsToTestJSON(transactions TransactionHistory) error {
-	file, err := os.Create(testJSONFilePath)
-	if err != nil {
-		return err
-	}
-	defer file.Close()
-
-	encoder := json.NewEncoder(file)
-	encoder.SetIndent("", "  ")
-	return encoder.Encode(transactions)
 }
 
 // setupTestEncryption creates temporary directories for encryption testing

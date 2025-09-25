@@ -30,17 +30,11 @@ func main() {
 		os.Exit(1)
 	}
 
-	// TODO: maybe if debug mode enabledd then logs can also be sent to stdout
-	// log.SetOutput(io.MultiWriter(os.Stdout, logFile))
 	log.SetOutput(io.MultiWriter(logFile))
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // timestamps + file:line info
 
 	// set up graceful shutdown handler to make sure database re-encryption happens even if the tui gets killed
 	setupGracefulShutdown(config)
-
-	// TODO: path to database file and log should be configurable
-	// TODO: update all places where we do a print or error modal, or success modal, etc to generate an event in the log as well
-	// TODO: evaluate option to either keep and encrypt JSON or remove the JSON option altogether
 
 	tui = tview.NewApplication()
 	tui.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
