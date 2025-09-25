@@ -82,8 +82,11 @@ The expense tracking tool now supports configurable storage backends. You can ch
 ### Environment Variables
 
 - `EXPENSE_STORAGE_TYPE`: Set to `"sqlite"` (default) or `"json"`
-- `EXPENSE_SQLITE_PATH`: Path to SQLite database file (default: `"db/transactions.db"`)
-- `EXPENSE_JSON_PATH`: Path to JSON file (default: `"db/transactions.json"`)
+- `EXPENSE_UNENCRYPTED_DB_PATH`: Path to unencrypted SQLite database file (default: `"~/.expense-tracking/transactions.db"`)
+- `EXPENSE_ENCRYPTED_DB_PATH`: Path to encrypted database file (default: `"~/.expense-tracking/transactions.enc"`)
+- `EXPENSE_JSON_PATH`: Path to JSON file (default: `"~/.expense-tracking/transactions.json"`)
+- `EXPENSE_LOG_PATH`: Path to log file (default: `"~/.expense-tracking/expense-tracking.log"`)
+- `EXPENSE_SALT_PATH`: Path to salt file (default: `"~/.expense-tracking/transactions.salt"`)
 
 ### Usage Examples
 
@@ -99,7 +102,7 @@ EXPENSE_STORAGE_TYPE=json ./expense-tracker
 
 **Use custom SQLite path:**
 ```bash
-EXPENSE_SQLITE_PATH=/path/to/my/database.db ./expense-tracker
+EXPENSE_UNENCRYPTED_DB_PATH=/path/to/my/database.db ./expense-tracker
 ```
 
 TODO: json option is to be re-evaluated in the future, I am not sure i should maintain this as an option at all, SQLite seems the better approach and currently encryption is only handled for sqlite storage

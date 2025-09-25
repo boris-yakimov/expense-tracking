@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/gdamore/tcell/v2"
+	"github.com/rivo/tview"
 )
 
 // helper to handle vim-like motions when navigating the TUI - h, j, k, l
@@ -30,4 +31,27 @@ func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 		return nil                        // key event consumed
 	}
 	return event
+}
+
+// handle wrap around for table navigation (i.e. when last transaction reached wrap around to top)
+func enableTableWrap(table *tview.Table) {
+	table.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		row, col := table.GetSelection()
+		rowCount := table.GetRowCount()
+
+		switch event.Key() {
+		case tcell.KeyDown:
+			if row == rowCount-1 { // at last row
+				table.Select(0, col) // wrap to top
+				return nil           // consume key event
+			}
+		case tcell.KeyUp:
+			if row == 0 {
+				table.Select(rowCount-1, col) // wrap to bottom
+				return nil                    // consume key event
+			}
+		}
+
+		return event
+	})
 }

@@ -123,6 +123,11 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 	expenseTable := styleTable(createTransactionsTable("expense", displayMonth, displayYear, transactions))
 	investmentTable := styleTable(createTransactionsTable("investment", displayMonth, displayYear, transactions))
 
+	// handle wrap around for table navigation (i.e. when last transaction reached wrap around to top)
+	enableTableWrap(incomeTable)
+	enableTableWrap(expenseTable)
+	enableTableWrap(investmentTable)
+
 	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
 	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
 	helpLeftFooter := tview.NewTextView().
