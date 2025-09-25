@@ -59,6 +59,13 @@ func TestLoadTransactions(t *testing.T) {
 }
 
 func TestConfigSystem(t *testing.T) {
+	// Set HOME for test environment
+	originalHome := os.Getenv("HOME")
+	defer os.Setenv("HOME", originalHome)
+	testHome := "/tmp/test_home"
+	os.Setenv("HOME", testHome)
+	os.MkdirAll(testHome, 0755)
+
 	// Test default config
 	config, err := DefaultConfig()
 	if err != nil {
@@ -67,8 +74,9 @@ func TestConfigSystem(t *testing.T) {
 	if config.StorageType != StorageSQLite {
 		t.Errorf("Expected default storage type to be SQLite, got %s", config.StorageType)
 	}
-	if config.UnencryptedDbFile != "test_data/transactions.db" {
-		t.Errorf("Expected default SQLite path to be 'test_data/transactions.db', got %s", config.UnencryptedDbFile)
+	expectedPath := "/tmp/test_home/.expense-tracking/transactions.db"
+	if config.UnencryptedDbFile != expectedPath {
+		t.Errorf("Expected default SQLite path to be '%s', got %s", expectedPath, config.UnencryptedDbFile)
 	}
 
 	defer func() {
@@ -91,6 +99,10 @@ func TestSetGlobalConfig(t *testing.T) {
 func TestLoadConfigFromEnvVars(t *testing.T) {
 	// Test with no environment variables
 	os.Clearenv()
+	// Set HOME for test
+	testHome := "/tmp/test_home"
+	os.Setenv("HOME", testHome)
+	os.MkdirAll(testHome, 0755)
 	config, err := loadConfigFromEnvVars()
 	if err != nil {
 		t.Errorf("Failed to load config from env var, err %v", err)
@@ -101,7 +113,7 @@ func TestLoadConfigFromEnvVars(t *testing.T) {
 
 	// Test with SQLite environment variables
 	os.Setenv("EXPENSE_STORAGE_TYPE", "sqlite")
-	os.Setenv("EXPENSE_SQLITE_PATH", "custom.db")
+	os.Setenv("EXPENSE_UNENCRYPTED_DB_PATH", "custom.db")
 	defer os.Clearenv()
 
 	config, err = loadConfigFromEnvVars()

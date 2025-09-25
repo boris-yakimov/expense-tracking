@@ -62,6 +62,13 @@ func TestMainFunctionDependencies(t *testing.T) {
 	// This is a basic test to ensure the main function can be called
 	// without panicking due to missing dependencies
 
+	// Set HOME for test
+	originalHome := os.Getenv("HOME")
+	defer os.Setenv("HOME", originalHome)
+	testHome := "/tmp/test_home"
+	os.Setenv("HOME", testHome)
+	os.MkdirAll(testHome, 0755)
+
 	// Test loadConfigFromEnvVars
 	config, err := loadConfigFromEnvVars()
 	if err != nil {

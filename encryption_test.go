@@ -77,6 +77,22 @@ func TestLoadSaltNotFound(t *testing.T) {
 }
 
 func TestGetOrCreateSalt(t *testing.T) {
+	// Set up test config
+	originalConfig := globalConfig
+	defer SetGlobalConfig(originalConfig)
+
+	tmpDir, err := os.MkdirTemp("", "test_salt_*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	testSaltFile := tmpDir + "/test_salt"
+	testConfig := &Config{
+		SaltFile: testSaltFile,
+	}
+	SetGlobalConfig(testConfig)
+
 	// Test creating new salt
 	salt, err := getOrCreateSalt()
 	if err != nil {
@@ -97,8 +113,24 @@ func TestGetOrCreateSalt(t *testing.T) {
 }
 
 func TestDeriveEncryptionKey(t *testing.T) {
+	// Set up test config
+	originalConfig := globalConfig
+	defer SetGlobalConfig(originalConfig)
+
+	tmpDir, err := os.MkdirTemp("", "test_salt_*")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	testSaltFile := tmpDir + "/test_salt"
+	testConfig := &Config{
+		SaltFile: testSaltFile,
+	}
+	SetGlobalConfig(testConfig)
+
 	// Test deriving key with empty password
-	_, err := deriveEncryptionKey("")
+	_, err = deriveEncryptionKey("")
 	if err == nil {
 		t.Errorf("Expected error with empty password")
 	}
