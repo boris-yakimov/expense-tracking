@@ -65,11 +65,11 @@ func main() {
 	if config.StorageType == StorageSQLite {
 		closeDb()
 		if userPassword != "" {
-			if err := encryptDatabase(config.SQLitePath); err != nil {
+			if err := encryptDatabase(config.UnencryptedDbFile); err != nil {
 				log.Printf("failed to encrypt database on shutdown: %s\n", err)
 			} else {
 				// remove unencrypted database file after successful encryption
-				if err := os.Remove(config.SQLitePath); err != nil {
+				if err := os.Remove(config.UnencryptedDbFile); err != nil {
 					log.Printf("warning: failed to remove plaintext database: %s\n", err)
 				}
 			}
@@ -92,11 +92,11 @@ func setupGracefulShutdown(config *Config) {
 		if config.StorageType == StorageSQLite {
 			closeDb()
 			if userPassword != "" {
-				if err := encryptDatabase(config.SQLitePath); err != nil {
+				if err := encryptDatabase(config.UnencryptedDbFile); err != nil {
 					log.Printf("failed to encrypt database on shutdown: %s\n", err)
 				} else {
 					// remove unencrypted database file after successful encryption
-					if err := os.Remove(config.SQLitePath); err != nil {
+					if err := os.Remove(config.UnencryptedDbFile); err != nil {
 						log.Printf("warning: failed to remove plaintext database: %s\n", err)
 					}
 				}

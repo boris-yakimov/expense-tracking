@@ -40,7 +40,7 @@ func loginForm() error {
 			// if encrypted file exists, decrypt with provided password
 			if _, err := os.Stat(globalConfig.EncryptedDBFile); err == nil {
 
-				if err := decryptDatabase(globalConfig.SQLitePath); err != nil {
+				if err := decryptDatabase(globalConfig.UnencryptedDbFile); err != nil {
 
 					if errors.Is(err, ErrWrongPassword) {
 						// wrong password, stay on login prompt
@@ -59,7 +59,7 @@ func loginForm() error {
 			}
 
 			// initialize DB connection now that the DB is decrypted or already plaintext
-			if err := initDb(globalConfig.SQLitePath); err != nil {
+			if err := initDb(globalConfig.UnencryptedDbFile); err != nil {
 				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), centeredModal, passwordInputField)
 				log.Printf("failed to initialize DB: %s\n", err)
 				clearUserPassword() // remove pass from memory on error
@@ -168,7 +168,7 @@ func setNewPasswordForm() {
 				}
 
 				// proceed directly to app using the newly set in-memory password
-				if err := initDb(globalConfig.SQLitePath); err != nil {
+				if err := initDb(globalConfig.UnencryptedDbFile); err != nil {
 					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), centeredModal, passwordInputField)
 					log.Printf("failed to initialize DB: %s\n", err)
 					clearUserPassword() // remove pass from memory on error

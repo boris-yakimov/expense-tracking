@@ -27,12 +27,12 @@ const (
 )
 
 type Config struct {
-	StorageType     StorageType
-	SQLitePath      string
-	JSONFilePath    string
-	LogFilePath     string
-	EncryptedDBFile string
-	SaltFile        string
+	StorageType       StorageType
+	UnencryptedDbFile string
+	JSONFilePath      string
+	LogFilePath       string
+	EncryptedDBFile   string
+	SaltFile          string
 }
 
 func SetGlobalConfig(config *Config) {
@@ -67,12 +67,12 @@ func DefaultConfig() (*Config, error) {
 	saltFilePath := filepath.Join(expenseToolDir, defaultSaltFile)
 
 	return &Config{
-		StorageType:     StorageSQLite,
-		SQLitePath:      unencryptedDbFilePath,
-		EncryptedDBFile: encryptedDbFilePath,
-		LogFilePath:     logFilePath,
-		JSONFilePath:    jsonFilePath,
-		SaltFile:        saltFilePath,
+		StorageType:       StorageSQLite,
+		UnencryptedDbFile: unencryptedDbFilePath,
+		EncryptedDBFile:   encryptedDbFilePath,
+		LogFilePath:       logFilePath,
+		JSONFilePath:      jsonFilePath,
+		SaltFile:          saltFilePath,
 	}, nil
 }
 
@@ -93,15 +93,25 @@ func loadConfigFromEnvVars() (*Config, error) {
 		}
 	}
 
-	if sqlitePath := os.Getenv("EXPENSE_SQLITE_PATH"); sqlitePath != "" {
-		config.SQLitePath = sqlitePath
-	}
-
 	if jsonPath := os.Getenv("EXPENSE_JSON_PATH"); jsonPath != "" {
 		config.JSONFilePath = jsonPath
 	}
 
-	// TODO: option for the user to select path for salt, .enc, .db (temp file), log
+	if encryptedDbFilePath := os.Getenv("EXPENSE_ENCRYPTED_DB_PATH"); encryptedDbFilePath != "" {
+		config.EncryptedDBFile = encryptedDbFilePath
+	}
+
+	if unencryptedDbFilePath := os.Getenv("EXPENSE_UNENCRYPTED_DB_PATH"); unencryptedDbFilePath != "" {
+		config.UnencryptedDbFile = unencryptedDbFilePath
+	}
+
+	if logFilePath := os.Getenv("EXPENSE_LOG_PATH"); logFilePath != "" {
+		config.LogFilePath = logFilePath
+	}
+
+	if saltFilePath := os.Getenv("EXPENSE_SALT_PATH"); saltFilePath != "" {
+		config.SaltFile = saltFilePath
+	}
 
 	return config, nil
 }

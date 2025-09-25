@@ -13,9 +13,9 @@ import (
 func TestSetupGracefulShutdown(t *testing.T) {
 	// Create a test config
 	testConfig := &Config{
-		StorageType:  StorageSQLite,
-		SQLitePath:   "test.db",
-		JSONFilePath: "test.json",
+		StorageType:       StorageSQLite,
+		UnencryptedDbFile: "test.db",
+		JSONFilePath:      "test.json",
 	}
 
 	// Test that setupGracefulShutdown doesn't panic
@@ -29,9 +29,9 @@ func TestSetupGracefulShutdown(t *testing.T) {
 func TestSetupGracefulShutdownWithJSONStorage(t *testing.T) {
 	// Create a test config with JSON storage
 	testConfig := &Config{
-		StorageType:  StorageJSONFile,
-		SQLitePath:   "test.db",
-		JSONFilePath: "test.json",
+		StorageType:       StorageJSONFile,
+		UnencryptedDbFile: "test.db",
+		JSONFilePath:      "test.json",
 	}
 
 	// Test that setupGracefulShutdown doesn't panic with JSON storage

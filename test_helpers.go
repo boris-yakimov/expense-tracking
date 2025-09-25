@@ -76,9 +76,9 @@ func setupTestDb(t *testing.T) {
 
 	// Set up test config for SQLite
 	testConfig := &Config{
-		StorageType:  StorageSQLite,
-		SQLitePath:   testDbFilePath,
-		JSONFilePath: "",
+		StorageType:       StorageSQLite,
+		UnencryptedDbFile: testDbFilePath,
+		JSONFilePath:      "",
 	}
 	SetGlobalConfig(testConfig)
 
@@ -107,9 +107,9 @@ func setupTestJSON(t *testing.T) {
 
 	// Set up test config for JSON
 	testConfig := &Config{
-		StorageType:  StorageJSONFile,
-		SQLitePath:   "",
-		JSONFilePath: testJSONFilePath,
+		StorageType:       StorageJSONFile,
+		UnencryptedDbFile: "",
+		JSONFilePath:      testJSONFilePath,
 	}
 	SetGlobalConfig(testConfig)
 

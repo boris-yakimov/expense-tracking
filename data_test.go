@@ -68,8 +68,8 @@ func TestConfigSystem(t *testing.T) {
 	if config.StorageType != StorageSQLite {
 		t.Errorf("Expected default storage type to be SQLite, got %s", config.StorageType)
 	}
-	if config.SQLitePath != "test_data/transactions.db" {
-		t.Errorf("Expected default SQLite path to be 'test_data/transactions.db', got %s", config.SQLitePath)
+	if config.UnencryptedDbFile != "test_data/transactions.db" {
+		t.Errorf("Expected default SQLite path to be 'test_data/transactions.db', got %s", config.UnencryptedDbFile)
 	}
 	if config.JSONFilePath != "test_data/transactions.json" {
 		t.Errorf("Expected default JSON path to be 'test_data/transactions.json', got %s", config.JSONFilePath)
@@ -99,9 +99,9 @@ func TestConfigSystem(t *testing.T) {
 func TestSetGlobalConfig(t *testing.T) {
 	// Test setting global config
 	testConfig := &Config{
-		StorageType:  StorageJSONFile,
-		SQLitePath:   "test.db",
-		JSONFilePath: "test.json",
+		StorageType:       StorageJSONFile,
+		UnencryptedDbFile: "test.db",
+		JSONFilePath:      "test.json",
 	}
 
 	SetGlobalConfig(testConfig)
@@ -133,8 +133,8 @@ func TestLoadConfigFromEnvVars(t *testing.T) {
 	if config.StorageType != StorageSQLite {
 		t.Errorf("Expected storage type to be SQLite, got %s", config.StorageType)
 	}
-	if config.SQLitePath != "custom.db" {
-		t.Errorf("Expected SQLite path to be 'custom.db', got %s", config.SQLitePath)
+	if config.UnencryptedDbFile != "custom.db" {
+		t.Errorf("Expected SQLite path to be 'custom.db', got %s", config.UnencryptedDbFile)
 	}
 
 	// Test with JSON environment variables
