@@ -25,12 +25,17 @@ func vimMotions(event *tcell.EventKey) *tcell.EventKey {
 }
 
 // helper to handle exit events - ESC, q, Q
-func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
-	if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-		gridVisualizeTransactions("", "") // go back to list of transactions
-		return nil                        // key event consumed
+// returns a closure function around the scope of month, year that were passed
+// the TUI will actually call the returned function when a key is pressed
+// it is defined in this way because the form.SetInputCapture() expects a function as an arugment
+func exitShortcuts(selectedMonth, selectedYear string) func(event *tcell.EventKey) *tcell.EventKey {
+	return func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to the list of transactions (at the same month and year from where we came)
+			return nil                                             // key event consumed
+		}
+		return event // key event not consumed, so return it
 	}
-	return event
 }
 
 // handle wrap around for table navigation (i.e. when last transaction reached wrap around to top)

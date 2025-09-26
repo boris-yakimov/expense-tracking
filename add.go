@@ -151,8 +151,6 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 		periodDropdown.SetInputCapture(vimMotions)
 	}
 
-	// TODO: opening the add form window we always get the latest month as the default selection
-	// it will be better if the atuomatically selected month and year matches the month that we came from when we pressed 'a'
 	form = styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).
 		AddFormItem(amountField).
@@ -212,7 +210,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to list of transactions on ESC or q key press
-	form.SetInputCapture(exitShortcuts)
+	form.SetInputCapture(exitShortcuts(selectedMonth, selectedYear))
 
 	// center the modal
 	modal := styleFlex(tview.NewFlex().
