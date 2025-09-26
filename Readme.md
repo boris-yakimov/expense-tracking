@@ -11,6 +11,7 @@ Or directly download the latest release in your terminal
 
 Linux x86  
 ```sh
+# download latest release
 wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
   | grep "browser_download_url" \
   | grep "expense-tracking-linux-amd64" \
@@ -24,6 +25,7 @@ chmod +x expense-tracking-linux-amd64
 
 Linux ARM  
 ```sh
+# download latest release
 wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
   | grep "browser_download_url" \
   | grep "expense-tracking-linux-arm64" \
@@ -39,11 +41,16 @@ Windows
 Download a release and just run the .exe {not shady at all :)}
 or via powershell  
 ```posh
+# Download the latest release ZIP for Windows amd64
 Invoke-RestMethod -Uri "https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest" `
   | Select-Object -ExpandProperty assets `
-  | Where-Object { $_.name -like "*windows-amd64.exe" } `
-  | ForEach-Object { Invoke-WebRequest $_.browser_download_url -OutFile "expense-tracking-windows-amd64.exe" }
+  | Where-Object { $_.name -like "*windows-amd64.zip" } `
+  | ForEach-Object { Invoke-WebRequest $_.browser_download_url -OutFile "expense-tracking-windows-amd64.zip" }
 
+# Extract the ZIP
+Expand-Archive -Path "expense-tracking-windows-amd64.zip" -DestinationPath "." -Force
+
+# Run the executable (assumes it's now in the current folder)
 .\expense-tracking-windows-amd64.exe
 ```
 
