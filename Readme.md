@@ -7,8 +7,9 @@ Track your expenses in the terminal
 
 Download a release from https://github.com/boris-yakimov/expense-tracking/releases  
 
-Or directly download the latest release in your terminal
-Linux x86
+Or directly download the latest release in your terminal  
+
+Linux x86  
 ```sh
 wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
   | grep "browser_download_url" \
@@ -18,13 +19,10 @@ wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/l
 
 chmod +x expense-tracking-linux-amd64 
 
-# TODO: to make the db location configurable
-mkdir db/
-# TODO: steps to add PATH 
 ./expense-tracking-linux-amd64
 ```
 
-Linux ARM
+Linux ARM  
 ```sh
 wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest \
   | grep "browser_download_url" \
@@ -34,15 +32,20 @@ wget -qO- https://api.github.com/repos/boris-yakimov/expense-tracking/releases/l
 
 chmod +x expense-tracking-linux-arm64 
 
-# TODO: to make the db location configurable
-mkdir db/
-# TODO: steps to add PATH 
 ./expense-tracking-linux-arm64
 ```
 
 Windows  
-TODO: powershell  
-TODO: cmd  
+Download a release and just run the .exe {not shady at all :)}
+```posh
+Invoke-RestMethod -Uri "https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest" `
+  | Select-Object -ExpandProperty assets `
+  | Where-Object { $_.name -like "*windows-amd64.exe" } `
+  | ForEach-Object { Invoke-WebRequest $_.browser_download_url -OutFile "expense-tracking-windows-amd64.exe" }
+
+.\expense-tracking-windows-amd64.exe
+```
+
 
 ## Authentication & Encryption Overview
 
@@ -97,4 +100,31 @@ The expense tracking tool now supports configurable storage backends. Primary st
 **Use custom SQLite path:**
 ```bash
 EXPENSE_UNENCRYPTED_DB_PATH=/path/to/my/database.db ./expense-tracker
+```
+
+
+## Compile source
+
+Dependencies
+```
+sudo apt install gcc-aarch64-linux-gnu
+sudo apt install gcc-mingw-w64
+```
+
+Compile
+```
+make compile
+
+~/repos/expense-tracking main !1 ❯ make compile
+rm -f bin/expense-tracking-*
+env GOOS=linux GOARCH=amd64 CGO_ENABLED=1 go build -o bin/expense-tracking-linux-amd64 .
+# requires ARM cross compiler to be installed - sudo apt install gcc-aarch64-linux-gnu
+env GOOS=linux GOARCH=arm64 CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc go build -o bin/expense-tracking-linux-arm64 .
+# requires MinGW cross compiler to be installed - sudo apt install gcc-mingw-w64
+env GOOS=windows GOARCH=amd64 CGO_ENABLED=1 CC=x86_64-w64-mingw32-gcc go build -o bin/expense-tracking-windows-amd64.exe .
+
+ls -lah bin/
+-rwxrwxr-x 1 boris boris 9.3M Sep 26 11:21 expense-tracking-linux-amd64
+-rwxrwxr-x 1 boris boris 8.9M Sep 26 11:21 expense-tracking-linux-arm64
+-rwxrwxr-x 1 boris boris  17M Sep 26 11:21 expense-tracking-windows-amd64.exe
 ```

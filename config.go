@@ -45,7 +45,6 @@ func DefaultConfig() (*Config, error) {
 		return nil, fmt.Errorf("error getting user's home directory: %w", err)
 	}
 
-	// TODO: test if those paths will also work on windows
 	expenseToolDir := filepath.Join(homeDir, defaultExpenseToolDir)
 	if _, err := os.Stat(expenseToolDir); err != nil {
 		if os.IsNotExist(err) { // directory doesn't exist, create it
@@ -57,7 +56,6 @@ func DefaultConfig() (*Config, error) {
 		}
 	}
 
-	// TODO: test if those paths will also work on windows
 	encryptedDbFilePath := filepath.Join(expenseToolDir, defaultEncryptedDb)
 	unencryptedDbFilePath := filepath.Join(expenseToolDir, defaultUnencryptedDb)
 	logFilePath := filepath.Join(expenseToolDir, defaultLogFile)
