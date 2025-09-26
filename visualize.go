@@ -213,7 +213,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 			case 2:
 				currentTableType = "investment"
 			}
-			if err := formAddTransaction(currentTableType); err != nil {
+			if err := formAddTransaction(currentTableType, displayMonth, displayYear); err != nil {
 				showErrorModal(fmt.Sprintf("add error:\n\n%s", err), nil, grid)
 				return nil
 			}

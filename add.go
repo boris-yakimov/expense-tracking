@@ -23,7 +23,7 @@ type AddTransactionRequest struct {
 }
 
 // creates a TUI form with required fiields to add a new transaction
-func formAddTransaction(currentTableType string) error {
+func formAddTransaction(currentTableType, selectedMonth, selectedYear string) error {
 	var transactionType string
 	var category string
 	var categoryDropdown *tview.DropDown
@@ -135,10 +135,21 @@ func formAddTransaction(currentTableType string) error {
 			monthAndYear = selectedOption
 		})
 
+		//pre-select the month that we came from when we initiated formAddTransaction()
+		prefillIndex := 0
+		for i, period := range opts {
+			if period == fmt.Sprintf("%s %s", selectedMonth, selectedYear) {
+				prefillIndex = i
+				monthAndYear = period
+				break
+			}
+		}
+
+		periodDropdown.SetCurrentOption(prefillIndex)
+
 		// j/k navigation inside dropdown
 		periodDropdown.SetInputCapture(vimMotions)
 	}
-	periodDropdown.SetCurrentOption(0)
 
 	// TODO: opening the add form window we always get the latest month as the default selection
 	// it will be better if the atuomatically selected month and year matches the month that we came from when we pressed 'a'
@@ -191,17 +202,7 @@ func formAddTransaction(currentTableType string) error {
 			transactionType = "expense"
 		}).
 		AddButton("Cancel", func() {
-			_, opt := periodDropdown.GetCurrentOption()
-			if opt == "" { // fallback to current system month/year
-				now := time.Now()
-				opt = fmt.Sprintf("%s %d", strings.ToLower(now.Month().String()), now.Year())
-			}
-			parts := strings.SplitN(opt, " ", 2)
-			if len(parts) == 2 {
-				gridVisualizeTransactions(parts[0], parts[1]) // go back to the same month that you initiated add from
-			} else {
-				gridVisualizeTransactions("", "") // fallback, should not happen but added just in case
-			}
+			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
 		}))
 
 	form.SetBorder(true).SetTitle("Add Transaction").SetTitleAlign(tview.AlignCenter)
