@@ -123,8 +123,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 			descriptionField.SetText("")
 		}).
 		AddButton("Cancel", func() {
-			// TODO: check all places where we pass nothing, like we do here, if that is expected
-			gridVisualizeTransactions("", "") // go back to list of transactions
+			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to list of transactions
 		}))
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)

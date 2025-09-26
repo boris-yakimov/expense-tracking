@@ -191,7 +191,17 @@ func formAddTransaction(currentTableType string) error {
 			transactionType = "expense"
 		}).
 		AddButton("Cancel", func() {
-			gridVisualizeTransactions("", "") // go back to list of transactions
+			_, opt := periodDropdown.GetCurrentOption()
+			if opt == "" { // fallback to current system month/year
+				now := time.Now()
+				opt = fmt.Sprintf("%s %d", strings.ToLower(now.Month().String()), now.Year())
+			}
+			parts := strings.SplitN(opt, " ", 2)
+			if len(parts) == 2 {
+				gridVisualizeTransactions(parts[0], parts[1]) // go back to the same month that you initiated add from
+			} else {
+				gridVisualizeTransactions("", "") // fallback, should not happen but added just in case
+			}
 		}))
 
 	form.SetBorder(true).SetTitle("Add Transaction").SetTitleAlign(tview.AlignCenter)

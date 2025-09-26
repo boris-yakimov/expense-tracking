@@ -37,6 +37,7 @@ chmod +x expense-tracking-linux-arm64
 
 Windows  
 Download a release and just run the .exe {not shady at all :)}
+or via powershell  
 ```posh
 Invoke-RestMethod -Uri "https://api.github.com/repos/boris-yakimov/expense-tracking/releases/latest" `
   | Select-Object -ExpandProperty assets `
@@ -106,13 +107,13 @@ EXPENSE_UNENCRYPTED_DB_PATH=/path/to/my/database.db ./expense-tracker
 ## Compile source
 
 Dependencies
-```
+```sh
 sudo apt install gcc-aarch64-linux-gnu
 sudo apt install gcc-mingw-w64
 ```
 
 Compile
-```
+```sh
 make compile
 
 ~/repos/expense-tracking main !1 ❯ make compile
