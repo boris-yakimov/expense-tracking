@@ -65,12 +65,11 @@ var allowedTransactionCategories = map[string]map[string]string{
 }
 
 // minimal expense without year and date
-// TODO: maybe this format no-longer makes sense, since we no longer have the option for JSON storage at all
 type Transaction struct {
-	Id          string  `json:"id"`
-	Amount      float64 `json:"amount"`
-	Category    string  `json:"category"`
-	Description string  `json:"description"`
+	Id          string
+	Amount      float64
+	Category    string
+	Description string
 }
 
 // helper to build a table for a specific transaction type for visualization in the TUI
