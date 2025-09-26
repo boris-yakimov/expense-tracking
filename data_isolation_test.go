@@ -233,7 +233,7 @@ func TestDatabaseFileProtection(t *testing.T) {
 		TestStyleTable(t)
 		TestStyleList(t)
 		TestVimNavigation(t)
-		TestExitShortcuts(t)
+		TestExitKeys(t)
 		TestAddInitialPassword(t)
 		TestSetupGracefulShutdown(t)
 		TestSignalHandling(t)

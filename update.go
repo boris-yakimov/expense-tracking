@@ -133,7 +133,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to list of transactions on ESC or q key press
-	form.SetInputCapture(exitShortcuts(selectedMonth, selectedYear))
+	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear))
 
 	modal := styleFlex(tview.NewFlex().
 		AddItem(nil, 0, 1, false).

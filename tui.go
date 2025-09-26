@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -37,7 +38,14 @@ func showErrorModal(msg string, previous tview.Primitive, focus tview.Primitive)
 			tui.SetRoot(previous, true).SetFocus(focus)
 		}))
 	// back to list of transactions on ESC or q key press
-	modal.SetInputCapture(exitShortcuts)
+	modal.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+			// go back to previous screen
+			tui.SetRoot(previous, true).SetFocus(focus)
+			return nil
+		}
+		return event
+	})
 	// set focus to the error
 	tui.SetRoot(modal, true).SetFocus(modal)
 }

@@ -62,6 +62,8 @@ func showMonthSelector() error {
 	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
+			// go back to the grid
+			gridVisualizeTransactions("", "")
 			return nil // key event consumed
 		}
 

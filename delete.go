@@ -62,7 +62,7 @@ func formDeleteTransaction(transactionId, transactionType, selectedMonth, select
 	tui.SetRoot(centeredModal, true).SetFocus(form)
 
 	// back to transactions list on ESC or q key press
-	form.SetInputCapture(exitShortcuts(selectedMonth, selectedYear))
+	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear))
 
 	tui.SetRoot(centeredModal, true).SetFocus(form)
 	return nil

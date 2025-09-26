@@ -210,7 +210,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to list of transactions on ESC or q key press
-	form.SetInputCapture(exitShortcuts(selectedMonth, selectedYear))
+	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear))
 
 	// center the modal
 	modal := styleFlex(tview.NewFlex().

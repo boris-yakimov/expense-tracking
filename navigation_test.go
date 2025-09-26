@@ -36,7 +36,7 @@ func TestVimNavigation(t *testing.T) {
 	}
 }
 
-func TestExitShortcuts(t *testing.T) {
+func TestExitKeys(t *testing.T) {
 	// Test ESC key
 	event := tcell.NewEventKey(tcell.KeyEsc, 0, tcell.ModNone)
 	result := exitShortcuts(event)
