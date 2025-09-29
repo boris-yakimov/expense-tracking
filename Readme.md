@@ -1,8 +1,11 @@
 # expense tracking CLI tool
 Track your expenses in the terminal
 
-
+List of Transactions Page
+![ListOfTransactions](assets/visualize-transactions-page.png)
+Year Summary and P&L
 ![Summary](assets/year-overview.png)
+Navigating the Menus
 ![Recording](assets/tui-recording.gif)
 
 ## Installation 
