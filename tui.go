@@ -14,6 +14,7 @@ func generateCombinedControlsFooter() string {
 func generateWindowNavigationFooter() string {
 	return "[yellow]ESC[-]/[yellow]q[-]: back  " +
 		"[yellow]m[-]: select month  " +
+		"[yellow]y[-]: select year " +
 		"[yellow]TAB[-]: next table"
 }
 

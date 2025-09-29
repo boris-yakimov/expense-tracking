@@ -44,14 +44,14 @@ func showMonthSelector() error {
 	// navigation help
 	frame := tview.NewFrame(list).
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
-	//
+
 	// horizontal centering
 	modal := styleFlex(tview.NewFlex().
 		AddItem(nil, 0, 1, false).   // left spacer
 		AddItem(frame, 60, 1, true). // form width fixed to fit text
 		AddItem(nil, 0, 1, false))   // right spacer
 
-	// vertical centering (height = 0 lets it fit content)
+	// vertical centering (height = 0 lets it fit content with varying size)
 	centeredModal := styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(nil, 0, 1, false).  // top spacer
@@ -71,6 +71,72 @@ func showMonthSelector() error {
 		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
 			if err := showMonthSelector(); err != nil {
 				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, list)
+				return nil
+			}
+			return nil // key event consumed
+		}
+		// handle j/k events to navigate up or down
+		return vimMotions(event)
+	})
+
+	tui.SetRoot(centeredModal, true).SetFocus(list)
+	return nil
+}
+
+// creates a TUI window to show list of available years with transactions
+func showYearSelector() error {
+	years, err := getYearsWithTransactions()
+	if err != nil {
+		return fmt.Errorf("unable to get years with transactions: %w", err)
+	}
+
+	if len(years) == 0 {
+		return fmt.Errorf("no transactions found")
+	}
+
+	list := styleList(tview.NewList())
+	for _, year := range years {
+		list.AddItem(year, "", 0, func() {
+			// TODO: what gets triggered when a year is selected
+			// generate the p&l stats for each each month and show them
+			fmt.Printf("TEMP: WE ARE inside show year selector")
+		})
+	}
+
+	list.SetTitle("Select Year").
+		SetTitleAlign(tview.AlignCenter).
+		SetBorder(true)
+
+	// navigation help
+	frame := tview.NewFrame(list).
+		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+
+	// horizontal centering
+	modal := styleFlex(tview.NewFlex().
+		AddItem(nil, 0, 1, false).   // left spacer
+		AddItem(frame, 60, 1, true). // form width fixed to fit text
+		AddItem(nil, 0, 1, false))   // right spacer
+
+	// vertical centering (height = 0 lets it fit content with varying size)
+	centeredModal := styleFlex(tview.NewFlex().
+		SetDirection(tview.FlexRow).
+		AddItem(nil, 0, 1, false).  // top spacer
+		AddItem(modal, 0, 1, true). // enough to fit the text
+		AddItem(nil, 0, 1, false))  // bottom spacer
+
+	// handle input capture for month selection and exit
+	list.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
+		// handle exit events
+		if ev := exitShortcuts(event); ev == nil {
+			// go back to the grid
+			gridVisualizeTransactions("", "")
+			return nil // key event consumed
+		}
+
+		// handle list years event
+		if event.Key() == tcell.KeyRune && event.Rune() == 'y' {
+			if err := showYearSelector(); err != nil {
+				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), nil, list)
 				return nil
 			}
 			return nil // key event consumed
@@ -263,6 +329,18 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), nil, grid)
 				return nil
 			}
+		}
+
+		if event.Key() == tcell.KeyRune && event.Rune() == 'y' {
+			// TODO: when a year is selected show a screen with p&l for the selected year
+			// TODO: list of all months and the result of each month split in income, expense, investment and result (on the left)
+			// TODO: than at the end a p&l for the selected year
+			// TODO: can we fit an ASCII pie chart for the year result (on the right)
+			if err := showYearSelector(); err != nil {
+				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), nil, grid)
+				return nil
+			}
+			return nil // key event consumed
 		}
 
 		return event

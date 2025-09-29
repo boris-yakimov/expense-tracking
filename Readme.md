@@ -90,7 +90,7 @@ The system is designed so that the database on disk is stored **encrypted**. It 
 
 The expense tracking tool now supports configurable storage backends. Primary storage option SQLite (default). Previously a JSON file storage was also supported but is now deprecated.
 
-### Environment Variables
+### Environment Variables (optional)
 
 - `EXPENSE_STORAGE_TYPE`: Set to `"sqlite"` (default) (previously JSON was supported, but was deprecated)
 - `EXPENSE_UNENCRYPTED_DB_PATH`: Path to unencrypted SQLite database file (default: `"~/.expense-tracking/transactions.db"`)

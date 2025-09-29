@@ -208,6 +208,26 @@ func getMonthsWithTransactions() (months []string, err error) {
 	return months, nil
 }
 
+func getYearsWithTransactions() (years []string, err error) {
+	transactions, loadFileErr := LoadTransactions()
+	if loadFileErr != nil {
+		return years, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+	}
+
+	for y := range transactions {
+		years = append(years, y)
+	}
+
+	sort.Slice(years, func(i, j int) bool {
+		yearI, _ := strconv.Atoi(years[i])
+		yearJ, _ := strconv.Atoi(years[j])
+
+		return yearI > yearJ
+	})
+
+	return years, nil
+}
+
 // helper to determine what is the latest month that contains transactions
 func determineLatestMonthAndYear() (month, year string, err error) {
 	transactions, err := LoadTransactions()
