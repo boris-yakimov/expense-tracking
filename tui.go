@@ -5,28 +5,31 @@ import (
 	"github.com/rivo/tview"
 )
 
-// creates a footer for the TUI that shows navingation options
+// creates a footer for the TUI that shows navigation options
 func generateCombinedControlsFooter() string {
-	return "[yellow]ESC[-]/[yellow]q[-]: back   [green]TAB[-]: next   [cyan]j/k[-] or [cyan]↑/↓[-]: navigate"
-	// return generateWindowNavigationFooter() + generateTransactionNavigationFooter()
+	return Yellow + "ESC" + Reset + " /" +
+		Yellow + "q" + Reset + ": back   " +
+		Green + "TAB" + Reset + ": next   " +
+		Green + "j/k" + Reset + " or " + Green + "↑/↓" + Reset + ": navigate"
 }
 
 func generateWindowNavigationFooter() string {
-	return "[yellow]ESC[-]/[yellow]q[-]: back  " +
-		"[yellow]m[-]: select month  " +
-		"[yellow]y[-]: select year " +
-		"[yellow]TAB[-]: next table"
+	return Yellow + "ESC" + Reset + "/" +
+		Yellow + "q" + Reset + ": back  " +
+		Yellow + "m" + Reset + ": select month  " +
+		Yellow + "y" + Reset + ": select year  " +
+		Yellow + "TAB" + Reset + ": next table"
 }
 
 func generateTransactionCrudFooter() string {
-	return "[green]a[-]: add  " +
-		"[red]d[-]: delete  " +
-		"[yellow]e/u[-]: update"
+	return Green + "a" + Reset + ": add  " +
+		Red + "d" + Reset + ": delete  " +
+		Yellow + "e/u" + Reset + ": update"
 }
 
 func generateTransactionNavigationFooter() string {
-	return "[green]j/k[-] or [green]↑/↓[-]: move up and down  " +
-		"[green]h/l[-] or [green]←/→[-]: move left and right"
+	return Green + "j/k" + Reset + " or " + Green + "↑/↓" + Reset + ": move up and down  " +
+		Green + "h/l" + Reset + " or " + Green + "←/→" + Reset + ": move left and right"
 }
 
 // handles creating a pop-up for error messages in the TUI

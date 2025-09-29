@@ -9,14 +9,6 @@ import (
 	"github.com/rivo/tview"
 )
 
-// tview color tags for dynamic colors
-const (
-	Blue  = "[blue]"
-	Red   = "[red]"
-	Green = "[green]"
-	Reset = "[-]"
-)
-
 // generatePieChart returns a string with colored ASCII pie chart
 func generatePieChart(pnl PnLResult, width, height int) string {
 	total := pnl.incomeTotal + pnl.expenseTotal + pnl.investmentTotal

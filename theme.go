@@ -27,6 +27,16 @@ var theme = TuiTheme{
 	BackgroundColor:       tcell.NewRGBColor(26, 27, 38),    // dark navy base
 }
 
+// tview color tags for dynamic colors
+// used for pie chart and navigation menus
+const (
+	Blue   = "[blue]"
+	Red    = "[red]"
+	Green  = "[green]"
+	Yellow = "[yellow]"
+	Reset  = "[-]"
+)
+
 // helper to style input fields in TUI
 func styleInputField(field *tview.InputField) *tview.InputField {
 	return field.SetLabelColor(theme.LabelColor).
