@@ -102,3 +102,23 @@ func calculateYearPnL(year string) (PnLResult, error) {
 
 	return pnl, nil
 }
+
+// calculates the p&l for each month in a specific year
+func calculateYearMonthlyPnL(year string) (map[string]PnLResult, error) {
+	monthlyPnL := make(map[string]PnLResult)
+
+	transactions, loadFileErr := LoadTransactions()
+	if loadFileErr != nil {
+		return monthlyPnL, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+	}
+
+	for month := range transactions[year] {
+		pnl, err := calculateMonthPnL(month, year)
+		if err != nil {
+			return monthlyPnL, fmt.Errorf("unable to calculate pnl for %s %s: %w", month, year, err)
+		}
+		monthlyPnL[month] = pnl
+	}
+
+	return monthlyPnL, nil
+}

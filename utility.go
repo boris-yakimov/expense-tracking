@@ -228,6 +228,31 @@ func getYearsWithTransactions() (years []string, err error) {
 	return years, nil
 }
 
+// helper to get a list of months for a specific year that have transactions
+func getMonthsForYear(year string) (months []string, err error) {
+	transactions, loadFileErr := LoadTransactions()
+	if loadFileErr != nil {
+		return months, fmt.Errorf("unable to load transactions file: %w", loadFileErr)
+	}
+
+	if _, exists := transactions[year]; !exists {
+		return months, fmt.Errorf("no transactions for year %s", year)
+	}
+
+	for m := range transactions[year] {
+		months = append(months, m)
+	}
+
+	// sort months by monthOrder (newest first)
+	sort.Slice(months, func(i, j int) bool {
+		monthI := monthOrder[strings.ToLower(months[i])]
+		monthJ := monthOrder[strings.ToLower(months[j])]
+		return monthI > monthJ
+	})
+
+	return months, nil
+}
+
 // helper to determine what is the latest month that contains transactions
 func determineLatestMonthAndYear() (month, year string, err error) {
 	transactions, err := LoadTransactions()

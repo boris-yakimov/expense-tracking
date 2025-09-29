@@ -96,10 +96,17 @@ func showYearSelector() error {
 
 	list := styleList(tview.NewList())
 	for _, year := range years {
+		yearCopy := year // capture loop variable in each iteration because we need to use it in a closure for AddItem()
 		list.AddItem(year, "", 0, func() {
-			// TODO: what gets triggered when a year is selected
-			// generate the p&l stats for each each month and show them
-			fmt.Printf("TEMP: WE ARE inside show year selector")
+			//yearCopy is used instead of year because closures in Go remember variables passed, not only their values and if we don't create a new variable in each loop iteration we get the same year in each iteration
+			//That means if years = []{"2023", "2024", "2025"}:
+			// You click 2023 → the callback sees year == "2025"
+			// You click 2024 → the callback sees year == "2025"
+			// You click 2025 → the callback sees year == "2025"
+			if err := showYearResults(yearCopy); err != nil {
+				showErrorModal(fmt.Sprintf("error showing year results:\n\n%s", err), nil, list)
+				return
+			}
 		})
 	}
 
