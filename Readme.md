@@ -1,6 +1,8 @@
 # expense tracking CLI tool
 Track your expenses in the terminal
 
+
+![Summary](assets/year-overview.png)
 ![Recording](assets/tui-recording.gif)
 
 ## Installation 

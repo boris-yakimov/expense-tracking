@@ -29,11 +29,11 @@ func generatePieChart(pnl PnLResult, width, height int) string {
 	investmentPct := pnl.investmentTotal / total
 
 	// ensure minimum size
-	if width < 15 {
-		width = 15
-	}
-	if height < 5 {
-		height = 5
+	if width < 20 {
+		width = 20
+	} // pie chart size - keeping aspect ratio 2:1 for circular appearance
+	if height < 10 {
+		height = 10
 	}
 	chart := make([][]rune, height)
 	for i := range chart {
