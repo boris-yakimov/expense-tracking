@@ -175,6 +175,9 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 			month := parts[0]
 			year := parts[1]
 
+			// TODO: when I start typing on any of the text fields it also triggers vim navigation
+			// can I make it so that when a text field entry is focused vim navigation doesn't work, except TAB
+			// TODO: also typing q in any field triggers the vim navigation 'q'
 			var addReq = AddTransactionRequest{
 				Type:        transactionType,
 				Amount:      amount,
@@ -249,6 +252,10 @@ func handleAddTransaction(req AddTransactionRequest) error {
 		return fmt.Errorf("invalid transaction category: %s", updatedCategory)
 	}
 
+	// TODO: update description to allow the use of + and &
+	// TODO: allow . for domains
+	// TODO: allow cyrilic
+	// TODO: allow () brackets
 	if !validDescriptionInputFormat(req.Description) {
 		return fmt.Errorf("invalid character in description, should contain only letters, numbers, spaces, commas, or dashes: %s", req.Description)
 	}

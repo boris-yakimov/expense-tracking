@@ -111,6 +111,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 				Description: description,
 			}
 
+			// TODO: failed to update transaction because of incorrect content of description resizes back the window to fullscreen isntead of the adequate modal size that we have in the initial update window
 			if err := handleUpdateTransaction(updateReq); err != nil {
 				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), frame, form)
 				log.Printf("failed to update transaction:\n\n%s", err)
