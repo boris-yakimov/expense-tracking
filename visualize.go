@@ -257,16 +257,6 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		currentTable = 0
 	}
 
-	var currentTableType string
-	switch currentTable {
-	case 0:
-		currentTableType = "income"
-	case 1:
-		currentTableType = "expense"
-	case 2:
-		currentTableType = "investment"
-	}
-
 	// start with focus on the specified table
 	tui.SetRoot(grid, true).SetFocus(tables[currentTable])
 
@@ -344,8 +334,11 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 			row, col := tables[currentTable].GetSelection()
 			cell := tables[currentTable].GetCell(row, col)
 			txId, _ := cell.GetReference().(string)
+			if txId == "" {
+				return nil
+			}
 
-			currentTableType := ""
+			var currentTableType string
 			switch currentTable {
 			case 0:
 				currentTableType = "income"
@@ -397,20 +390,15 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 				case 2:
 					investmentSearch = text
 				}
-				// recreate the grid
-				newGrid, err := gridVisualizeTransactions(displayMonth, displayYear, currentTableType, false)
-				if err != nil {
-					return // ignore error for dynamic update
-				}
-				flex := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow))
-				flex.AddItem(newGrid, 0, 1, false)
-				flex.AddItem(searchInput, 1, 1, true) // show search prompt bellow the transaction grid
-				tui.SetRoot(flex, true).SetFocus(searchInput)
+				// update the tables in place
+				updateTransactionsTable(incomeTable, "income", displayMonth, displayYear, transactions, incomeSearch)
+				updateTransactionsTable(expenseTable, "expense", displayMonth, displayYear, transactions, expenseSearch)
+				updateTransactionsTable(investmentTable, "investment", displayMonth, displayYear, transactions, investmentSearch)
 			})
 
 			searchInput.SetDoneFunc(func(key tcell.Key) {
 				switch key {
-				case tcell.KeyEnter: // keep focus on the search prompt
+				case tcell.KeyEnter: // exit search and focus on the table
 					tui.SetRoot(grid, true).SetFocus(tables[currentTable])
 
 				case tcell.KeyEsc: // reset the search
@@ -423,18 +411,17 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 						investmentSearch = ""
 					}
 
-					// recreate the grid
-					if _, err := gridVisualizeTransactions(displayMonth, displayYear, currentTableType, true); err != nil {
-						showErrorModal(fmt.Sprintf("error refreshing grid:\n\n%s", err), nil, grid)
-						return
-					}
+					// update the tables with reset filters
+					updateTransactionsTable(incomeTable, "income", displayMonth, displayYear, transactions, incomeSearch)
+					updateTransactionsTable(expenseTable, "expense", displayMonth, displayYear, transactions, expenseSearch)
+					updateTransactionsTable(investmentTable, "investment", displayMonth, displayYear, transactions, investmentSearch)
 					tui.SetRoot(grid, true).SetFocus(tables[currentTable])
 				}
 			})
 
 			// show the search input
-			flex := tview.NewFlex().SetDirection(tview.FlexRow)
-			flex.AddItem(grid, 0, 1, false)
+			flex := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow))
+			flex.AddItem(grid, 0, 1, true)
 			flex.AddItem(searchInput, 1, 1, true)
 			tui.SetRoot(flex, true).SetFocus(searchInput)
 			return nil

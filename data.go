@@ -139,6 +139,86 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 	return table
 }
 
+// helper to update an existing table with filtered transactions
+func updateTransactionsTable(table *tview.Table, txType, month, year string, transactions TransactionHistory, filter string) {
+	// get the currently selected transaction ID to preserve selection
+	var selectedTxId string
+	row, col := table.GetSelection()
+	if row > 0 && col >= 0 {
+		cell := table.GetCell(row, col)
+		if ref := cell.GetReference(); ref != nil {
+			selectedTxId, _ = ref.(string)
+		}
+	}
+
+	// clear table before populating with only filtered transactions
+	table.Clear()
+
+	// re-set properties
+	table.SetSelectable(true, false)
+	table.SetFixed(1, 0)
+	table.SetBorder(false)
+	table.SetTitle(capitalize(txType)).SetBorder(true)
+
+	headers := []string{"ID", "Amount", "Category", "Description"}
+	for c, h := range headers {
+		table.SetCell(0, c, tview.NewTableCell(h).SetSelectable(false))
+	}
+
+	if year == "" || month == "" {
+		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
+		return
+	}
+
+	txList := transactions[year][month][txType]
+	if len(txList) == 0 {
+		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
+		return
+	}
+
+	var filteredTxList []Transaction
+	if filter == "" {
+		filteredTxList = txList
+	} else {
+		filterLower := strings.ToLower(filter)
+		for _, tx := range txList {
+			if strings.Contains(strings.ToLower(tx.Id), filterLower) ||
+				strings.Contains(strings.ToLower(fmt.Sprintf("%.2f", tx.Amount)), filterLower) ||
+				strings.Contains(strings.ToLower(tx.Category), filterLower) ||
+				strings.Contains(strings.ToLower(tx.Description), filterLower) {
+				filteredTxList = append(filteredTxList, tx)
+			}
+		}
+	}
+
+	if len(filteredTxList) == 0 {
+		table.SetCell(1, 0, tview.NewTableCell("no transaction matches found"))
+		return
+	}
+
+	for r, tx := range filteredTxList {
+		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)).
+			SetReference(tx.Id))
+		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
+		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
+		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
+	}
+
+	// Try to preserve selection on the same transaction, otherwise select first row
+	if len(filteredTxList) > 0 {
+		selectedRow := 1 // default to first
+		if selectedTxId != "" {
+			for r := 0; r < len(filteredTxList); r++ {
+				if filteredTxList[r].Id == selectedTxId {
+					selectedRow = r + 1
+					break
+				}
+			}
+		}
+		table.Select(selectedRow, 0)
+	}
+}
+
 // year -> month -> transcation type (expense, income, or investment) -> transaction
 type TransactionHistory map[string]map[string]map[string][]Transaction
 
