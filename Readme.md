@@ -122,6 +122,23 @@ EXPENSE_UNENCRYPTED_DB_PATH=/path/to/my/database.db ./expense-tracker
 ```
 
 
+## Backup and Restore
+
+The encrypted database file (`transactions.enc`) and the salt file (`transactions.salt`) are stored in `~/.expense-tracking/` by default.
+
+### Backup
+
+1. Locate the files: `~/.expense-tracking/transactions.enc` and `~/.expense-tracking/transactions.salt`
+2. Copy them to a secure backup location, such as an external drive or cloud storage.
+
+### Restore
+
+1. Ensure the expense tracking program is not running.
+2. Copy the backed-up `transactions.enc` and `transactions.salt` files back to `~/.expense-tracking/`
+3. Start the program and log in with your password.
+
+Note: Both files must be restored together for the encryption to work properly. If using custom paths via environment variables, adjust the paths accordingly.
+
 ## Compile source
 
 Dependencies
