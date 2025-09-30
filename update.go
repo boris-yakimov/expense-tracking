@@ -85,10 +85,14 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 
 	// description field (pre-populated with current description)
 	descriptionField := styleInputField(tview.NewInputField().
-		SetLabel("Description").
+		SetLabel(fmt.Sprintf("Description (%d/%d)", len(tx.Description), DescriptionMaxCharLength)).
 		SetText(tx.Description).
 		SetAcceptanceFunc(enforceCharLimit),
 	)
+	// keep track of characters typed so far and char limit for description
+	descriptionField.SetChangedFunc(func(text string) {
+		descriptionField.SetLabel(fmt.Sprintf("Description (%d/%d)", len(text), DescriptionMaxCharLength))
+	})
 
 	form = styleForm(tview.NewForm().
 		AddFormItem(typeDropdown).

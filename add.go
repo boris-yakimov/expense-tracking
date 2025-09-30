@@ -102,9 +102,13 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 	categoryDropdown.SetCurrentOption(0)
 
 	descriptionField := styleInputField(tview.NewInputField().
-		SetLabel("Description").
+		SetLabel(fmt.Sprintf("Description (0/%d)", DescriptionMaxCharLength)).
 		SetAcceptanceFunc(enforceCharLimit),
 	)
+	// keep track of characters typed so far and char limit for description
+	descriptionField.SetChangedFunc(func(text string) {
+		descriptionField.SetLabel(fmt.Sprintf("Description (%d/%d)", len(text), DescriptionMaxCharLength))
+	})
 
 	var monthAndYear string
 	periodDropdown := styleDropdown(tview.NewDropDown().
