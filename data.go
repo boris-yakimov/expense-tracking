@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/rivo/tview"
 )
@@ -73,7 +74,7 @@ type Transaction struct {
 }
 
 // helper to build a table for a specific transaction type for visualization in the TUI
-func createTransactionsTable(txType, month, year string, transactions TransactionHistory) *tview.Table {
+func createTransactionsTable(txType, month, year string, transactions TransactionHistory, filter string) *tview.Table {
 	table := tview.NewTable().
 		SetSelectable(true, false). // enable row selection
 		SetFixed(1, 0)              // make header row fixed
@@ -96,15 +97,40 @@ func createTransactionsTable(txType, month, year string, transactions Transactio
 		return table
 	}
 
-	// populate table
-	for r, tx := range txList {
+	var filteredTxList []Transaction
+	// if no search filter is provided just use the list of transactions for the selected month
+	// this way we show all transactions initially and when we initiate a search we show only trasactions that match the pattern
+	if filter == "" {
+		filteredTxList = txList
+	} else {
+		// search through transactions if filter is provided (for vim like search functionality)
+		filterLower := strings.ToLower(filter)
+		for _, tx := range txList {
+			// search for a pattern in any of the sections if present, append to the filtered list
+			// filtered list will later be used to show only trasactions that match the search pattern during searching
+			if strings.Contains(strings.ToLower(tx.Id), filterLower) ||
+				strings.Contains(strings.ToLower(fmt.Sprintf("%.2f", tx.Amount)), filterLower) ||
+				strings.Contains(strings.ToLower(tx.Category), filterLower) ||
+				strings.Contains(strings.ToLower(tx.Description), filterLower) {
+				filteredTxList = append(filteredTxList, tx)
+			}
+		}
+	}
+
+	if len(filteredTxList) == 0 {
+		table.SetCell(1, 0, tview.NewTableCell("no transaction matches found"))
+		return table
+	}
+
+	// populate a table with only the transactions that match the specific pattern that we are searching for
+	for r, tx := range filteredTxList {
 		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)).
 			SetReference(tx.Id)) // setting a reference for transaction IDs that will later be used when trying to match specific transaction IDs during update and delete operations
 		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
 		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
 		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
-	}
 
+	}
 	// make sure selection always starts on the first row
 	if table.GetRowCount() > 1 {
 		table.Select(1, 0)

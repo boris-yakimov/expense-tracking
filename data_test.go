@@ -217,13 +217,13 @@ func TestCreateTransactionsTable(t *testing.T) {
 				t.Fatalf("Failed to load test data: %v", err)
 			}
 
-			table := createTransactionsTable("expense", "january", "2023", loadedTransactions)
+			table := createTransactionsTable("expense", "january", "2023", loadedTransactions, "")
 			if table == nil {
 				t.Errorf("Expected table to be created")
 			}
 
 			// Test with no transactions
-			table = createTransactionsTable("expense", "", "", loadedTransactions)
+			table = createTransactionsTable("expense", "", "", loadedTransactions, "")
 			if table == nil {
 				t.Errorf("Expected table to be created")
 			}

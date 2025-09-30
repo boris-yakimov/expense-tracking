@@ -25,10 +25,10 @@ func formDeleteTransaction(transactionId, transactionType, selectedMonth, select
 				showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, form)
 				return
 			}
-			gridVisualizeTransactions(selectedMonth, selectedYear, transactionType) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
+			gridVisualizeTransactions(selectedMonth, selectedYear, transactionType, true) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
 		}).
 		AddButton("Cancel", func() {
-			gridVisualizeTransactions(selectedMonth, selectedYear, transactionType) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
+			gridVisualizeTransactions(selectedMonth, selectedYear, transactionType, true) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
 		}))
 
 	form.SetTitle("Delete Transaction").

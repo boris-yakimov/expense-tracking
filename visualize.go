@@ -8,6 +8,10 @@ import (
 	"github.com/rivo/tview"
 )
 
+var incomeSearch string
+var expenseSearch string
+var investmentSearch string
+
 // creates a TUI window to show list of available months with transactions
 func showMonthSelector() error {
 	months, err := getMonthsWithTransactions()
@@ -29,7 +33,7 @@ func showMonthSelector() error {
 				selectedMonth := parts[0]
 				selectedYear := parts[1]
 				// go back to grid of visualized transactions but for the selected month and year
-				if _, err := gridVisualizeTransactions(selectedMonth, selectedYear, ""); err != nil {
+				if _, err := gridVisualizeTransactions(selectedMonth, selectedYear, "", true); err != nil {
 					showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), nil, list)
 					return
 				}
@@ -63,7 +67,7 @@ func showMonthSelector() error {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
 			// go back to the grid
-			gridVisualizeTransactions("", "", "")
+			gridVisualizeTransactions("", "", "", true)
 			return nil // key event consumed
 		}
 
@@ -136,7 +140,7 @@ func showYearSelector() error {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
 			// go back to the grid
-			gridVisualizeTransactions("", "", "")
+			gridVisualizeTransactions("", "", "", true)
 			return nil // key event consumed
 		}
 
@@ -158,7 +162,7 @@ func showYearSelector() error {
 
 // creates a grid in the TUI to visualize and structure a list of transactions for a specific month and year
 // if a month and year is provided will use it, otherwise will take the latest month
-func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType string) (tview.Primitive, error) {
+func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType string, setRoot bool) (tview.Primitive, error) {
 	var displayMonth string
 	var displayYear string
 	var err error
@@ -194,9 +198,9 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 	}
 
 	// build tx table for each tx type
-	incomeTable := styleTable(createTransactionsTable("income", displayMonth, displayYear, transactions))
-	expenseTable := styleTable(createTransactionsTable("expense", displayMonth, displayYear, transactions))
-	investmentTable := styleTable(createTransactionsTable("investment", displayMonth, displayYear, transactions))
+	incomeTable := styleTable(createTransactionsTable("income", displayMonth, displayYear, transactions, incomeSearch))
+	expenseTable := styleTable(createTransactionsTable("expense", displayMonth, displayYear, transactions, expenseSearch))
+	investmentTable := styleTable(createTransactionsTable("investment", displayMonth, displayYear, transactions, investmentSearch))
 
 	// handle wrap around for table navigation (i.e. when last transaction reached wrap around to top)
 	enableTableWrap(incomeTable)
@@ -251,6 +255,16 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		currentTable = 2
 	default:
 		currentTable = 0
+	}
+
+	var currentTableType string
+	switch currentTable {
+	case 0:
+		currentTableType = "income"
+	case 1:
+		currentTableType = "expense"
+	case 2:
+		currentTableType = "investment"
 	}
 
 	// start with focus on the specified table
@@ -349,10 +363,6 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		}
 
 		if event.Key() == tcell.KeyRune && event.Rune() == 'y' {
-			// TODO: when a year is selected show a screen with p&l for the selected year
-			// TODO: list of all months and the result of each month split in income, expense, investment and result (on the left)
-			// TODO: than at the end a p&l for the selected year
-			// TODO: can we fit an ASCII pie chart for the year result (on the right)
 			if err := showYearSelector(); err != nil {
 				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), nil, grid)
 				return nil
@@ -360,8 +370,83 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 			return nil // key event consumed
 		}
 
+		// enter search mode
+		if event.Key() == tcell.KeyRune && event.Rune() == '/' {
+			var currentSearch string
+			switch currentTable {
+			case 0:
+				currentSearch = incomeSearch
+			case 1:
+				currentSearch = expenseSearch
+			case 2:
+				currentSearch = investmentSearch
+			}
+
+			searchInput := styleInputField(tview.NewInputField().
+				SetLabel("Search: ").
+				SetFieldWidth(30).
+				SetText(currentSearch))
+
+			searchInput.SetChangedFunc(func(text string) {
+				// update the search
+				switch currentTable {
+				case 0:
+					incomeSearch = text
+				case 1:
+					expenseSearch = text
+				case 2:
+					investmentSearch = text
+				}
+				// recreate the grid
+				newGrid, err := gridVisualizeTransactions(displayMonth, displayYear, currentTableType, false)
+				if err != nil {
+					return // ignore error for dynamic update
+				}
+				flex := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow))
+				flex.AddItem(newGrid, 0, 1, false)
+				flex.AddItem(searchInput, 1, 1, true) // show search prompt bellow the transaction grid
+				tui.SetRoot(flex, true).SetFocus(searchInput)
+			})
+
+			searchInput.SetDoneFunc(func(key tcell.Key) {
+				switch key {
+				case tcell.KeyEnter: // keep focus on the search prompt
+					tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+
+				case tcell.KeyEsc: // reset the search
+					switch currentTable {
+					case 0:
+						incomeSearch = ""
+					case 1:
+						expenseSearch = ""
+					case 2:
+						investmentSearch = ""
+					}
+
+					// recreate the grid
+					if _, err := gridVisualizeTransactions(displayMonth, displayYear, currentTableType, true); err != nil {
+						showErrorModal(fmt.Sprintf("error refreshing grid:\n\n%s", err), nil, grid)
+						return
+					}
+					tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+				}
+			})
+
+			// show the search input
+			flex := tview.NewFlex().SetDirection(tview.FlexRow)
+			flex.AddItem(grid, 0, 1, false)
+			flex.AddItem(searchInput, 1, 1, true)
+			tui.SetRoot(flex, true).SetFocus(searchInput)
+			return nil
+		}
+
 		return event
 	})
+
+	// in cases like search where we still want to draw the grid of transactions but we want to focus on the search window instead of the grid
+	if setRoot {
+		tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+	}
 
 	return grid, nil
 }

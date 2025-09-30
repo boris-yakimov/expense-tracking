@@ -66,7 +66,7 @@ func loginForm() error {
 				return
 			}
 
-			if _, err := gridVisualizeTransactions("", "", ""); err != nil {
+			if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
 				showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
 				log.Printf("list transactions error:\n\n%s", err)
 				clearUserPassword() // remove pass from memory on error
@@ -161,7 +161,7 @@ func setNewPasswordForm() {
 					return
 				}
 
-				if _, err := gridVisualizeTransactions("", "", ""); err != nil {
+				if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
 					showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
 					log.Printf("list transactions error:\n\n%s", err)
 					clearUserPassword() // remove pass from memory on error
