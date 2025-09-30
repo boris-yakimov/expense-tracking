@@ -29,7 +29,7 @@ func showMonthSelector() error {
 				selectedMonth := parts[0]
 				selectedYear := parts[1]
 				// go back to grid of visualized transactions but for the selected month and year
-				if _, err := gridVisualizeTransactions(selectedMonth, selectedYear); err != nil {
+				if _, err := gridVisualizeTransactions(selectedMonth, selectedYear, ""); err != nil {
 					showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), nil, list)
 					return
 				}
@@ -63,7 +63,7 @@ func showMonthSelector() error {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
 			// go back to the grid
-			gridVisualizeTransactions("", "")
+			gridVisualizeTransactions("", "", "")
 			return nil // key event consumed
 		}
 
@@ -136,7 +136,7 @@ func showYearSelector() error {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
 			// go back to the grid
-			gridVisualizeTransactions("", "")
+			gridVisualizeTransactions("", "", "")
 			return nil // key event consumed
 		}
 
@@ -158,7 +158,7 @@ func showYearSelector() error {
 
 // creates a grid in the TUI to visualize and structure a list of transactions for a specific month and year
 // if a month and year is provided will use it, otherwise will take the latest month
-func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primitive, error) {
+func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType string) (tview.Primitive, error) {
 	var displayMonth string
 	var displayYear string
 	var err error
@@ -242,8 +242,18 @@ func gridVisualizeTransactions(selectedMonth, selectedYear string) (tview.Primit
 	// keep a list of tables for focus switching in the TUI
 	tables := []*tview.Table{incomeTable, expenseTable, investmentTable}
 	currentTable := 0 // index of which table is currently in focus
+	switch focusTableType {
+	case "income":
+		currentTable = 0
+	case "expense":
+		currentTable = 1
+	case "investment":
+		currentTable = 2
+	default:
+		currentTable = 0
+	}
 
-	// start with focus on incomeTable
+	// start with focus on the specified table
 	tui.SetRoot(grid, true).SetFocus(tables[currentTable])
 
 	// handle input capture for navigation,

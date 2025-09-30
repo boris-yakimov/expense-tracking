@@ -113,7 +113,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 				return
 			}
 
-			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
+			gridVisualizeTransactions(selectedMonth, selectedYear, transactionType) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
 
 		}).
 		AddButton("Clear", func() {
@@ -123,7 +123,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 			descriptionField.SetText("")
 		}).
 		AddButton("Cancel", func() {
-			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to list of transactions
+			gridVisualizeTransactions(selectedMonth, selectedYear, transactionType) // go back to list of transactions
 		}))
 
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
@@ -133,7 +133,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to list of transactions on ESC or q key press
-	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear))
+	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear, transactionType))
 
 	modal := styleFlex(tview.NewFlex().
 		AddItem(nil, 0, 1, false).

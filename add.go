@@ -186,7 +186,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 				return
 			}
 
-			_, err := gridVisualizeTransactions(month, year) // go back to list of transactions for the same month
+			_, err := gridVisualizeTransactions(month, year, transactionType) // go back to list of transactions for the same month and table type
 			if err != nil {
 				showErrorModal("failed to return back to transactions list from add form", frame, form)
 				log.Printf("failed to return back to transactions list from add form")
@@ -200,7 +200,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 			transactionType = "expense"
 		}).
 		AddButton("Cancel", func() {
-			gridVisualizeTransactions(selectedMonth, selectedYear) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
+			gridVisualizeTransactions(selectedMonth, selectedYear, currentTableType) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)
 		}))
 
 	form.SetBorder(true).SetTitle("Add Transaction").SetTitleAlign(tview.AlignCenter)
@@ -210,7 +210,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to list of transactions on ESC or q key press
-	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear))
+	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear, currentTableType))
 
 	// center the modal
 	modal := styleFlex(tview.NewFlex().
