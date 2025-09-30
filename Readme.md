@@ -12,7 +12,7 @@ Update Transactions
 Delete Transactions
 ![DeleteTx](assets/delete-transactions.png)
 Navigating the Menus
-![Recording](assets/tui-recording.gif)
+![Recording](assets/recording.gif)
 
 ## Installation 
 
