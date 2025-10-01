@@ -78,9 +78,6 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 				break
 			}
 		}
-
-		// j/k navigation inside dropdown
-		categoryDropdown.SetInputCapture(vimMotions)
 	}
 
 	// description field (pre-populated with current description)

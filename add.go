@@ -95,9 +95,6 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 		categoryDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			category = selectedOption
 		})
-
-		// j/k navigation inside dropdown
-		categoryDropdown.SetInputCapture(vimMotions)
 	}
 	categoryDropdown.SetCurrentOption(0)
 

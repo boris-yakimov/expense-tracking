@@ -9,8 +9,7 @@ import (
 func generateCombinedControlsFooter() string {
 	return Yellow + "ESC" + Reset + " /" +
 		Yellow + "q" + Reset + ": back   " +
-		Green + "TAB" + Reset + ": next   " +
-		Green + "j/k" + Reset + " or " + Green + "↑/↓" + Reset + ": navigate"
+		Green + "TAB" + Reset + ": next   "
 }
 
 func generateWindowNavigationFooter() string {
