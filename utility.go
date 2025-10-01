@@ -24,9 +24,17 @@ var monthOrder = map[string]int{
 	"december":  12,
 }
 
-// helper to validate the the format of the description field - only letters, numbers, commas, spaces or dashes
+// helper to validate the the format of the description field
 func validDescriptionInputFormat(description string) bool {
-	pattern := `^[a-zA-Z0-9,' '-]+$`
+	// Latin letters (a-zA-Z)
+	// Cyrillic letters (\p{IsCyrillic})
+	// Numbers (0-9)
+	// Commas (,)
+	// Spaces ( )
+	// Dashes (-)
+	// Dots (.)
+	// Brackets (())
+	pattern := `^[a-zA-Z0-9\p{Cyrillic}, .\-\(\)]+$`
 	matched, err := regexp.MatchString(pattern, description)
 	if err != nil {
 		return false

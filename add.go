@@ -252,12 +252,8 @@ func handleAddTransaction(req AddTransactionRequest) error {
 		return fmt.Errorf("invalid transaction category: %s", updatedCategory)
 	}
 
-	// TODO: update description to allow the use of + and &
-	// TODO: allow . for domains
-	// TODO: allow cyrilic
-	// TODO: allow () brackets
 	if !validDescriptionInputFormat(req.Description) {
-		return fmt.Errorf("invalid character in description, should contain only letters, numbers, spaces, commas, or dashes: %s", req.Description)
+		return fmt.Errorf("invalid character in description, allowed: %s, got: %s", allowedCharsDescription, req.Description)
 	}
 
 	transactions, loadFileErr := LoadTransactions()

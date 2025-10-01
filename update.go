@@ -177,7 +177,7 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 	}
 
 	if !validDescriptionInputFormat(req.Description) {
-		return fmt.Errorf("\ninvalid character in description, should contain only letters, numbers, spaces, commas, or dashes")
+		return fmt.Errorf("invalid character in description, allowed: %s, got: %s", allowedCharsDescription, req.Description)
 	}
 
 	transactions, loadFileErr := LoadTransactions()

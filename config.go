@@ -21,10 +21,10 @@ const (
 	iterations = 200_000 // PBKDF2 iterations for key derivation
 	saltLen    = 16      // Salt length in bytes
 
-	// TODO: this seems too short for some descriptions i've used in the past
-	// experiment with 55, 60, etc
-	DescriptionMaxCharLength = 40
-	TransactionIDLength      = 8
+	DescriptionMaxCharLength = 80
+	allowedCharsDescription  = "Latin letters, Cyrillic letters, numbers, commas, spaces, dashes, dots, and brackets"
+
+	TransactionIDLength = 8
 )
 
 type Config struct {
