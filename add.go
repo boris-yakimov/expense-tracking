@@ -172,9 +172,6 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 			month := parts[0]
 			year := parts[1]
 
-			// TODO: when I start typing on any of the text fields it also triggers vim navigation
-			// can I make it so that when a text field entry is focused vim navigation doesn't work, except TAB
-			// TODO: also typing q in any field triggers the vim navigation 'q'
 			var addReq = AddTransactionRequest{
 				Type:        transactionType,
 				Amount:      amount,

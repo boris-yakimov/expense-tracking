@@ -2,7 +2,7 @@
 Track your expenses in the terminal
 
 List of Transactions Page
-![ListTxs](assets/visualize-transactions-page.png)
+![ListTxs](assets/visualize-transactions.png)
 Year Summary and P&L
 ![Summary](assets/year-overview.png)
 Add Transactions
