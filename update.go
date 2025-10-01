@@ -25,12 +25,12 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 	}
 
 	var form *tview.Form
-	var frame *tview.Frame
+	var centeredModal *tview.Flex
 
 	// transaction type dropdown (pre-populated with currently selected type)
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
-		showErrorModal(fmt.Sprintf("get a list of allowed transaction types err:\n\n%s", err), frame, form)
+		showErrorModal(fmt.Sprintf("get a list of allowed transaction types err:\n\n%s", err), centeredModal, form)
 		log.Printf("get a list of allowed transaction types err:\n\n%s", err)
 	}
 
@@ -64,7 +64,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			showErrorModal(fmt.Sprintf("failed to list categories err:\n\n%s", err), frame, form)
+			showErrorModal(fmt.Sprintf("failed to list categories err:\n\n%s", err), centeredModal, form)
 			log.Printf("failed to list categories err:\n\n%s", err)
 			return err
 		}
@@ -111,9 +111,8 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 				Description: description,
 			}
 
-			// TODO: failed to update transaction because of incorrect content of description resizes back the window to fullscreen isntead of the adequate modal size that we have in the initial update window
 			if err := handleUpdateTransaction(updateReq); err != nil {
-				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), frame, form)
+				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), centeredModal, form)
 				log.Printf("failed to update transaction:\n\n%s", err)
 				return
 			}
@@ -134,7 +133,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 	form.SetBorder(true).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
 
 	// navigation help
-	frame = tview.NewFrame(form).
+	frame := tview.NewFrame(form).
 		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
 
 	// back to list of transactions on ESC or q key press
@@ -145,7 +144,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 		AddItem(frame, 60, 1, true). // width fixed
 		AddItem(nil, 0, 1, false))
 
-	centeredModal := styleFlex(tview.NewFlex().
+	centeredModal = styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
 		AddItem(nil, 0, 1, false).
 		AddItem(modal, 17, 1, true). // enough to fit all the fields of the form on the screen
