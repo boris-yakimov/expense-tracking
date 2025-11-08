@@ -14,6 +14,7 @@ import (
 
 var tui *tview.Application
 var logFile *os.File
+var pages *tview.Pages
 
 func main() {
 	var err error
@@ -42,6 +43,11 @@ func main() {
 		screen.Fill(' ', tcell.StyleDefault.Background(theme.BackgroundColor))
 		return false
 	})
+
+	// maintain a list of each page like add, delete, update transaction, login, etc instead of replacing the root every time we have to switch a screen because it was causing resizing issues
+	// this way we add each page and we can easily switch between them on each funciton as needed
+	pages = tview.NewPages()
+	tui.SetRoot(pages, true)
 
 	log.Printf("Start Expense Tracking Tool")
 

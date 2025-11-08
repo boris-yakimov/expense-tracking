@@ -34,7 +34,7 @@ func validDescriptionInputFormat(description string) bool {
 	// Dashes (-)
 	// Dots (.)
 	// Brackets (())
-	pattern := `^[a-zA-Z0-9\p{Cyrillic}, .\-\(\)]+$`
+	pattern := `^[a-zA-Z0-9\p{Cyrillic}, .\-\(\)']+$`
 	matched, err := regexp.MatchString(pattern, description)
 	if err != nil {
 		return false

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
@@ -39,8 +40,13 @@ func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 func exitShortcutsWithPeriod(selectedMonth, selectedYear, focusTableType string) func(event *tcell.EventKey) *tcell.EventKey {
 	return func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-			gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType, true) // go back to the list of transactions (at the same month and year from where we came)
-			return nil                                                                   // key event consumed
+			// determine the correct page name to switch to
+			pageName := "main"
+			if selectedMonth != "" && selectedYear != "" {
+				pageName = fmt.Sprintf("main_%s_%s", selectedMonth, selectedYear)
+			}
+			pages.SwitchToPage(pageName) // go back to the list of transactions (at the same month and year from where we came)
+			return nil                    // key event consumed
 		}
 		return event // key event not consumed, so return it
 	}

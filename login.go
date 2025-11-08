@@ -66,12 +66,12 @@ func loginForm() error {
 				return
 			}
 
-			if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
-				showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
-				log.Printf("list transactions error:\n\n%s", err)
-				clearUserPassword() // remove pass from memory on error
-				return
-			}
+	if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
+		showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
+		log.Printf("list transactions error:\n\n%s", err)
+		clearUserPassword() // remove pass from memory on error
+		return
+	}
 
 		}).
 		AddButton("Quit", func() {
@@ -119,7 +119,8 @@ func loginForm() error {
 		return event
 	})
 
-	tui.SetRoot(root, true).SetFocus(passwordInputField)
+	pages.AddPage("login", root, true, true)
+	tui.SetFocus(passwordInputField)
 	return nil
 }
 
@@ -161,12 +162,12 @@ func setNewPasswordForm() {
 					return
 				}
 
-				if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
-					showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
-					log.Printf("list transactions error:\n\n%s", err)
-					clearUserPassword() // remove pass from memory on error
-					return
-				}
+			if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
+				showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
+				log.Printf("list transactions error:\n\n%s", err)
+				clearUserPassword() // remove pass from memory on error
+				return
+			}
 
 			} else {
 				message.SetText("Passwords do not match. Try Again.")
@@ -227,7 +228,8 @@ func setNewPasswordForm() {
 		return event
 	})
 
-	tui.SetRoot(root, true).SetFocus(passwordInputField)
+	pages.AddPage("setPassword", root, true, true)
+	tui.SetFocus(passwordInputField)
 }
 
 // helper to check if newly set password is adequate and stores it in memory for later use in generating an encryption key

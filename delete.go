@@ -59,12 +59,11 @@ func formDeleteTransaction(transactionId, transactionType, selectedMonth, select
 		AddItem(modal, 15, 1, true). // enough to fit all the fields of the form on the screen
 		AddItem(nil, 0, 1, false))   // bottom spacer
 
-	tui.SetRoot(centeredModal, true).SetFocus(form)
+	pages.AddPage("delete-transaction", centeredModal, true, true)
+	tui.SetFocus(form)
 
 	// back to transactions list on ESC or q key press
 	form.SetInputCapture(exitShortcutsWithPeriod(selectedMonth, selectedYear, transactionType))
-
-	tui.SetRoot(centeredModal, true).SetFocus(form)
 	return nil
 }
 

@@ -155,14 +155,13 @@ func showYearResults(year string) error {
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if ev := exitShortcuts(event); ev == nil {
 			// go back to year selector
-			if err := showYearSelector(); err != nil {
-				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), nil, flex)
-			}
+			pages.SwitchToPage("yearSelector")
 			return nil
 		}
 		return event
 	})
 
-	tui.SetRoot(frame, true).SetFocus(flex)
+	pages.AddPage("yearResults", frame, true, true)
+	tui.SetFocus(flex)
 	return nil
 }

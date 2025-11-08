@@ -147,7 +147,8 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 		AddItem(modal, 17, 1, true). // enough to fit all the fields of the form on the screen
 		AddItem(nil, 0, 1, false))
 
-	tui.SetRoot(centeredModal, true).SetFocus(form)
+	pages.AddPage("update-transaction", centeredModal, true, true)
+	tui.SetFocus(form)
 
 	return nil
 }

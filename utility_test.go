@@ -296,7 +296,7 @@ func TestEnforceCharLimit(t *testing.T) {
 		{string(make([]byte, DescriptionMaxCharLength)), 'a', true},
 		{string(make([]byte, DescriptionMaxCharLength+1)), 'a', false},
 		{"exactly forty chars long text here!", 'a', true},
-		{"this text is way too long and exceeds the maximum character limit allowed", 'a', false},
+		{"this text is way too long and exceeds the maximum character limit allowed and should definitely be invalid", 'a', false},
 	}
 
 	for _, c := range cases {

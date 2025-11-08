@@ -67,7 +67,7 @@ func showMonthSelector() error {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
 			// go back to the grid
-			gridVisualizeTransactions("", "", "", true)
+			pages.SwitchToPage("main")
 			return nil // key event consumed
 		}
 
@@ -83,7 +83,8 @@ func showMonthSelector() error {
 		return vimMotions(event)
 	})
 
-	tui.SetRoot(centeredModal, true).SetFocus(list)
+	pages.AddPage("monthSelector", centeredModal, true, true)
+	tui.SetFocus(list)
 	return nil
 }
 
@@ -140,7 +141,7 @@ func showYearSelector() error {
 		// handle exit events
 		if ev := exitShortcuts(event); ev == nil {
 			// go back to the grid
-			gridVisualizeTransactions("", "", "", true)
+			pages.SwitchToPage("main")
 			return nil // key event consumed
 		}
 
@@ -156,7 +157,8 @@ func showYearSelector() error {
 		return vimMotions(event)
 	})
 
-	tui.SetRoot(centeredModal, true).SetFocus(list)
+	pages.AddPage("yearSelector", centeredModal, true, true)
+	tui.SetFocus(list)
 	return nil
 }
 
@@ -257,8 +259,13 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		currentTable = 0
 	}
 
-	// start with focus on the specified table
-	tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+	// add page to pages system
+	pageName := "main"
+	if selectedMonth != "" && selectedYear != "" {
+		pageName = fmt.Sprintf("main_%s_%s", selectedMonth, selectedYear)
+	}
+	pages.AddPage(pageName, grid, true, true)
+	tui.SetFocus(tables[currentTable])
 
 	// handle input capture for navigation,
 	grid.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
@@ -399,7 +406,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 			searchInput.SetDoneFunc(func(key tcell.Key) {
 				switch key {
 				case tcell.KeyEnter: // exit search and focus on the table
-					tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+					pages.SwitchToPage(pageName)
+					tui.SetFocus(tables[currentTable])
 
 				case tcell.KeyEsc: // reset the search
 					switch currentTable {
@@ -415,7 +423,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 					updateTransactionsTable(incomeTable, "income", displayMonth, displayYear, transactions, incomeSearch)
 					updateTransactionsTable(expenseTable, "expense", displayMonth, displayYear, transactions, expenseSearch)
 					updateTransactionsTable(investmentTable, "investment", displayMonth, displayYear, transactions, investmentSearch)
-					tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+					pages.SwitchToPage(pageName)
+					tui.SetFocus(tables[currentTable])
 				}
 			})
 
@@ -423,7 +432,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 			flex := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow))
 			flex.AddItem(grid, 0, 1, true)
 			flex.AddItem(searchInput, 1, 1, true)
-			tui.SetRoot(flex, true).SetFocus(searchInput)
+			pages.AddPage("search", flex, true, true)
+			tui.SetFocus(searchInput)
 			return nil
 		}
 
@@ -432,7 +442,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 
 	// in cases like search where we still want to draw the grid of transactions but we want to focus on the search window instead of the grid
 	if setRoot {
-		tui.SetRoot(grid, true).SetFocus(tables[currentTable])
+		pages.SwitchToPage(pageName)
+		tui.SetFocus(tables[currentTable])
 	}
 
 	return grid, nil
