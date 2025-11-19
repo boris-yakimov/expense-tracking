@@ -37,16 +37,25 @@ func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 // returns a closure function around the scope of month, year that were passed
 // the TUI will actually call the returned function when a key is pressed
 // it is defined in this way because the form.SetInputCapture() expects a function as an arugment
+// TODO: focusTableType is unused, what did we use this for before refactoring to the pages model ?
 func exitShortcutsWithPeriod(selectedMonth, selectedYear, focusTableType string) func(event *tcell.EventKey) *tcell.EventKey {
 	return func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
-			// determine the correct page name to switch to
+			// determine the correct page name to switch to with a safe fallback
 			pageName := "main"
 			if selectedMonth != "" && selectedYear != "" {
-				pageName = fmt.Sprintf("main_%s_%s", selectedMonth, selectedYear)
+				candidate := fmt.Sprintf("main_%s_%s", selectedMonth, selectedYear)
+				// Prefer the month-specific page if it exists, otherwise fall back to the generic main page
+				if pages != nil && pages.HasPage(candidate) {
+					pageName = candidate
+				} else if pages != nil && pages.HasPage("main") {
+					pageName = "main"
+				} else {
+					return nil
+				}
 			}
 			pages.SwitchToPage(pageName) // go back to the list of transactions (at the same month and year from where we came)
-			return nil                    // key event consumed
+			return nil                   // key event consumed
 		}
 		return event // key event not consumed, so return it
 	}
