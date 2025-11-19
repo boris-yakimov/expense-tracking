@@ -40,7 +40,18 @@ func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 // TODO: focusTableType is unused, what did we use this for before refactoring to the pages model ?
 func exitShortcutsWithPeriod(selectedMonth, selectedYear, focusTableType string) func(event *tcell.EventKey) *tcell.EventKey {
 	return func(event *tcell.EventKey) *tcell.EventKey {
+		// If user presses ESC or 'q'/'Q', decide whether to exit.
 		if event.Key() == tcell.KeyEsc || (event.Key() == tcell.KeyRune && (event.Rune() == 'q' || event.Rune() == 'Q')) {
+			// If a text input field has focus, do not exit (allow typing to continue).
+			if tui != nil {
+				if focus := tui.GetFocus(); focus != nil {
+					switch focus.(type) {
+					case *tview.InputField:
+						return event // consume nothing; keep focus for typing
+					}
+				}
+			}
+
 			// determine the correct page name to switch to with a safe fallback
 			pageName := "main"
 			if selectedMonth != "" && selectedYear != "" {
