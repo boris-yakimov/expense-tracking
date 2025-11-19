@@ -54,8 +54,18 @@ func exitShortcutsWithPeriod(selectedMonth, selectedYear, focusTableType string)
 					return nil
 				}
 			}
+			// Remove the add-transaction modal if it's present to ensure clean focus restoration
+			if pages != nil {
+				pages.RemovePage("add-transaction")
+			}
 			pages.SwitchToPage(pageName) // go back to the list of transactions (at the same month and year from where we came)
-			return nil                   // key event consumed
+			// Attempt to restore focus by re-rendering the main grid with the correct focus table
+			if selectedMonth != "" && selectedYear != "" {
+				if _, err := gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType, true); err != nil {
+					// ignore render errors; not fatal
+				}
+			}
+			return nil
 		}
 		return event // key event not consumed, so return it
 	}

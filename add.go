@@ -27,8 +27,6 @@ type AddTransactionRequest struct {
 // TODO: bug where during transaction add if I try to navigate to the first transaction and than press up it doesn't go to the last one (it works the other way around, if I am on the last transaction and press down it successfully wraps back and sends me to the first one which is the intended behaviour in both directions)
 // TODO: maybe should also allow the & sign in description
 //
-//
-// TODO: pressing ESC on the add screen goes to black
 // TODO: coming back from a screen to the list transactions and pressin up and down moves the whole screen until tab is pressed one time to bring us inside the tables
 
 // creates a TUI form with required fiields to add a new transaction

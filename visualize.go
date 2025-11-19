@@ -443,7 +443,10 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 	// in cases like search where we still want to draw the grid of transactions but we want to focus on the search window instead of the grid
 	if setRoot {
 		pages.SwitchToPage(pageName)
-		tui.SetFocus(tables[currentTable])
+		// Ensure focus is on the active table even if the grid itself retained focus
+		if len(tables) > currentTable && tables[currentTable] != nil && !tables[currentTable].HasFocus() {
+			tui.SetFocus(tables[currentTable])
+		}
 	}
 
 	return grid, nil
