@@ -37,7 +37,6 @@ func exitShortcuts(event *tcell.EventKey) *tcell.EventKey {
 // returns a closure function around the scope of month, year that were passed
 // the TUI will actually call the returned function when a key is pressed
 // it is defined in this way because the form.SetInputCapture() expects a function as an arugment
-// TODO: focusTableType is unused, what did we use this for before refactoring to the pages model ?
 func exitShortcutsWithPeriod(selectedMonth, selectedYear, focusTableType string) func(event *tcell.EventKey) *tcell.EventKey {
 	return func(event *tcell.EventKey) *tcell.EventKey {
 		// If user presses ESC or 'q'/'Q', decide whether to exit.

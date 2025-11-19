@@ -33,7 +33,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
-		showErrorModal(fmt.Sprintf("list allowed transaction types: %s, err:\n\n%s", transactionType, err), frame, form)
+		showErrorModal(fmt.Sprintf("list allowed transaction types: %s, err:\n\n%s", transactionType, err), form)
 		log.Printf("list allowed transaction types: %s, err:\n\n%s", transactionType, err)
 		return err
 	}
@@ -46,7 +46,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 				opts, err := listOfAllowedCategories(transactionType)
 				if err != nil {
 					// Set empty options on error to prevent crashes
-					showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
+					showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), form)
 					log.Printf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err)
 					return
 				}
@@ -88,7 +88,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), frame, form)
+			showErrorModal(fmt.Sprintf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err), form)
 			log.Printf("list allowed categories for transaction type: %s, err:\n\n%s", transactionType, err)
 			return err
 		}
@@ -113,7 +113,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 	{
 		opts, err := getMonthsWithTransactions()
 		if err != nil {
-			showErrorModal(fmt.Sprintf("unable to get months with transactions: err:\n\n%s", err), frame, form)
+			showErrorModal(fmt.Sprintf("unable to get months with transactions: err:\n\n%s", err), form)
 			log.Printf("unable to get months with transactions: err:\n\n%s", err)
 			return err
 		}
@@ -165,7 +165,7 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 			// parse the selected month and year
 			parts := strings.SplitN(monthAndYear, " ", 2)
 			if len(parts) != 2 {
-				showErrorModal(fmt.Sprintf("invalid period format: %s", monthAndYear), frame, form)
+				showErrorModal(fmt.Sprintf("invalid period format: %s", monthAndYear), form)
 				log.Printf("invalid period format: %s", monthAndYear)
 				return
 			}
@@ -182,14 +182,14 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 			}
 
 			if err := handleAddTransaction(addReq); err != nil {
-				showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), frame, form)
+				showErrorModal(fmt.Sprintf("failed to add transaction:\n\n%s", err), form)
 				log.Printf("failed to add transaction:\n\n%s", err)
 				return
 			}
 
 			_, err := gridVisualizeTransactions(month, year, transactionType, true) // go back to list of transactions for the same month and table type
 			if err != nil {
-				showErrorModal("failed to return back to transactions list from add form", frame, form)
+				showErrorModal("failed to return back to transactions list from add form", form)
 				log.Printf("failed to return back to transactions list from add form")
 			}
 		}).

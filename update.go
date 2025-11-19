@@ -30,7 +30,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 	// transaction type dropdown (pre-populated with currently selected type)
 	allowedTransactionTypes, err := listOfAllowedTransactionTypes()
 	if err != nil {
-		showErrorModal(fmt.Sprintf("get a list of allowed transaction types err:\n\n%s", err), centeredModal, form)
+		showErrorModal(fmt.Sprintf("get a list of allowed transaction types err:\n\n%s", err), form)
 		log.Printf("get a list of allowed transaction types err:\n\n%s", err)
 	}
 
@@ -64,7 +64,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 	{
 		opts, err := listOfAllowedCategories(transactionType)
 		if err != nil {
-			showErrorModal(fmt.Sprintf("failed to list categories err:\n\n%s", err), centeredModal, form)
+			showErrorModal(fmt.Sprintf("failed to list categories err:\n\n%s", err), form)
 			log.Printf("failed to list categories err:\n\n%s", err)
 			return err
 		}
@@ -109,7 +109,7 @@ func formUpdateTransaction(transactionId, transactionType, selectedMonth, select
 			}
 
 			if err := handleUpdateTransaction(updateReq); err != nil {
-				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), centeredModal, form)
+				showErrorModal(fmt.Sprintf("failed to update transaction:\n\n%s", err), form)
 				log.Printf("failed to update transaction:\n\n%s", err)
 				return
 			}

@@ -51,7 +51,7 @@ func loginForm() error {
 					}
 
 					// some other unexpected error occured - corrupted file, permision issues, etc
-					showErrorModal(fmt.Sprintf("decryption failed: %s", err), centeredModal, passwordInputField)
+					showErrorModal(fmt.Sprintf("decryption failed: %s", err), passwordInputField)
 					log.Printf("decryption failed: %s", err)
 					clearUserPassword()
 					return
@@ -60,18 +60,18 @@ func loginForm() error {
 
 			// initialize DB connection now that the DB is decrypted or already plaintext
 			if err := initDb(globalConfig.UnencryptedDbFile); err != nil {
-				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), centeredModal, passwordInputField)
+				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), passwordInputField)
 				log.Printf("failed to initialize DB: %s\n", err)
 				clearUserPassword() // remove pass from memory on error
 				return
 			}
 
-	if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
-		showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
-		log.Printf("list transactions error:\n\n%s", err)
-		clearUserPassword() // remove pass from memory on error
-		return
-	}
+			if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
+				showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), passwordInputField)
+				log.Printf("list transactions error:\n\n%s", err)
+				clearUserPassword() // remove pass from memory on error
+				return
+			}
 
 		}).
 		AddButton("Quit", func() {
@@ -149,25 +149,25 @@ func setNewPasswordForm() {
 
 			if entered == repeat {
 				if err := addInitialPassword(entered); err != nil {
-					showErrorModal(fmt.Sprintf("failed to set a new password: %v", err), centeredModal, passwordInputField)
+					showErrorModal(fmt.Sprintf("failed to set a new password: %v", err), passwordInputField)
 					log.Printf("failed to set a new password: %v", err)
 					return // interrupt here
 				}
 
 				// proceed directly to app using the newly set in-memory password
 				if err := initDb(globalConfig.UnencryptedDbFile); err != nil {
-					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), centeredModal, passwordInputField)
+					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), passwordInputField)
 					log.Printf("failed to initialize DB: %s\n", err)
 					clearUserPassword() // remove pass from memory on error
 					return
 				}
 
-			if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
-				showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), centeredModal, passwordInputField)
-				log.Printf("list transactions error:\n\n%s", err)
-				clearUserPassword() // remove pass from memory on error
-				return
-			}
+				if _, err := gridVisualizeTransactions("", "", "", true); err != nil {
+					showErrorModal(fmt.Sprintf("list transactions error:\n\n%s", err), passwordInputField)
+					log.Printf("list transactions error:\n\n%s", err)
+					clearUserPassword() // remove pass from memory on error
+					return
+				}
 
 			} else {
 				message.SetText("Passwords do not match. Try Again.")

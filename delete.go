@@ -22,7 +22,7 @@ func formDeleteTransaction(transactionId, transactionType, selectedMonth, select
 	form = styleForm(tview.NewForm().
 		AddButton("Delete", func() {
 			if err := handleDeleteTransaction(transactionType, transactionId); err != nil {
-				showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), frame, form)
+				showErrorModal(fmt.Sprintf("failed to delete transaction:\n\n%s", err), form)
 				return
 			}
 			gridVisualizeTransactions(selectedMonth, selectedYear, transactionType, true) // go back to the list of transactions (at the same month and year from where formDeleteTransaction was triggered)

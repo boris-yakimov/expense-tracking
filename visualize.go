@@ -34,7 +34,7 @@ func showMonthSelector() error {
 				selectedYear := parts[1]
 				// go back to grid of visualized transactions but for the selected month and year
 				if _, err := gridVisualizeTransactions(selectedMonth, selectedYear, "", true); err != nil {
-					showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), nil, list)
+					showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), list)
 					return
 				}
 			}
@@ -74,7 +74,7 @@ func showMonthSelector() error {
 		// handle list months event
 		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
 			if err := showMonthSelector(); err != nil {
-				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, list)
+				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), list)
 				return nil
 			}
 			return nil // key event consumed
@@ -109,7 +109,7 @@ func showYearSelector() error {
 			// You click 2024 → the callback sees year == "2025"
 			// You click 2025 → the callback sees year == "2025"
 			if err := showYearResults(yearCopy); err != nil {
-				showErrorModal(fmt.Sprintf("error showing year results:\n\n%s", err), nil, list)
+				showErrorModal(fmt.Sprintf("error showing year results:\n\n%s", err), list)
 				return
 			}
 		})
@@ -148,7 +148,7 @@ func showYearSelector() error {
 		// handle list years event
 		if event.Key() == tcell.KeyRune && event.Rune() == 'y' {
 			if err := showYearSelector(); err != nil {
-				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), nil, list)
+				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), list)
 				return nil
 			}
 			return nil // key event consumed
@@ -293,7 +293,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		// handle list months event
 		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
 			if err := showMonthSelector(); err != nil {
-				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), nil, grid)
+				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), grid)
 				return nil
 			}
 			return nil // key event consumed
@@ -310,7 +310,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 				currentTableType = "investment"
 			}
 			if err := formAddTransaction(currentTableType, displayMonth, displayYear); err != nil {
-				showErrorModal(fmt.Sprintf("add error:\n\n%s", err), nil, grid)
+				showErrorModal(fmt.Sprintf("add error:\n\n%s", err), grid)
 				return nil
 			}
 		}
@@ -332,7 +332,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 
 			// month and year are passed here only for the purposes for the update transation form sending us back to the same month and year that we came from when we triggered it
 			if err := formUpdateTransaction(txId, currentTableType, displayMonth, displayYear); err != nil {
-				showErrorModal(fmt.Sprintf("update error:\n\n%s", err), nil, grid)
+				showErrorModal(fmt.Sprintf("update error:\n\n%s", err), grid)
 				return nil
 			}
 		}
@@ -357,14 +357,14 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 
 			// month and year are passed here only for the purposes for the delete transation form sending us back to the same month and year that we came from when we triggered it
 			if err := formDeleteTransaction(txId, currentTableType, displayMonth, displayYear); err != nil {
-				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), nil, grid)
+				showErrorModal(fmt.Sprintf("delete error:\n\n%s", err), grid)
 				return nil
 			}
 		}
 
 		if event.Key() == tcell.KeyRune && event.Rune() == 'y' {
 			if err := showYearSelector(); err != nil {
-				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), nil, grid)
+				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), grid)
 				return nil
 			}
 			return nil // key event consumed

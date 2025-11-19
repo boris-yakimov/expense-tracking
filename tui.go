@@ -34,7 +34,7 @@ func generateTransactionNavigationFooter() string {
 }
 
 // handles creating a pop-up for error messages in the TUI
-func showErrorModal(msg string, previous tview.Primitive, focus tview.Primitive) {
+func showErrorModal(msg string, focus tview.Primitive) {
 	modal := styleModal(tview.NewModal().
 		SetText(msg).
 		AddButtons([]string{"OK"}))
