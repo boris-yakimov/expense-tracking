@@ -22,12 +22,8 @@ type AddTransactionRequest struct {
 	Year        string
 }
 
-// TODO: didn't allow the description: salary + on-call ; check what chars are missing and fix it
 // TODO: bug where during transaction add if 'q' is typed in description it exits the add transaction screen
 // TODO: bug where during transaction add if I try to navigate to the first transaction and than press up it doesn't go to the last one (it works the other way around, if I am on the last transaction and press down it successfully wraps back and sends me to the first one which is the intended behaviour in both directions)
-// TODO: maybe should also allow the & sign in description
-//
-// TODO: coming back from a screen to the list transactions and pressin up and down moves the whole screen until tab is pressed one time to bring us inside the tables
 
 // creates a TUI form with required fiields to add a new transaction
 func formAddTransaction(currentTableType, selectedMonth, selectedYear string) error {
