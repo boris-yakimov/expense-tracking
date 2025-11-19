@@ -90,13 +90,13 @@ func enableTableWrap(table *tview.Table) {
 
 		switch event.Key() {
 		case tcell.KeyDown:
-			if row == rowCount-1 { // at last row
-				table.Select(0, col) // wrap to top
+			if row == rowCount-1 { // at last data row
+				table.Select(1, col) // wrap to first data row (skip header)
 				return nil           // consume key event
 			}
 		case tcell.KeyUp:
-			if row == 0 {
-				table.Select(rowCount-1, col) // wrap to bottom
+			if row == 1 { // at first data row (skip header)
+				table.Select(rowCount-1, col) // wrap to last data row
 				return nil                    // consume key event
 			}
 		}

@@ -22,8 +22,6 @@ type AddTransactionRequest struct {
 	Year        string
 }
 
-// TODO: bug where during transaction add if I try to navigate to the first transaction and than press up it doesn't go to the last one (it works the other way around, if I am on the last transaction and press down it successfully wraps back and sends me to the first one which is the intended behaviour in both directions)
-
 // creates a TUI form with required fiields to add a new transaction
 func formAddTransaction(currentTableType, selectedMonth, selectedYear string) error {
 	var transactionType string
