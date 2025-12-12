@@ -13,6 +13,13 @@ import (
 	"github.com/rivo/tview"
 )
 
+// TODO: should I not just let all symbols in description and do no validation ?
+// TODO: add ":" as an allowed symbol
+// TODO: add ";" as an allowed symbol
+// TODO: add option to support "_"
+//
+// TODO: add housing as an expense option
+
 type AddTransactionRequest struct {
 	Type        string
 	Amount      string
