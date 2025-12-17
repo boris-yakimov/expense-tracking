@@ -22,7 +22,6 @@ const (
 	saltLen    = 16      // Salt length in bytes
 
 	DescriptionMaxCharLength = 160
-	allowedCharsDescription  = "Latin letters, Cyrillic letters, numbers, commas, spaces, dashes, dots, and brackets"
 
 	TransactionIDLength = 8
 )

@@ -25,6 +25,7 @@ var allowedTransactionCategories = map[string]map[string]string{
 		"transportation": "anything transportation related excluding personal car expenditures",
 		"healthcare":     "hospital, pharmacy, supplements, etc",
 		"transfers":      "transfer out to other people - split bills, family support, etc",
+		"housing":        "rent, mortgage, etc",
 		"taxes":          "property, capital gains tax, personal income tax, etc (excluding anything related to car)",
 		"renovation":     "construction, renovations, home improvements (structural/contractor work)",
 		"education":      "courses, certificates, books for learning, tuition",

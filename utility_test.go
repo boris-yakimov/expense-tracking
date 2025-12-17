@@ -5,32 +5,6 @@ import (
 	"testing"
 )
 
-func TestValidDescriptionInputFormat(t *testing.T) {
-	cases := []struct {
-		input    string
-		expected bool
-	}{
-		{"correct description", true},
-		{"Valid description 123", true},
-		{"Another-description, with commas", true},
-		{"dash-separated-description", true},
-		{"description with 'single quotes'", true},
-		{"contains_underscore", false},
-		{"contains@symbol", false},
-		{"contains/slash", false},
-		{"", false},   // empty string is not valid based on the regex
-		{"   ", true}, // spaces only, allowed by regex
-		{"strings that is too long for what might be expected as a description, but is still valid also includes - and Capital letter", true},
-	}
-
-	for _, c := range cases {
-		validFormat := validDescriptionInputFormat(c.input)
-		if validFormat != c.expected {
-			t.Errorf("validDescriptionInputFormat(%q) = %v; expected %v", c.input, validFormat, c.expected)
-		}
-	}
-}
-
 func TestNormalizeTransactionType(t *testing.T) {
 	cases := []struct {
 		input    string

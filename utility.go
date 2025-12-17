@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"regexp"
 	"sort"
 	"strconv"
 	"strings"
@@ -22,27 +21,6 @@ var monthOrder = map[string]int{
 	"october":   10,
 	"november":  11,
 	"december":  12,
-}
-
-// helper to validate the the format of the description field
-func validDescriptionInputFormat(description string) bool {
-	// Latin letters (a-zA-Z)
-	// Cyrillic letters (\p{IsCyrillic})
-	// Numbers (0-9)
-	// Commas (,)
-	// Spaces ( )
-	// Dashes (-)
-	// Dots (.)
-	// Brackets (())
-	// Plus (+)
-	// Ampersand (&)
-	pattern := `^[a-zA-Z0-9\p{Cyrillic}, .&\-\(\)'+]+$`
-	matched, err := regexp.MatchString(pattern, description)
-	if err != nil {
-		return false
-	}
-
-	return matched
 }
 
 // helper to make sure transaction types are standardized - lowercase and matching the expected name as in the db

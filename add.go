@@ -13,13 +13,6 @@ import (
 	"github.com/rivo/tview"
 )
 
-// TODO: should I not just let all symbols in description and do no validation ?
-// TODO: add ":" as an allowed symbol
-// TODO: add ";" as an allowed symbol
-// TODO: add option to support "_"
-//
-// TODO: add housing as an expense option
-
 type AddTransactionRequest struct {
 	Type        string
 	Amount      string
@@ -252,10 +245,6 @@ func handleAddTransaction(req AddTransactionRequest) error {
 	updatedCategory := req.Category
 	if _, ok := allowedTransactionCategories[txType][updatedCategory]; !ok {
 		return fmt.Errorf("invalid transaction category: %s", updatedCategory)
-	}
-
-	if !validDescriptionInputFormat(req.Description) {
-		return fmt.Errorf("invalid character in description, allowed: %s, got: %s", allowedCharsDescription, req.Description)
 	}
 
 	transactions, loadFileErr := LoadTransactions()

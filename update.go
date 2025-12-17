@@ -173,10 +173,6 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("\n\ninvalid transaction category: %s", req.Category)
 	}
 
-	if !validDescriptionInputFormat(req.Description) {
-		return fmt.Errorf("invalid character in description, allowed: %s, got: %s", allowedCharsDescription, req.Description)
-	}
-
 	transactions, loadFileErr := LoadTransactions()
 	if loadFileErr != nil {
 		return fmt.Errorf("unable to load transactions file: %w", loadFileErr)
