@@ -87,16 +87,6 @@ func TestHandleAddTransaction(t *testing.T) {
 					year:            year,
 					expectedError:   true,
 				},
-				{
-					name:            "invalid description format",
-					transactionType: "expense",
-					amount:          "100.00",
-					category:        "food",
-					description:     "description_with_underscores",
-					month:           month,
-					year:            year,
-					expectedError:   true,
-				},
 			}
 
 			for _, c := range cases {

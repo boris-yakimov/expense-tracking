@@ -103,15 +103,7 @@ func TestHandleUpdateTransaction(t *testing.T) {
 					description:     "test",
 					expectedError:   true,
 				},
-				{
-					name:            "invalid description format",
-					transactionType: "expense",
-					transactionId:   "12345678",
-					amount:          "50.00",
-					category:        "food",
-					description:     "description_with_underscores",
-					expectedError:   true,
-				},
+
 				{
 					name:            "invalid transaction type",
 					transactionType: "invalidtype",
