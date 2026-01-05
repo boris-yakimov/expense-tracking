@@ -16,6 +16,10 @@ var tui *tview.Application
 var logFile *os.File
 var pages *tview.Pages
 
+// TODO: the year summary percentages seems hard to understand, think of how to visualize better
+// should show mainly % total savings rate (or negative savings rate if it is not present)
+// maybe 2 separate totals one that includes investments and one that includes only expenses and income
+
 func main() {
 	var err error
 	// load configuration
