@@ -18,7 +18,9 @@ var pages *tview.Pages
 
 // TODO: the year summary percentages seems hard to understand, think of how to visualize better
 // should show mainly % total savings rate (or negative savings rate if it is not present)
-// maybe 2 separate totals one that includes investments and one that includes only expenses and income
+//
+// TODO: maybe 2 separate totals for the year - one that includes investments and one that includes only expenses and income
+// also 2 separate totals for each month to see a better savings % with and without investments included
 
 func main() {
 	var err error
