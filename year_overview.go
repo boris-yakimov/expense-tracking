@@ -18,7 +18,7 @@ func generatePieChart(pnl PnLResult, width, height int) string {
 
 	incomePct := pnl.incomeTotal / total
 	expensePct := pnl.expenseTotal / total
-	investmentPct := pnl.investmentTotal / total
+	// investmentPct := pnl.investmentTotal / total
 
 	// ensure minimum size
 	if width < 20 {
@@ -78,9 +78,10 @@ func generatePieChart(pnl PnLResult, width, height int) string {
 	}
 
 	// add legend
-	result += fmt.Sprintf("\n%s█%s Income: €%.2f (%.1f%%)\n", Blue, Reset, pnl.incomeTotal, incomePct*100)
-	result += fmt.Sprintf("%s█%s Expenses: €%.2f (%.1f%%)\n", Red, Reset, pnl.expenseTotal, expensePct*100)
-	result += fmt.Sprintf("%s█%s Investments: €%.2f (%.1f%%)\n", Green, Reset, pnl.investmentTotal, investmentPct*100)
+	result += fmt.Sprintf("\n%s█%s Income: €%.2f \n", Blue, Reset, pnl.incomeTotal)
+	result += fmt.Sprintf("%s█%s Expenses: €%.2f \n", Red, Reset, pnl.expenseTotal)
+	result += fmt.Sprintf("%s█%s Investments: €%.2f \n", Green, Reset, pnl.investmentTotal)
+	// (%.1f%%) - , investmentPct*100
 
 	return result
 }
@@ -120,7 +121,7 @@ func showYearResults(year string) error {
 		leftContent.WriteString(fmt.Sprintf("  Income: €%.2f\n", pnl.incomeTotal))
 		leftContent.WriteString(fmt.Sprintf("  Expenses: €%.2f\n", pnl.expenseTotal))
 		leftContent.WriteString(fmt.Sprintf("  Investments: €%.2f\n", pnl.investmentTotal))
-		leftContent.WriteString(fmt.Sprintf("  P&L: €%.2f (%.1f%%)\n\n", pnl.pnlAmount, pnl.pnlPercent))
+		leftContent.WriteString(fmt.Sprintf("  Savings: €%.2f (%.1f%% of income)\n\n", pnl.pnlAmount, pnl.pnlPercent))
 	}
 
 	leftContent.WriteString("-----------------------------\n")
@@ -128,7 +129,7 @@ func showYearResults(year string) error {
 	leftContent.WriteString(fmt.Sprintf("  Income: €%.2f\n", yearPnL.incomeTotal))
 	leftContent.WriteString(fmt.Sprintf("  Expenses: €%.2f\n", yearPnL.expenseTotal))
 	leftContent.WriteString(fmt.Sprintf("  Investments: €%.2f\n", yearPnL.investmentTotal))
-	leftContent.WriteString(fmt.Sprintf("  P&L: €%.2f (%.1f%%)\n", yearPnL.pnlAmount, yearPnL.pnlPercent))
+	leftContent.WriteString(fmt.Sprintf("  Savings: €%.2f (%.1f%% of income)\n", yearPnL.pnlAmount, yearPnL.pnlPercent))
 
 	leftText.SetText(leftContent.String())
 

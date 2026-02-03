@@ -196,7 +196,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		return nil, fmt.Errorf("unable to calculate pnl: %w", err)
 	}
 	if displayMonth != "" && displayYear != "" {
-		footerText = fmt.Sprintf("Income: €%.2f | Expenses: €%.2f | Investments: €%.2f \n\nP&L Result: €%.2f | %.1f%%", calculatedPnl.incomeTotal, calculatedPnl.expenseTotal, calculatedPnl.investmentTotal, calculatedPnl.pnlAmount, calculatedPnl.pnlPercent)
+		footerText = fmt.Sprintf("Income: €%.2f | Expenses: €%.2f | Investments: €%.2f \n\nSavings: €%.2f | %.1f%% of income", calculatedPnl.incomeTotal, calculatedPnl.expenseTotal, calculatedPnl.investmentTotal, calculatedPnl.pnlAmount, calculatedPnl.pnlPercent)
 	}
 
 	// build tx table for each tx type

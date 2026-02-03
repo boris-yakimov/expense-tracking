@@ -13,7 +13,7 @@ type PnLResult struct {
 	pnlPercent      float64
 }
 
-// calculates the p&l for a specific month
+// calculates the p&l for a specific month - does not include investments
 func calculateMonthPnL(month, year string) (PnLResult, error) {
 	var pnl PnLResult
 
@@ -44,20 +44,20 @@ func calculateMonthPnL(month, year string) (PnLResult, error) {
 		}
 	}
 
-	// calucalte the reulting P&L: income - spend(expenses and investments)
-	// in absolute value and in % savings i.e. if you receved 1000 and spent 400, this will be 60% savings rate
+	// calucalte the reulting P&L: income - expenses
+	// in absolute value and in % savings i.e. if you receved 1000 and spent 400, this will be 60% savings rate (investments are not calculated as either income or expense, they are their separate category that does not factor into calculating the savings rate)
 	if pnl.incomeTotal == 0 { // avoid division by zero
-		pnl.pnlAmount = pnl.incomeTotal - (pnl.expenseTotal + pnl.investmentTotal)
+		pnl.pnlAmount = pnl.incomeTotal - pnl.expenseTotal
 		pnl.pnlPercent = 0
 	} else {
-		pnl.pnlAmount = pnl.incomeTotal - (pnl.expenseTotal + pnl.investmentTotal)
-		pnl.pnlPercent = ((pnl.incomeTotal - (pnl.expenseTotal + pnl.investmentTotal)) / pnl.incomeTotal) * 100
+		pnl.pnlAmount = pnl.incomeTotal - pnl.expenseTotal
+		pnl.pnlPercent = ((pnl.incomeTotal - pnl.expenseTotal) / pnl.incomeTotal) * 100
 	}
 
 	return pnl, nil
 }
 
-// calculates the p&l for a specific month
+// calculates the p&l for a specific year - does not include investments
 func calculateYearPnL(year string) (PnLResult, error) {
 	var pnl PnLResult
 
@@ -90,14 +90,14 @@ func calculateYearPnL(year string) (PnLResult, error) {
 		}
 	}
 
-	// calucalte the reulting P&L: income - spend(expenses and investments)
-	// in absolute value and in % savings i.e. if you receved 1000 and spent 400, this will be 60% savings rate
+	// calucalte the reulting P&L: income - expenses
+	// in absolute value and in % savings i.e. if you receved 1000 and spent 400, this will be 60% savings rate (investments are not calculated as either income or expense, they are their separate category that does not factor into calculating the savings rate)
 	if pnl.incomeTotal == 0 { // avoid division by zero
-		pnl.pnlAmount = pnl.incomeTotal - (pnl.expenseTotal + pnl.investmentTotal)
+		pnl.pnlAmount = pnl.incomeTotal - pnl.expenseTotal
 		pnl.pnlPercent = 0
 	} else {
-		pnl.pnlAmount = pnl.incomeTotal - (pnl.expenseTotal + pnl.investmentTotal)
-		pnl.pnlPercent = ((pnl.incomeTotal - (pnl.expenseTotal + pnl.investmentTotal)) / pnl.incomeTotal) * 100
+		pnl.pnlAmount = pnl.incomeTotal - pnl.expenseTotal
+		pnl.pnlPercent = ((pnl.incomeTotal - pnl.expenseTotal) / pnl.incomeTotal) * 100
 	}
 
 	return pnl, nil
