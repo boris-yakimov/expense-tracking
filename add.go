@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"slices"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -118,19 +119,30 @@ func formAddTransaction(currentTableType, selectedMonth, selectedYear string) er
 			return err
 		}
 
-		// make sure the current month is in the list
+		// make sure all 12 months of the current year are in the list
 		now := time.Now()
-		currentMonth := fmt.Sprintf("%s %s", strings.ToLower(now.Month().String()), strconv.Itoa(now.Year()))
-		if !slices.Contains(opts, currentMonth) {
-			opts = append(opts, currentMonth)
+		currentYear := strconv.Itoa(now.Year())
+		for m := 1; m <= 12; m++ {
+			monthStr := fmt.Sprintf("%s %s", strings.ToLower(time.Month(m).String()), currentYear)
+			if !slices.Contains(opts, monthStr) {
+				opts = append(opts, monthStr)
+			}
 		}
 
-		// make sure the previous month is also in the list
-		prev := now.AddDate(0, -1, 0)
-		previousMonth := fmt.Sprintf("%s %s", strings.ToLower(prev.Month().String()), strconv.Itoa(prev.Year()))
-		if !slices.Contains(opts, previousMonth) {
-			opts = append(opts, previousMonth)
-		}
+		// sort by year (ascending), then month (ascending)
+		sort.Slice(opts, func(i, j int) bool {
+			partsI := strings.SplitN(opts[i], " ", 2)
+			partsJ := strings.SplitN(opts[j], " ", 2)
+			if len(partsI) != 2 || len(partsJ) != 2 {
+				return opts[i] < opts[j]
+			}
+			yearI, _ := strconv.Atoi(partsI[1])
+			yearJ, _ := strconv.Atoi(partsJ[1])
+			if yearI != yearJ {
+				return yearI < yearJ
+			}
+			return monthOrder[strings.ToLower(partsI[0])] < monthOrder[strings.ToLower(partsJ[0])]
+		})
 
 		periodDropdown.SetOptions(opts, func(selectedOption string, index int) {
 			monthAndYear = selectedOption
