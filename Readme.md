@@ -1,20 +1,85 @@
 # expense tracking CLI tool (TUI)
 Track your expenses in the terminal
 
+Navigating the Menus
+![Recording](assets/recording.gif)
+
+Login
+![Login](assets/login.png)
 List of Transactions Page
 ![ListTxs](assets/visualize-transactions.png)
+Monthly Spending Breakdown by Category
+![SpendingBreakdown](assets/spending-breakdown.png)
 Year Summary and P&L
 ![Summary](assets/year-overview.png)
-Spending Breakdown by Category
-![SpendingBreakdown](assets/spending-breakdown.png)
 Add Transactions
 ![AddTx](assets/add-transactions.png)
 Update Transactions
 ![UpdateTx](assets/update-transactions.png)
 Delete Transactions
 ![DeleteTx](assets/delete-transactions.png)
-Navigating the Menus
-![Recording](assets/recording.gif)
+Search Transactions
+![Search](assets/search.png)
+Undo / Redo
+![Undo](assets/undo.png)
+
+## Features
+
+- **Monthly transactions view** - income, expenses and investments for a month side by side, with a month summary (P&L, savings, savings after investing and a split bar). Opens on the latest month that has transactions.
+- **Add / update / delete** transactions. New transactions can be added to any month and year, not only the one currently shown. Descriptions are limited to 160 characters.
+- **Search** - filter the focused table by text as you type.
+- **Undo / redo** - every add, update and delete can be undone and redone. The app then jumps to the month and table where the change happened. History holds the last 100 changes and only lasts for the current session.
+- **Monthly spending breakdown** - expenses for a month grouped by category, with a pie chart, each category's share, and how it compares to the average month of that year.
+- **Year summary** - P&L for the whole year, month-by-month results with savings rate, and a full-year spending breakdown. Press Enter on a month to open its spending breakdown.
+- **Encrypted storage** - the database is encrypted with a password you set on first run (see below).
+
+## Keybindings
+
+Vim-style motions work everywhere: `j`/`k` = down/up, `h`/`l` = previous/next (same as `Shift+TAB`/`TAB`).
+
+Transactions view
+
+| Key | Action |
+| --- | --- |
+| `a` | add a transaction (type preselected from the focused table) |
+| `e` / `u` | update the selected transaction |
+| `d` | delete the selected transaction |
+| `/` | search the focused table (`Enter` keeps the filter and returns to the table, `ESC` clears it) |
+| `ctrl+z` | undo the last change |
+| `ctrl+y` / `ctrl+r` | redo |
+| `m` | select a month |
+| `y` | select a year and open its summary |
+| `b` | spending breakdown for the shown month |
+| `TAB` / `Shift+TAB`, `l` / `h`, `→` / `←` | next / previous table |
+| `j` / `k`, `↓` / `↑` | move between rows (wraps around) |
+| `ESC` / `q` | quit |
+
+Spending breakdown
+
+| Key | Action |
+| --- | --- |
+| `m` | pick another month of the same year |
+| `y` | open the year summary (`ESC` there returns to the breakdown) |
+| `j` / `k`, `↓` / `↑` | scroll |
+| `ESC` / `q` | back |
+
+Year summary
+
+| Key | Action |
+| --- | --- |
+| `Enter` | open the spending breakdown of the selected month |
+| `TAB` / `Shift+TAB` | switch between panels (scroll long panels with `j` / `k`) |
+| `ESC` / `q` | back |
+
+Forms and pop-ups: `TAB` / `Shift+TAB` move between fields, `Enter` opens dropdowns and presses buttons, `ESC` / `q` go back when a dropdown or button is focused (inside a text field they are ignored / typed so you don't lose input). `ESC` on the login screen quits.
+
+## Categories
+
+| Type | Categories |
+| --- | --- |
+| Income | salary, transfers, dividends, capitalGains, rentals, interest, selfEmployment, insurance, refunds |
+| Expense | housing, bills, food, car, transportation, shopping, entertainment, travel, healthcare, insurance, taxes, renovation, education, kids, pets, sports, donations, fees, services, transfers, cash |
+| Investment | stocks, bonds, funds, insurance, privateEquity, realEstate, deposits, retirement, p2p, crypto, forex, options, commodities |
 
 ## Installation 
 
@@ -105,7 +170,6 @@ The expense tracking tool now supports configurable storage backends. Primary st
 
 ### Environment Variables (optional)
 
-- `EXPENSE_STORAGE_TYPE`: Set to `"sqlite"` (default) (previously JSON was supported, but was deprecated)
 - `EXPENSE_UNENCRYPTED_DB_PATH`: Path to unencrypted SQLite database file (default: `"~/.expense-tracking/transactions.db"`)
 - `EXPENSE_ENCRYPTED_DB_PATH`: Path to encrypted database file (default: `"~/.expense-tracking/transactions.enc"`)
 - `EXPENSE_LOG_PATH`: Path to log file (default: `"~/.expense-tracking/expense-tracking.log"`)
@@ -143,13 +207,24 @@ Note: Both files must be restored together for the encryption to work properly. 
 
 ## Compile source
 
-Dependencies
+Dependencies (cross compilers, only needed for `make compile`)
 ```sh
+# Debian / Ubuntu
 sudo apt install gcc-aarch64-linux-gnu
 sudo apt install gcc-mingw-w64
+
+# Arch
+sudo pacman -S aarch64-linux-gnu-gcc mingw-w64-gcc
 ```
 
-Compile
+Other make targets
+```sh
+make build   # native build to bin/expense-tracking
+make run     # go run .
+make test    # go test -v .
+```
+
+Compile for all platforms
 ```sh
 make compile
 
