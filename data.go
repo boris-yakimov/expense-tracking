@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
 )
 
@@ -75,150 +76,147 @@ type Transaction struct {
 	Description string
 }
 
-// helper to build a table for a specific transaction type for visualization in the TUI
-func createTransactionsTable(txType, month, year string, transactions TransactionHistory, filter string) *tview.Table {
-	table := tview.NewTable().
-		SetSelectable(true, false). // enable row selection
-		SetFixed(1, 0)              // make header row fixed
-	table.SetBorder(false)
-	table.SetTitle(capitalize(txType)).SetBorder(true)
-
-	headers := []string{"ID", "Amount", "Category", "Description"}
-	for c, h := range headers {
-		table.SetCell(0, c, tview.NewTableCell(h).SetSelectable(false))
+// color (tview tag) used for a transaction type across the TUI, matching the year overview palette
+func txTypeColor(txType string) string {
+	switch txType {
+	case "income":
+		return incomeColor
+	case "expense":
+		return expenseColor
+	case "investment":
+		return investmentColor
 	}
+	return Reset
+}
 
-	if year == "" || month == "" {
-		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
-		return table
-	}
-
-	txList := transactions[year][month][txType]
-	if len(txList) == 0 {
-		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
-		return table
-	}
-
-	var filteredTxList []Transaction
-	// if no search filter is provided just use the list of transactions for the selected month
-	// this way we show all transactions initially and when we initiate a search we show only trasactions that match the pattern
+// transactions of a type that match the search filter (case-insensitive, any field); no filter returns all of them
+func filterTransactions(txList []Transaction, filter string) []Transaction {
 	if filter == "" {
-		filteredTxList = txList
-	} else {
-		// search through transactions if filter is provided (for vim like search functionality)
-		filterLower := strings.ToLower(filter)
-		for _, tx := range txList {
-			// search for a pattern in any of the sections if present, append to the filtered list
-			// filtered list will later be used to show only trasactions that match the search pattern during searching
-			if strings.Contains(strings.ToLower(tx.Id), filterLower) ||
-				strings.Contains(strings.ToLower(fmt.Sprintf("%.2f", tx.Amount)), filterLower) ||
-				strings.Contains(strings.ToLower(tx.Category), filterLower) ||
-				strings.Contains(strings.ToLower(tx.Description), filterLower) {
-				filteredTxList = append(filteredTxList, tx)
-			}
+		return txList
+	}
+	filterLower := strings.ToLower(filter)
+	var filtered []Transaction
+	for _, tx := range txList {
+		if strings.Contains(strings.ToLower(tx.Id), filterLower) ||
+			strings.Contains(strings.ToLower(fmt.Sprintf("%.2f", tx.Amount)), filterLower) ||
+			strings.Contains(strings.ToLower(tx.Category), filterLower) ||
+			strings.Contains(strings.ToLower(tx.Description), filterLower) {
+			filtered = append(filtered, tx)
 		}
 	}
+	return filtered
+}
 
-	if len(filteredTxList) == 0 {
-		table.SetCell(1, 0, tview.NewTableCell("no transaction matches found"))
-		return table
+// clears and fills a transactions table (header, rows and a title with count and total) and returns the rows shown
+// every cell of a row carries the transaction id as its reference, used by update and delete
+func populateTransactionsTable(table *tview.Table, txType, month, year string, transactions TransactionHistory, filter string) []Transaction {
+	table.Clear()
+	table.SetSelectable(true, false). // enable row selection
+						SetFixed(1, 0) // make header row fixed
+	styleTable(table)
+	table.SetBackgroundColor(theme.FieldBackgroundColor) // panel look, same as the breakdown and year summary pages
+	table.SetBorder(true)
+
+	color := txTypeColor(txType)
+	typeColor := tagColor(color)
+	headerColor := tagColor("[#56b6c2]")
+	muted := tagColor(mutedColor)
+
+	// empty states replace the header row, a long message in the first column would otherwise stretch it
+	message := func(text string) {
+		table.SetCell(0, 0, tview.NewTableCell(text).SetTextColor(muted).SetSelectable(false))
 	}
 
-	// populate a table with only the transactions that match the specific pattern that we are searching for
-	for r, tx := range filteredTxList {
-		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)).
-			SetReference(tx.Id)) // setting a reference for transaction IDs that will later be used when trying to match specific transaction IDs during update and delete operations
-		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
-		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
-		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
-
+	var txList []Transaction
+	if year != "" && month != "" {
+		txList = transactions[year][month][txType]
 	}
+	filtered := filterTransactions(txList, filter)
+
+	var total float64
+	for _, tx := range filtered {
+		total += tx.Amount
+	}
+	count := fmt.Sprintf("%d", len(txList))
+	if filter != "" {
+		count = fmt.Sprintf("%d of %d", len(filtered), len(txList))
+	}
+	table.SetTitle(fmt.Sprintf(" %s%s%s  %s%s ·%s %s€%.2f%s ",
+		color, capitalize(txType), Reset, mutedColor, count, Reset, color, total, Reset))
+
+	switch {
+	case len(txList) == 0:
+		message("no transactions")
+		return nil
+	case len(filtered) == 0:
+		message(fmt.Sprintf("no matches for \"%s\"", tview.Escape(filter)))
+		return nil
+	}
+
+	headers := []string{"ID", "Amount €", "Category", "Description"}
+	for c, h := range headers {
+		cell := tview.NewTableCell(h).
+			SetTextColor(headerColor).
+			SetAttributes(tcell.AttrBold).
+			SetSelectable(false)
+		if c == 1 {
+			cell.SetAlign(tview.AlignRight)
+		}
+		table.SetCell(0, c, cell)
+	}
+
+	for r, tx := range filtered {
+		cells := []*tview.TableCell{
+			tview.NewTableCell(tx.Id + "  ").SetTextColor(muted),
+			tview.NewTableCell(fmt.Sprintf("%.2f", tx.Amount)).SetTextColor(typeColor).SetAlign(tview.AlignRight),
+			tview.NewTableCell(" " + tview.Escape(capitalize(tx.Category))).SetTextColor(theme.LabelColor),
+			tview.NewTableCell(" " + tview.Escape(tx.Description)).SetTextColor(theme.FieldTextColor).SetExpansion(1),
+		}
+		for c, cell := range cells {
+			fg, _, _ := cell.Style.Decompose()
+			cell.SetReference(tx.Id). // used to match specific transaction IDs during update and delete operations
+							SetSelectedStyle(tcell.StyleDefault.Foreground(fg).Background(selectedRowColor).Bold(true))
+			table.SetCell(r+1, c, cell)
+		}
+	}
+	return filtered
+}
+
+// helper to build a table for a specific transaction type for visualization in the TUI
+// with a search filter only transactions matching it in any field are shown (vim like search)
+func createTransactionsTable(txType, month, year string, transactions TransactionHistory, filter string) *tview.Table {
+	table := tview.NewTable()
+	populateTransactionsTable(table, txType, month, year, transactions, filter)
+
 	// make sure selection always starts on the first row
 	if table.GetRowCount() > 1 {
 		table.Select(1, 0)
 	}
-
 	return table
 }
 
-// helper to update an existing table with filtered transactions
+// helper to update an existing table with filtered transactions, keeping the selected transaction selected if still shown
 func updateTransactionsTable(table *tview.Table, txType, month, year string, transactions TransactionHistory, filter string) {
-	// get the currently selected transaction ID to preserve selection
 	var selectedTxId string
-	row, col := table.GetSelection()
-	if row > 0 && col >= 0 {
-		cell := table.GetCell(row, col)
-		if ref := cell.GetReference(); ref != nil {
-			selectedTxId, _ = ref.(string)
+	if row, col := table.GetSelection(); row > 0 && col >= 0 {
+		if cell := table.GetCell(row, col); cell != nil {
+			selectedTxId, _ = cell.GetReference().(string)
 		}
 	}
 
-	// clear table before populating with only filtered transactions
-	table.Clear()
-
-	// re-set properties
-	table.SetSelectable(true, false)
-	table.SetFixed(1, 0)
-	table.SetBorder(false)
-	table.SetTitle(capitalize(txType)).SetBorder(true)
-
-	headers := []string{"ID", "Amount", "Category", "Description"}
-	for c, h := range headers {
-		table.SetCell(0, c, tview.NewTableCell(h).SetSelectable(false))
-	}
-
-	if year == "" || month == "" {
-		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
+	filtered := populateTransactionsTable(table, txType, month, year, transactions, filter)
+	if len(filtered) == 0 {
 		return
 	}
 
-	txList := transactions[year][month][txType]
-	if len(txList) == 0 {
-		table.SetCell(1, 0, tview.NewTableCell("no transactions"))
-		return
-	}
-
-	var filteredTxList []Transaction
-	if filter == "" {
-		filteredTxList = txList
-	} else {
-		filterLower := strings.ToLower(filter)
-		for _, tx := range txList {
-			if strings.Contains(strings.ToLower(tx.Id), filterLower) ||
-				strings.Contains(strings.ToLower(fmt.Sprintf("%.2f", tx.Amount)), filterLower) ||
-				strings.Contains(strings.ToLower(tx.Category), filterLower) ||
-				strings.Contains(strings.ToLower(tx.Description), filterLower) {
-				filteredTxList = append(filteredTxList, tx)
-			}
+	selectedRow := 1 // default to first
+	for r, tx := range filtered {
+		if tx.Id == selectedTxId {
+			selectedRow = r + 1
+			break
 		}
 	}
-
-	if len(filteredTxList) == 0 {
-		table.SetCell(1, 0, tview.NewTableCell("no transaction matches found"))
-		return
-	}
-
-	for r, tx := range filteredTxList {
-		table.SetCell(r+1, 0, tview.NewTableCell(fmt.Sprintf("%s    ", tx.Id)).
-			SetReference(tx.Id))
-		table.SetCell(r+1, 1, tview.NewTableCell(fmt.Sprintf("€%.2f", tx.Amount)))
-		table.SetCell(r+1, 2, tview.NewTableCell(tx.Category))
-		table.SetCell(r+1, 3, tview.NewTableCell(tx.Description))
-	}
-
-	// Try to preserve selection on the same transaction, otherwise select first row
-	if len(filteredTxList) > 0 {
-		selectedRow := 1 // default to first
-		if selectedTxId != "" {
-			for r := 0; r < len(filteredTxList); r++ {
-				if filteredTxList[r].Id == selectedTxId {
-					selectedRow = r + 1
-					break
-				}
-			}
-		}
-		table.Select(selectedRow, 0)
-	}
+	table.Select(selectedRow, 0)
 }
 
 // year -> month -> transcation type (expense, income, or investment) -> transaction

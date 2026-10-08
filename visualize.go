@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"strings"
 
 	"github.com/gdamore/tcell/v2"
@@ -185,65 +186,56 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		return nil, fmt.Errorf("unable to load transactions file: %w", err)
 	}
 
-	var headerText string
-	if displayMonth != "" && displayYear != "" {
-		headerText = fmt.Sprintf("%s %s", capitalize(displayMonth), displayYear)
-	}
-
 	var calculatedPnl PnLResult
-	var footerText string
 	if calculatedPnl, err = calculateMonthPnL(displayMonth, displayYear); err != nil {
 		return nil, fmt.Errorf("unable to calculate pnl: %w", err)
 	}
-	if displayMonth != "" && displayYear != "" {
-		footerText = fmt.Sprintf("Income: €%.2f | Expenses: €%.2f | Investments: €%.2f \n\nSavings: €%.2f | %.1f%% of income", calculatedPnl.incomeTotal, calculatedPnl.expenseTotal, calculatedPnl.investmentTotal, calculatedPnl.pnlAmount, calculatedPnl.pnlPercent)
-	}
 
 	// build tx table for each tx type
-	incomeTable := styleTable(createTransactionsTable("income", displayMonth, displayYear, transactions, incomeSearch))
-	expenseTable := styleTable(createTransactionsTable("expense", displayMonth, displayYear, transactions, expenseSearch))
-	investmentTable := styleTable(createTransactionsTable("investment", displayMonth, displayYear, transactions, investmentSearch))
+	incomeTable := createTransactionsTable("income", displayMonth, displayYear, transactions, incomeSearch)
+	expenseTable := createTransactionsTable("expense", displayMonth, displayYear, transactions, expenseSearch)
+	investmentTable := createTransactionsTable("investment", displayMonth, displayYear, transactions, investmentSearch)
 
 	// handle wrap around for table navigation (i.e. when last transaction reached wrap around to top)
 	enableTableWrap(incomeTable)
 	enableTableWrap(expenseTable)
 	enableTableWrap(investmentTable)
 
-	header := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(headerText)
-	pnlFooter := tview.NewTextView().SetTextAlign(tview.AlignCenter).SetText(footerText)
-	helpLeftFooter := tview.NewTextView().
-		SetDynamicColors(true).
-		SetTextAlign(tview.AlignLeft).
-		SetText(generateWindowNavigationFooter())
-
-	helpCenterFooter := tview.NewTextView().
+	header := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
-		SetText(generateTransactionCrudFooter())
+		SetText(renderMonthHeader(displayMonth, displayYear))
+	header.SetBackgroundColor(theme.BackgroundColor)
 
-	helpRightFooter := tview.NewTextView().
+	summary := styleTextView(tview.NewTextView().
 		SetDynamicColors(true).
-		SetTextAlign(tview.AlignRight).
-		SetText(generateTransactionNavigationFooter())
+		SetWrap(false).
+		SetTextAlign(tview.AlignCenter))
+	summary.SetBorder(true).SetTitle(" Month Summary ")
+	summary.SetText(renderMonthSummary(calculatedPnl, displayMonth != "" && displayYear != ""))
 
-	// nested footer grid with 2 columns
-	footerGrid := styleGrid(tview.NewGrid().
-		SetColumns(0, 0). // left + right
-		AddItem(helpLeftFooter, 0, 0, 1, 1, 0, 0, false).
-		AddItem(helpCenterFooter, 0, 1, 1, 1, 0, 0, false).
-		AddItem(helpRightFooter, 0, 2, 1, 1, 0, 0, false))
+	// help footer: transaction actions and pages on the first line, movement on the second (one line gets cut off on narrower terminals)
+	helpFooter := tview.NewTextView().
+		SetDynamicColors(true).
+		SetTextAlign(tview.AlignCenter).
+		SetText(generateTransactionCrudFooter() + "     " + generateWindowNavigationFooter() + "\n" + generateTransactionNavigationFooter())
+	helpFooter.SetBackgroundColor(theme.BackgroundColor)
+	helpFooter.SetTextColor(theme.FieldTextColor)
 
+	// header, the three transaction panels side by side, summary panel and help - no grid lines, the panels have their own borders
 	grid := styleGrid(tview.NewGrid().
-		SetRows(3, 0, 3, 2).
+		SetRows(1, 0, 4, 2).
 		SetColumns(0, 0, 0).
-		SetBorders(true).
+		SetGap(0, 1).
+		SetBorders(false).
 		AddItem(header, 0, 0, 1, 3, 0, 0, false).
 		AddItem(incomeTable, 1, 0, 1, 1, 0, 0, false).
 		AddItem(expenseTable, 1, 1, 1, 1, 0, 0, false).
 		AddItem(investmentTable, 1, 2, 1, 1, 0, 0, false).
-		AddItem(pnlFooter, 2, 0, 1, 3, 0, 0, false).
-		AddItem(footerGrid, 3, 0, 1, 3, 0, 0, false))
-	grid.SetBorder(false).SetTitle("Expense Tracking Tool").SetTitleAlign(tview.AlignCenter)
+		AddItem(summary, 2, 0, 1, 3, 0, 0, false).
+		AddItem(helpFooter, 3, 0, 1, 3, 0, 0, false))
+	grid.SetBorder(false)
+	grid.SetBorderPadding(0, 0, 1, 1)
 
 	// keep a list of tables for focus switching in the TUI
 	tables := []*tview.Table{incomeTable, expenseTable, investmentTable}
@@ -470,4 +462,56 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 	}
 
 	return grid, nil
+}
+
+// title line of the transactions page, e.g. "August 2025"
+func renderMonthHeader(month, year string) string {
+	if month == "" || year == "" {
+		return headerStyle + "No transactions yet" + headerReset + mutedColor + "  -  press a to add one" + Reset
+	}
+	return fmt.Sprintf("%s%s %s%s", headerStyle, capitalize(month), year, headerReset)
+}
+
+// width (in characters) of the stacked bar in the month summary
+const summaryBarWidth = 60
+
+// month totals on the first line, a stacked bar of where the income went on the second
+// expenses and investments are shown as a share of income; the green part of the bar is what's left after both
+func renderMonthSummary(pnl PnLResult, hasMonth bool) string {
+	if !hasMonth {
+		return mutedColor + "Nothing to summarize" + Reset
+	}
+
+	afterInvesting := pnl.pnlAmount - pnl.investmentTotal
+	totals := fmt.Sprintf("%s■%s Income %s€%.2f%s   %s■%s Expenses %s€%.2f%s %s(%s)%s   %s■%s Investments %s€%.2f%s %s(%s)%s   │   Savings %s€%.2f%s %s(%s)%s   %s■%s After investing %s€%.2f%s",
+		incomeColor, Reset, incomeColor, pnl.incomeTotal, Reset,
+		expenseColor, Reset, expenseColor, pnl.expenseTotal, Reset, mutedColor, formatPercentOfIncome(pnl.expenseTotal, pnl.incomeTotal), Reset,
+		investmentColor, Reset, investmentColor, pnl.investmentTotal, Reset, mutedColor, formatPercentOfIncome(pnl.investmentTotal, pnl.incomeTotal), Reset,
+		savingsColor(pnl.pnlAmount), pnl.pnlAmount, Reset, mutedColor, formatSavingsRate(pnl), Reset,
+		savingsColor(afterInvesting), Reset, savingsColor(afterInvesting), afterInvesting, Reset)
+
+	return totals + "\n" + renderIncomeSplitBar(pnl.incomeTotal, pnl.expenseTotal, pnl.investmentTotal)
+}
+
+// stacked bar: expenses, investments and what's left, scaled to income (or to the outflows when they exceed income)
+func renderIncomeSplitBar(income, expenses, investments float64) string {
+	expenses, investments = max(expenses, 0), max(investments, 0)
+	scale := max(income, expenses+investments)
+	if scale <= 0 {
+		return mutedColor + strings.Repeat("░", summaryBarWidth) + Reset
+	}
+
+	cells := func(v float64) int { return int(math.Round(v / scale * summaryBarWidth)) }
+	expenseCells := min(cells(expenses), summaryBarWidth)
+	investmentCells := min(cells(investments), summaryBarWidth-expenseCells)
+	leftCells := 0
+	if income > expenses+investments {
+		leftCells = summaryBarWidth - expenseCells - investmentCells
+	}
+	emptyCells := summaryBarWidth - expenseCells - investmentCells - leftCells
+
+	return expenseColor + strings.Repeat("█", expenseCells) +
+		investmentColor + strings.Repeat("█", investmentCells) +
+		positiveColor + strings.Repeat("█", leftCells) + Reset +
+		mutedColor + strings.Repeat("░", emptyCells) + Reset
 }
