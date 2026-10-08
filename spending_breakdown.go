@@ -42,16 +42,16 @@ func categoryColor(index int) string {
 	return categoryOtherColor
 }
 
+// one colored slice of a pie chart
+type pieSlice struct {
+	color string // tview color tag
+	value float64
+}
+
 // draws a colored ASCII pie chart where each slice is one expense category
 // slices start at 12 o'clock and go clockwise in order of spend (largest first)
 func generateCategoryPieChart(breakdown CategoryBreakdown, width, height int) string {
-	// only positive amounts can be drawn as slices
-	type slice struct {
-		color string
-		value float64
-	}
-	var slices []slice
-	var total float64
+	var slices []pieSlice
 	for i, ct := range breakdown.categories {
 		if ct.total <= 0 {
 			continue
@@ -61,9 +61,22 @@ func generateCategoryPieChart(breakdown CategoryBreakdown, width, height int) st
 		if color == categoryOtherColor && len(slices) > 0 && slices[len(slices)-1].color == categoryOtherColor {
 			slices[len(slices)-1].value += ct.total
 		} else {
-			slices = append(slices, slice{color: color, value: ct.total})
+			slices = append(slices, pieSlice{color: color, value: ct.total})
 		}
-		total += ct.total
+	}
+	return drawPieChart(slices, width, height)
+}
+
+// draws a colored ASCII pie chart, slices start at 12 o'clock and go clockwise in the given order
+// non-positive slices are skipped; returns "" when there is nothing to draw
+func drawPieChart(input []pieSlice, width, height int) string {
+	var slices []pieSlice
+	var total float64
+	for _, s := range input {
+		if s.value > 0 {
+			slices = append(slices, s)
+			total += s.value
+		}
 	}
 
 	if total == 0 {
@@ -145,7 +158,7 @@ func formatCategoryBreakdown(breakdown CategoryBreakdown) string {
 			color, Reset, tview.Escape(capitalize(ct.category)), ct.total, ct.percent, bar))
 	}
 
-	sb.WriteString(strings.Repeat("-", 60) + "\n")
+	sb.WriteString(strings.Repeat("─", 60) + "\n")
 	sb.WriteString(fmt.Sprintf("  %-15s €%10.2f  %5.1f%%\n", "Total", breakdown.expenseTotal, 100.0))
 
 	return sb.String()
