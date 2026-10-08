@@ -264,6 +264,14 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 	if selectedMonth != "" && selectedYear != "" {
 		pageName = fmt.Sprintf("main_%s_%s", selectedMonth, selectedYear)
 	}
+
+	// the grid itself must never hold focus - when it does, up/down/j/k scroll the whole grid out of the window
+	// instead of moving the selection in a table. this happens when coming back to this page via pages.SwitchToPage()
+	// (e.g. ESC on the month/year selector) or after closing an error modal, so always hand focus to the active table
+	grid.SetFocusFunc(func() {
+		tui.SetFocus(tables[currentTable])
+	})
+
 	pages.AddPage(pageName, grid, true, true)
 	tui.SetFocus(tables[currentTable])
 
