@@ -5,6 +5,8 @@ List of Transactions Page
 ![ListTxs](assets/visualize-transactions.png)
 Year Summary and P&L
 ![Summary](assets/year-overview.png)
+Spending Breakdown by Category
+![SpendingBreakdown](assets/spending-breakdown.png)
 Add Transactions
 ![AddTx](assets/add-transactions.png)
 Update Transactions
