@@ -108,7 +108,7 @@ func showYearSelector() error {
 			// You click 2023 → the callback sees year == "2025"
 			// You click 2024 → the callback sees year == "2025"
 			// You click 2025 → the callback sees year == "2025"
-			if err := showYearResults(yearCopy); err != nil {
+			if err := showYearResults(yearCopy, nil); err != nil {
 				showErrorModal(fmt.Sprintf("error showing year results:\n\n%s", err), list)
 				return
 			}
@@ -367,7 +367,7 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 			if displayMonth == "" || displayYear == "" {
 				return nil
 			}
-			if err := showSpendingBreakdown(displayMonth, displayYear); err != nil {
+			if err := showSpendingBreakdown(displayMonth, displayYear, nil); err != nil {
 				showErrorModal(fmt.Sprintf("error showing spending breakdown:\n\n%s", err), grid)
 				return nil
 			}

@@ -173,44 +173,147 @@ func renderSpendingBreakdown(breakdown CategoryBreakdown) string {
 	return pie + "\n" + formatCategoryBreakdown(breakdown)
 }
 
-// shows expenses grouped by category for the selected month and for the whole year of that month
-func showSpendingBreakdown(month, year string) error {
-	monthBreakdown, err := calculateMonthCategoryBreakdown(month, year)
-	if err != nil {
-		return fmt.Errorf("unable to calculate month category breakdown: %w", err)
+// colors for spending relative to the monthly average: above average is bad (red), below is good (green)
+const (
+	aboveAvgColor = "[#e06c75]"
+	belowAvgColor = "[#98c379]"
+	mutedColor    = "[#5c6370]"
+)
+
+// changes smaller than this (in %) are shown without an arrow so the table doesn't flag noise
+const deltaNoiseThreshold = 5.0
+
+// month spend relative to the monthly average as a fixed-width (7 cell) colored string, e.g. "▲  14%"
+func formatDeltaVsAvg(amount, avg float64) string {
+	if avg <= 0 {
+		return fmt.Sprintf("%7s", "–")
+	}
+	delta := (amount - avg) / avg * 100
+	switch {
+	case math.Abs(delta) < deltaNoiseThreshold:
+		return fmt.Sprintf("%s%7s%s", mutedColor, fmt.Sprintf("%+.0f%%", delta), Reset)
+	case delta > 999:
+		return fmt.Sprintf("%s▲%6s%s", aboveAvgColor, ">999%", Reset)
+	case delta > 0:
+		return fmt.Sprintf("%s▲%5.0f%%%s", aboveAvgColor, delta, Reset)
+	default:
+		return fmt.Sprintf("%s▼%5.0f%%%s", belowAvgColor, -delta, Reset)
+	}
+}
+
+// width of the rule above the total row of the month comparison table
+const monthComparisonWidth = 82
+
+// table of the month's categories with share, bar, the year's monthly average and the change vs that average
+// categories spent on in other months but not this one are listed (muted) at the bottom so nothing "disappears"
+func formatMonthComparison(cmp MonthComparison) []string {
+	if len(cmp.rows) == 0 {
+		return []string{"No expenses for this period"}
 	}
 
-	yearBreakdown, err := calculateYearCategoryBreakdown(year)
+	lines := []string{fmt.Sprintf("%s  %-15s %11s  %6s  %-*s  %10s  %7s%s",
+		headerStyle, "Category", "This month", "Share", categoryBarWidth, "", "Avg/month", "vs avg", headerReset)}
+
+	for i, row := range cmp.rows {
+		name := tview.Escape(capitalize(row.category))
+		delta := formatDeltaVsAvg(row.total, row.monthlyAvg)
+
+		if row.total == 0 && i >= len(cmp.month.categories) {
+			// nothing spent this month: no pie slice, so no legend color
+			lines = append(lines, fmt.Sprintf("%s■ %-15s €%10.2f  %5.1f%%  %s  €%9.2f%s  %s",
+				mutedColor, name, 0.0, 0.0, strings.Repeat("░", categoryBarWidth), row.monthlyAvg, Reset, delta))
+			continue
+		}
+
+		filled := int(math.Round(row.percent / 100 * categoryBarWidth))
+		filled = max(0, min(filled, categoryBarWidth)) // negative amounts (e.g. refunds) should not break the bar
+		color := categoryColor(i)
+		bar := color + strings.Repeat("█", filled) + Reset + strings.Repeat("░", categoryBarWidth-filled)
+
+		lines = append(lines, fmt.Sprintf("%s■%s %-15s €%10.2f  %5.1f%%  %s  €%9.2f  %s",
+			color, Reset, name, row.total, row.percent, bar, row.monthlyAvg, delta))
+	}
+
+	monthsLabel := "months"
+	if cmp.monthsInYear == 1 {
+		monthsLabel = "month"
+	}
+	lines = append(lines,
+		strings.Repeat("─", monthComparisonWidth),
+		fmt.Sprintf("  %-15s €%10.2f  %5.1f%%  %*s  €%9.2f  %s",
+			"Total", cmp.month.expenseTotal, 100.0, categoryBarWidth, "", cmp.avgExpenseTotal,
+			formatDeltaVsAvg(cmp.month.expenseTotal, cmp.avgExpenseTotal)),
+		"",
+		fmt.Sprintf("%sAverages are over the %d %s of the year with transactions%s", mutedColor, cmp.monthsInYear, monthsLabel, Reset),
+	)
+	return lines
+}
+
+// pie chart on the left, comparison table on the right (vertically centered on the pie when it is shorter)
+func renderMonthComparison(cmp MonthComparison) string {
+	table := formatMonthComparison(cmp)
+	pie := generateCategoryPieChart(cmp.month, categoryPieWidth, categoryPieHeight)
+	if pie == "" {
+		return strings.Join(table, "\n")
+	}
+
+	pieLines := strings.Split(strings.TrimSuffix(pie, "\n"), "\n")
+	offset := max(0, (len(pieLines)-len(table))/2)
+	blank := strings.Repeat(" ", categoryPieWidth)
+
+	var sb strings.Builder
+	for i := 0; i < max(len(pieLines), len(table)+offset); i++ {
+		if i < len(pieLines) {
+			sb.WriteString(pieLines[i])
+		} else {
+			sb.WriteString(blank)
+		}
+		if j := i - offset; j >= 0 && j < len(table) {
+			sb.WriteString("   " + table[j])
+		}
+		sb.WriteRune('\n')
+	}
+	return sb.String()
+}
+
+// shows expenses grouped by category for the selected month, compared against the monthly averages of its year
+// onBack is called on ESC/q; nil means go back to the transactions of the same month
+func showSpendingBreakdown(month, year string, onBack func()) error {
+	cmp, err := calculateMonthComparison(month, year)
 	if err != nil {
-		return fmt.Errorf("unable to calculate year category breakdown: %w", err)
+		return fmt.Errorf("unable to calculate month comparison: %w", err)
 	}
 
 	monthView := styleTextView(tview.NewTextView().
 		SetDynamicColors(true).
 		SetWordWrap(false))
 	monthView.SetBorder(true).SetTitle(fmt.Sprintf("Spending Breakdown - %s %s", capitalize(month), year))
-	monthView.SetText(renderSpendingBreakdown(monthBreakdown))
-
-	yearView := styleTextView(tview.NewTextView().
-		SetDynamicColors(true).
-		SetWordWrap(false))
-	yearView.SetBorder(true).SetTitle(fmt.Sprintf("Spending Breakdown - %s (Full Year)", year))
-	yearView.SetText(renderSpendingBreakdown(yearBreakdown))
+	monthView.SetText(renderMonthComparison(cmp))
 
 	flex := styleFlex(tview.NewFlex().
-		AddItem(monthView, 0, 1, true).
-		AddItem(yearView, 0, 1, false))
+		AddItem(monthView, 0, 1, true))
 
 	frame := tview.NewFrame(flex).
-		AddText(Yellow+"m"+Reset+": select month   "+generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+		AddText(Yellow+"m"+Reset+": select month   "+
+			Yellow+"y"+Reset+": year summary   "+
+			Yellow+"ESC"+Reset+"/"+Yellow+"q"+Reset+": back   "+
+			Green+"j/k"+Reset+" or "+Green+"↑/↓"+Reset+": scroll",
+			false, tview.AlignCenter, theme.FieldTextColor)
 
-	// keep track of which panel is focused so TAB can switch between them (useful for scrolling long lists)
-	views := []*tview.TextView{monthView, yearView}
-	current := 0
+	// re-opens this exact page (same month and back target), used when returning from pages opened from here
+	reopen := func() {
+		if err := showSpendingBreakdown(month, year, onBack); err != nil {
+			showErrorModal(fmt.Sprintf("error showing spending breakdown:\n\n%s", err), pages)
+		}
+	}
 
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if ev := exitShortcuts(event); ev == nil {
 			pages.RemovePage("spendingBreakdown")
+			if onBack != nil {
+				onBack()
+				return nil
+			}
 			// go back to the list of transactions for the same month, focused on expenses
 			if _, err := gridVisualizeTransactions(month, year, "expense", true); err != nil {
 				showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), flex)
@@ -218,22 +321,22 @@ func showSpendingBreakdown(month, year string) error {
 			return nil
 		}
 
-		// pick a different month of the same year to break down
-		if event.Key() == tcell.KeyRune && event.Rune() == 'm' {
-			if err := showBreakdownMonthSelector(month, year); err != nil {
-				showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), flex)
+		if event.Key() == tcell.KeyRune {
+			switch event.Rune() {
+			case 'm': // pick a different month of the same year to break down
+				if err := showBreakdownMonthSelector(month, year, onBack); err != nil {
+					showErrorModal(fmt.Sprintf("error showing month selector:\n\n%s", err), flex)
+				}
+				return nil
+			case 'y': // jump to the summary of this month's year, ESC there comes back here
+				if err := showYearResults(year, reopen); err != nil {
+					showErrorModal(fmt.Sprintf("error showing year results:\n\n%s", err), flex)
+				}
+				return nil
 			}
-			return nil
 		}
 
-		event = vimMotions(event)
-		switch event.Key() {
-		case tcell.KeyTAB, tcell.KeyBacktab, tcell.KeyLeft, tcell.KeyRight:
-			current = (current + 1) % len(views)
-			tui.SetFocus(views[current])
-			return nil
-		}
-		return event
+		return vimMotions(event)
 	})
 
 	pages.AddPage("spendingBreakdown", frame, true, true)
@@ -242,8 +345,8 @@ func showSpendingBreakdown(month, year string) error {
 }
 
 // pop-up list of months (with transactions) in the given year; selecting one re-renders the breakdown for it
-// the full-year panel stays the same since the year doesn't change
-func showBreakdownMonthSelector(currentMonth, year string) error {
+// onBack is passed through so the breakdown keeps returning to wherever it was opened from
+func showBreakdownMonthSelector(currentMonth, year string, onBack func()) error {
 	months, err := getMonthsForYear(year) // sorted newest first, same as the main month selector
 	if err != nil {
 		return fmt.Errorf("unable to get months for year %s: %w", year, err)
@@ -254,7 +357,7 @@ func showBreakdownMonthSelector(currentMonth, year string) error {
 		monthCopy := m // capture loop variable for the closure
 		list.AddItem(capitalize(m), "", 0, func() {
 			pages.RemovePage("breakdownMonthSelector")
-			if err := showSpendingBreakdown(monthCopy, year); err != nil {
+			if err := showSpendingBreakdown(monthCopy, year, onBack); err != nil {
 				showErrorModal(fmt.Sprintf("error showing spending breakdown:\n\n%s", err), list)
 			}
 		})
@@ -288,7 +391,7 @@ func showBreakdownMonthSelector(currentMonth, year string) error {
 		if ev := exitShortcuts(event); ev == nil {
 			// close the selector and return to the breakdown that was open (re-rendered so focus is restored on its panel)
 			pages.RemovePage("breakdownMonthSelector")
-			if err := showSpendingBreakdown(currentMonth, year); err != nil {
+			if err := showSpendingBreakdown(currentMonth, year, onBack); err != nil {
 				showErrorModal(fmt.Sprintf("error showing spending breakdown:\n\n%s", err), list)
 			}
 			return nil

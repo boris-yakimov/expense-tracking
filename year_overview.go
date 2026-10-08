@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"math"
 	"sort"
 	"strings"
 
@@ -20,9 +21,6 @@ const (
 	headerReset     = "[-::-]"
 )
 
-// width of the rule separating rows from totals in the year page panels
-const yearTableWidth = 67
-
 // green for non-negative savings, red for a loss
 func savingsColor(amount float64) string {
 	if amount < 0 {
@@ -39,95 +37,137 @@ func formatSavingsRate(pnl PnLResult) string {
 	return fmt.Sprintf("%.1f%%", pnl.pnlPercent)
 }
 
-// pie chart of income vs expenses vs investments (share of all money flows in the period)
-func generatePnLPieChart(pnl PnLResult, width, height int) string {
-	return drawPieChart([]pieSlice{
-		{color: incomeColor, value: pnl.incomeTotal},
-		{color: expenseColor, value: pnl.expenseTotal},
-		{color: investmentColor, value: pnl.investmentTotal},
-	}, width, height)
+// width (in characters) of the bars in the P&L panel
+const pnlBarWidth = 40
+
+// a flow as a share of income, or n/a when there was no income to compare against
+func formatPercentOfIncome(amount, income float64) string {
+	if income == 0 {
+		return "n/a"
+	}
+	return fmt.Sprintf("%.1f%%", amount/income*100)
 }
 
-// legend for the P&L pie: each flow with its amount and share of the pie, then savings vs income
-func formatPnLLegend(pnl PnLResult) []string {
-	total := pnl.incomeTotal + pnl.expenseTotal + pnl.investmentTotal
-	share := func(v float64) float64 {
-		if total <= 0 || v <= 0 {
-			return 0
-		}
-		return v / total * 100
-	}
-
-	return []string{
-		fmt.Sprintf("%s■%s %-12s €%10.2f  %5.1f%%", incomeColor, Reset, "Income", pnl.incomeTotal, share(pnl.incomeTotal)),
-		fmt.Sprintf("%s■%s %-12s €%10.2f  %5.1f%%", expenseColor, Reset, "Expenses", pnl.expenseTotal, share(pnl.expenseTotal)),
-		fmt.Sprintf("%s■%s %-12s €%10.2f  %5.1f%%", investmentColor, Reset, "Investments", pnl.investmentTotal, share(pnl.investmentTotal)),
-		strings.Repeat("─", 34),
-		fmt.Sprintf("  %-12s %s€%10.2f%s", "Savings", savingsColor(pnl.pnlAmount), pnl.pnlAmount, Reset),
-		fmt.Sprintf("  %-12s %s%11s%s  of income", "Savings rate", savingsColor(pnl.pnlAmount), formatSavingsRate(pnl), Reset),
-	}
-}
-
-// renders the P&L pie with its legend vertically centered to the right of it
+// P&L summary: every flow is shown relative to income (not as a share of all flows combined, which says nothing)
+// bars share one scale so they can be compared directly; the income bar is the reference
+// "after investing" is what's left once both expenses and investments are paid - negative means
+// more was invested than saved this period, i.e. it came out of existing savings
 func renderYearPnL(pnl PnLResult) string {
-	legend := formatPnLLegend(pnl)
-	pie := generatePnLPieChart(pnl, categoryPieWidth, categoryPieHeight)
-	if pie == "" {
-		return "No transactions for this period\n\n" + strings.Join(legend, "\n")
+	if pnl.incomeTotal == 0 && pnl.expenseTotal == 0 && pnl.investmentTotal == 0 {
+		return "No transactions for this period"
 	}
 
-	pieLines := strings.Split(strings.TrimSuffix(pie, "\n"), "\n")
-	offset := (len(pieLines) - len(legend)) / 2
-	if offset < 0 {
-		offset = 0
-	}
-
-	var sb strings.Builder
-	for i, line := range pieLines {
-		sb.WriteString(line)
-		if j := i - offset; j >= 0 && j < len(legend) {
-			sb.WriteString("   " + legend[j])
+	afterInvesting := pnl.pnlAmount - pnl.investmentTotal
+	scale := max(pnl.incomeTotal, pnl.expenseTotal, pnl.investmentTotal, math.Abs(pnl.pnlAmount), math.Abs(afterInvesting))
+	bar := func(color string, v float64) string {
+		filled := 0
+		if scale > 0 && v > 0 {
+			filled = min(pnlBarWidth, int(math.Round(v/scale*pnlBarWidth)))
 		}
-		sb.WriteRune('\n')
+		return color + strings.Repeat("█", filled) + Reset + strings.Repeat("░", pnlBarWidth-filled)
 	}
-	return sb.String()
+	row := func(color, label string, v float64, pct string) string {
+		return fmt.Sprintf("%s■%s %-16s %s€%10.2f%s  %9s   %s", color, Reset, label, color, v, Reset, pct, bar(color, v))
+	}
+
+	return strings.Join([]string{
+		"",
+		fmt.Sprintf("%s  %-16s %11s  %9s%s", headerStyle, "", "Amount", "of income", headerReset),
+		row(incomeColor, "Income", pnl.incomeTotal, ""),
+		row(expenseColor, "Expenses", pnl.expenseTotal, formatPercentOfIncome(pnl.expenseTotal, pnl.incomeTotal)),
+		row(investmentColor, "Investments", pnl.investmentTotal, formatPercentOfIncome(pnl.investmentTotal, pnl.incomeTotal)),
+		strings.Repeat("─", 2+16+1+11+2+9+3+pnlBarWidth),
+		row(savingsColor(pnl.pnlAmount), "Savings", pnl.pnlAmount, formatSavingsRate(pnl)),
+		row(savingsColor(afterInvesting), "After investing", afterInvesting, formatPercentOfIncome(afterInvesting, pnl.incomeTotal)),
+		"",
+		mutedColor + "  Savings = income - expenses.  After investing = savings - investments." + Reset,
+	}, "\n") + "\n"
 }
 
-// one row of the monthly results table; amounts are colored per flow so the table reads like the pie legend
-func formatPnLRow(label string, pnl PnLResult) string {
-	return fmt.Sprintf("%-10s %s%11.2f%s %s%11.2f%s %s%11.2f%s %s%11.2f%s %8s",
-		tview.Escape(label),
-		incomeColor, pnl.incomeTotal, Reset,
-		expenseColor, pnl.expenseTotal, Reset,
-		investmentColor, pnl.investmentTotal, Reset,
-		savingsColor(pnl.pnlAmount), pnl.pnlAmount, Reset,
-		formatSavingsRate(pnl))
+// background of the highlighted row in the monthly results table
+var selectedRowColor = tcell.NewRGBColor(62, 68, 82)
+
+// converts a tview hex color tag like "[#61afef]" into a tcell color
+func tagColor(tag string) tcell.Color {
+	return tcell.GetColor(strings.Trim(tag, "[]"))
 }
 
 // table of P&L per month (chronological) with the year total at the bottom
-func formatMonthlyPnLTable(months []string, monthlyPnL map[string]PnLResult, yearPnL PnLResult) string {
+// month rows are selectable and carry the month name as their reference so Enter can open that month
+func createMonthlyPnLTable(months []string, monthlyPnL map[string]PnLResult, yearPnL PnLResult) *tview.Table {
+	table := styleTable(tview.NewTable().
+		SetSelectable(true, false).
+		SetFixed(1, 0))
+	table.SetBackgroundColor(theme.FieldBackgroundColor) // match the text panels next to it
+
 	if len(months) == 0 {
-		return "No transactions for this year"
+		table.SetCell(0, 0, tview.NewTableCell("No transactions for this year").SetSelectable(false))
+		return table
+	}
+
+	headerColor := tagColor("[#56b6c2]")
+	headers := []string{"Month", "Income €", "Expenses €", "Invested €", "Savings €", "Rate"}
+	for col, h := range headers {
+		cell := tview.NewTableCell(h).
+			SetTextColor(headerColor).
+			SetAttributes(tcell.AttrBold).
+			SetSelectable(false)
+		if col > 0 {
+			cell.SetAlign(tview.AlignRight)
+		}
+		table.SetCell(0, col, cell)
+	}
+
+	// fills one row; selectable rows get a highlighted background that keeps each column's color
+	setRow := func(row int, label string, pnl PnLResult, selectable bool, ref string) {
+		values := []struct {
+			text  string
+			color tcell.Color
+		}{
+			{label, theme.FieldTextColor},
+			{fmt.Sprintf("%11.2f", pnl.incomeTotal), tagColor(incomeColor)},
+			{fmt.Sprintf("%11.2f", pnl.expenseTotal), tagColor(expenseColor)},
+			{fmt.Sprintf("%11.2f", pnl.investmentTotal), tagColor(investmentColor)},
+			{fmt.Sprintf("%11.2f", pnl.pnlAmount), tagColor(savingsColor(pnl.pnlAmount))},
+			{fmt.Sprintf("%8s", formatSavingsRate(pnl)), theme.FieldTextColor},
+		}
+		for col, v := range values {
+			cell := tview.NewTableCell(v.text).
+				SetTextColor(v.color).
+				SetSelectable(selectable).
+				SetReference(ref).
+				SetSelectedStyle(tcell.StyleDefault.Foreground(v.color).Background(selectedRowColor).Bold(true))
+			if col > 0 {
+				cell.SetAlign(tview.AlignRight)
+			}
+			if !selectable {
+				cell.SetAttributes(tcell.AttrBold)
+			}
+			table.SetCell(row, col, cell)
+		}
 	}
 
 	// calendar order reads more naturally in a year summary than the newest-first order of the selectors
 	sorted := append([]string(nil), months...)
 	sort.Slice(sorted, func(i, j int) bool { return monthOrder[sorted[i]] < monthOrder[sorted[j]] })
 
-	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("%s%-10s %11s %11s %11s %11s %8s%s\n",
-		headerStyle, "Month", "Income €", "Expenses €", "Invested €", "Savings €", "Rate", headerReset))
-	for _, month := range sorted {
-		sb.WriteString(formatPnLRow(capitalize(month), monthlyPnL[month]) + "\n")
+	for i, month := range sorted {
+		setRow(i+1, capitalize(month), monthlyPnL[month], true, month)
 	}
-	sb.WriteString(strings.Repeat("─", yearTableWidth) + "\n")
-	sb.WriteString(formatPnLRow("Total", yearPnL) + "\n")
 
-	return sb.String()
+	// blank spacer + bold total row, neither selectable
+	spacerRow := len(sorted) + 1
+	table.SetCell(spacerRow, 0, tview.NewTableCell("").SetSelectable(false))
+	setRow(spacerRow+1, "Total", yearPnL, false, "")
+
+	// start on the most recent month, it's usually the one worth drilling into
+	table.Select(len(sorted), 0)
+	return table
 }
 
 // shows the year summary: P&L pie, monthly results table and the full-year spending breakdown
-func showYearResults(year string) error {
+// Enter on a month opens its spending breakdown; onBack is called on ESC/q (nil means back to the year selector)
+func showYearResults(year string, onBack func()) error {
 	monthlyPnL, err := calculateYearMonthlyPnL(year)
 	if err != nil {
 		return fmt.Errorf("unable to calculate monthly pnl: %w", err)
@@ -158,29 +198,55 @@ func showYearResults(year string) error {
 	}
 
 	pnlView := newPanel(fmt.Sprintf("Profit & Loss - %s", year), renderYearPnL(yearPnL))
-	monthlyView := newPanel(fmt.Sprintf("Monthly Results - %s", year), formatMonthlyPnLTable(months, monthlyPnL, yearPnL))
 	categoryView := newPanel(fmt.Sprintf("Spending Breakdown - %s (Full Year)", year), renderSpendingBreakdown(yearCategories))
+
+	monthlyTable := createMonthlyPnLTable(months, monthlyPnL, yearPnL)
+	monthlyTable.SetBorder(true).SetTitle(fmt.Sprintf("Monthly Results - %s", year))
+
+	// opening a month from here should come back to this same summary
+	reopen := func() {
+		if err := showYearResults(year, onBack); err != nil {
+			showErrorModal(fmt.Sprintf("error showing year results:\n\n%s", err), pages)
+		}
+	}
+	monthlyTable.SetSelectedFunc(func(row, col int) {
+		month, _ := monthlyTable.GetCell(row, col).GetReference().(string)
+		if month == "" {
+			return
+		}
+		if err := showSpendingBreakdown(month, year, reopen); err != nil {
+			showErrorModal(fmt.Sprintf("error showing spending breakdown:\n\n%s", err), monthlyTable)
+		}
+	})
 
 	// left column: P&L summary on top (sized to fit the pie + borders), monthly table below
 	leftColumn := styleFlex(tview.NewFlex().
 		SetDirection(tview.FlexRow).
-		AddItem(pnlView, categoryPieHeight+2, 0, true).
-		AddItem(monthlyView, 0, 1, false))
+		AddItem(pnlView, strings.Count(pnlView.GetText(false), "\n")+2, 0, false).
+		AddItem(monthlyTable, 0, 1, true))
 
 	flex := styleFlex(tview.NewFlex().
 		AddItem(leftColumn, 0, 1, true).
 		AddItem(categoryView, 0, 1, false))
 
 	frame := tview.NewFrame(flex).
-		AddText(generateCombinedControlsFooter(), false, tview.AlignCenter, theme.FieldTextColor)
+		AddText(Yellow+"Enter"+Reset+": month breakdown   "+
+			Yellow+"ESC"+Reset+"/"+Yellow+"q"+Reset+": back   "+
+			Green+"TAB"+Reset+": next panel   "+
+			Green+"j/k"+Reset+" or "+Green+"↑/↓"+Reset+": navigate",
+			false, tview.AlignCenter, theme.FieldTextColor)
 
-	// TAB cycles focus between panels so long content can be scrolled with j/k
-	views := []*tview.TextView{pnlView, monthlyView, categoryView}
+	// TAB cycles focus between panels so long content can be scrolled with j/k; starts on the table
+	views := []tview.Primitive{monthlyTable, categoryView, pnlView}
 	current := 0
 
 	flex.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if ev := exitShortcuts(event); ev == nil {
-			// go back to year selector
+			pages.RemovePage("yearResults")
+			if onBack != nil {
+				onBack()
+				return nil
+			}
 			pages.SwitchToPage("yearSelector")
 			return nil
 		}
@@ -200,6 +266,6 @@ func showYearResults(year string) error {
 	})
 
 	pages.AddPage("yearResults", frame, true, true)
-	tui.SetFocus(pnlView)
+	tui.SetFocus(monthlyTable)
 	return nil
 }

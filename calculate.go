@@ -193,3 +193,65 @@ func calculateYearCategoryBreakdown(year string) (CategoryBreakdown, error) {
 
 	return buildExpenseCategoryBreakdown(transactions, year, months), nil
 }
+
+// spend on a category in one month next to its average monthly spend over the year
+type CategoryComparison struct {
+	CategoryTotal         // this month's total and share of this month's expenses
+	monthlyAvg    float64 // average monthly spend on the category across the year's months
+}
+
+// a month's category breakdown compared against the monthly averages of its year
+type MonthComparison struct {
+	month           CategoryBreakdown    // the month itself, categories sorted by spend (drives the pie chart)
+	rows            []CategoryComparison // month categories first (by spend), then categories only spent in other months (by average)
+	monthsInYear    int                  // number of months with transactions that the averages are based on
+	avgExpenseTotal float64              // average total monthly expenses across the year
+}
+
+// compares each category's spend in the month with its average monthly spend in the same year
+// the average is over months that have any transactions, so a partial year isn't diluted by empty months
+func buildMonthComparison(transactions TransactionHistory, month, year string) MonthComparison {
+	months := make([]string, 0, len(transactions[year]))
+	for m := range transactions[year] {
+		months = append(months, m)
+	}
+
+	cmp := MonthComparison{
+		month:        buildExpenseCategoryBreakdown(transactions, year, []string{month}),
+		monthsInYear: len(months),
+	}
+	yearBreakdown := buildExpenseCategoryBreakdown(transactions, year, months)
+	if cmp.monthsInYear == 0 {
+		return cmp
+	}
+	n := float64(cmp.monthsInYear)
+	cmp.avgExpenseTotal = yearBreakdown.expenseTotal / n
+
+	avg := make(map[string]float64, len(yearBreakdown.categories))
+	for _, ct := range yearBreakdown.categories {
+		avg[ct.category] = ct.total / n
+	}
+
+	inMonth := make(map[string]bool, len(cmp.month.categories))
+	for _, ct := range cmp.month.categories {
+		inMonth[ct.category] = true
+		cmp.rows = append(cmp.rows, CategoryComparison{CategoryTotal: ct, monthlyAvg: avg[ct.category]})
+	}
+	// year categories are already sorted by total, so these come out ordered by average too
+	for _, ct := range yearBreakdown.categories {
+		if !inMonth[ct.category] {
+			cmp.rows = append(cmp.rows, CategoryComparison{CategoryTotal: CategoryTotal{category: ct.category}, monthlyAvg: avg[ct.category]})
+		}
+	}
+
+	return cmp
+}
+
+// loads transactions and compares the given month against its year's monthly averages
+func calculateMonthComparison(month, year string) (MonthComparison, error) {
+	transactions, err := LoadTransactions()
+	if err != nil {
+		return MonthComparison{}, fmt.Errorf("unable to load transactions file: %w", err)
+	}
+	return buildMonthComparison(transactions, month, year), nil
+}

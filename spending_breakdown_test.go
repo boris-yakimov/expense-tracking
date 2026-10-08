@@ -296,7 +296,7 @@ func TestSpendingBreakdownMonthSelection(t *testing.T) {
 	screen := startSimulatedTui(t)
 
 	var err error
-	onTui(func() { err = showSpendingBreakdown("january", "2026") })
+	onTui(func() { err = showSpendingBreakdown("january", "2026", nil) })
 	if err != nil {
 		t.Fatalf("showSpendingBreakdown: %v", err)
 	}
@@ -331,4 +331,83 @@ func TestSpendingBreakdownMonthSelection(t *testing.T) {
 	pressKey(screen, tcell.KeyRune, 'k')
 	pressKey(screen, tcell.KeyEnter, 0)
 	waitForBreakdown(t, "Spending Breakdown - February 2026")
+}
+
+func TestBuildMonthComparison(t *testing.T) {
+	// january 2026: car 400, food 400, shopping 200; february: food 600, bills 400 -> 2 months to average over
+	cmp := buildMonthComparison(categoryBreakdownTestData(), "january", "2026")
+
+	if cmp.monthsInYear != 2 || cmp.avgExpenseTotal != 1000 || cmp.month.expenseTotal != 1000 {
+		t.Fatalf("unexpected totals: months=%d avg=%.2f month=%.2f", cmp.monthsInYear, cmp.avgExpenseTotal, cmp.month.expenseTotal)
+	}
+
+	expected := []struct {
+		category   string
+		total, avg float64
+	}{
+		{"car", 400, 200},
+		{"food", 400, 500},
+		{"shopping", 200, 100},
+		{"bills", 0, 200}, // only spent in february -> listed last with zero this month
+	}
+	if len(cmp.rows) != len(expected) {
+		t.Fatalf("got %d rows, expected %d: %+v", len(cmp.rows), len(expected), cmp.rows)
+	}
+	for i, e := range expected {
+		r := cmp.rows[i]
+		if r.category != e.category || r.total != e.total || r.monthlyAvg != e.avg {
+			t.Errorf("row %d = {%s %.2f avg %.2f}, expected {%s %.2f avg %.2f}", i, r.category, r.total, r.monthlyAvg, e.category, e.total, e.avg)
+		}
+	}
+
+	if empty := buildMonthComparison(categoryBreakdownTestData(), "january", "2030"); len(empty.rows) != 0 || empty.monthsInYear != 0 {
+		t.Errorf("expected empty comparison, got %+v", empty)
+	}
+}
+
+func TestFormatDeltaVsAvg(t *testing.T) {
+	cases := []struct {
+		amount, avg float64
+		expected    string
+	}{
+		{400, 200, aboveAvgColor + "▲  100%" + Reset},
+		{400, 500, belowAvgColor + "▼   20%" + Reset},
+		{0, 200, belowAvgColor + "▼  100%" + Reset},
+		{1020, 1000, mutedColor + "    +2%" + Reset}, // below the noise threshold -> no arrow
+		{5000, 100, aboveAvgColor + "▲ >999%" + Reset},
+		{100, 0, "      –"},
+	}
+	for _, c := range cases {
+		if got := formatDeltaVsAvg(c.amount, c.avg); got != c.expected {
+			t.Errorf("formatDeltaVsAvg(%.0f, %.0f) = %q; expected %q", c.amount, c.avg, got, c.expected)
+		}
+	}
+}
+
+func TestRenderMonthComparison(t *testing.T) {
+	out := renderMonthComparison(buildMonthComparison(categoryBreakdownTestData(), "january", "2026"))
+
+	for _, part := range []string{"Avg/month", "vs avg", "Car", "€    200.00", "▲  100%", "▼   20%", "Bills", "Total", "averages are over the 2 months"} {
+		if !strings.Contains(strings.ToLower(out), strings.ToLower(part)) {
+			t.Errorf("expected output to contain %q, got:\n%s", part, out)
+		}
+	}
+	// the pie only has slices for categories spent this month
+	if counts := countPieColors(generateCategoryPieChart(buildMonthCategoryBreakdownForTest(), categoryPieWidth, categoryPieHeight)); len(counts) != 3 {
+		t.Errorf("expected 3 pie slices for january, got %v", counts)
+	}
+	// bills was not spent in january: muted row, empty bar
+	for _, line := range strings.Split(out, "\n") {
+		if strings.Contains(line, "Bills") && !strings.Contains(line, mutedColor+"■ Bills") {
+			t.Errorf("expected muted bills row, got %q", line)
+		}
+	}
+
+	if got := renderMonthComparison(MonthComparison{}); got != "No expenses for this period" {
+		t.Errorf("unexpected empty output %q", got)
+	}
+}
+
+func buildMonthCategoryBreakdownForTest() CategoryBreakdown {
+	return buildMonthComparison(categoryBreakdownTestData(), "january", "2026").month
 }
