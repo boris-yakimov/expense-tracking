@@ -23,7 +23,6 @@ func loginForm() error {
 		SetMaskCharacter('*'))
 
 	var formWithMessage *tview.Flex
-	var centeredModal *tview.Flex
 
 	message := styleTextView(tview.NewTextView().
 		SetText("").
@@ -92,24 +91,10 @@ func loginForm() error {
 		AddItem(form, 0, 1, true).
 		AddItem(message, 1, 0, false))
 
-	formWithMessage.SetBorder(true).
-		SetTitle("Expense Tracking Tool").
-		SetTitleAlign(tview.AlignCenter)
+	formWithMessage.SetBorder(true) // no title, the logo above already names the app
 
-	// horizontal centering
-	initialModal := styleFlex(tview.NewFlex().
-		AddItem(nil, 0, 1, false).             // left spacer
-		AddItem(formWithMessage, 50, 1, true). // modal width fixed at 40
-		AddItem(nil, 0, 1, false))             // right spacer
-
-	// vertical centering
-	centeredModal = styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(nil, 0, 1, false).         // top spacer
-		AddItem(initialModal, 9, 1, true). // form box automatic height
-		AddItem(nil, 0, 1, false))         // bottom spacer
-
-	root := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(centeredModal, 0, 1, true))
+	// synthwave logo above the centered login box (50 wide, 9 high)
+	root := newLoginLayout(formWithMessage, 50, 9)
 
 	root.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc {
@@ -134,7 +119,6 @@ func setNewPasswordForm() {
 		SetMaskCharacter('*'))
 
 	var formWithMessage *tview.Flex
-	var centeredModal *tview.Flex
 
 	message := styleTextView(tview.NewTextView().
 		SetText("").
@@ -201,24 +185,10 @@ func setNewPasswordForm() {
 		AddItem(form, 7, 0, true).           // the form spans 7 rows - including password and repeat password fields and buttons for ok and cancel bellow
 		AddItem(message, 0, 1, false))       // dynamic size of field that contains error message (such as repeat password doesn't match)
 
-	formWithMessage.SetBorder(true).
-		SetTitle("Expense Tracking Tool").
-		SetTitleAlign(tview.AlignCenter)
+	formWithMessage.SetBorder(true) // no title, the logo above already names the app
 
-	// horizontal centering
-	initialModal := styleFlex(tview.NewFlex().
-		AddItem(nil, 0, 1, false).             // left spacer
-		AddItem(formWithMessage, 50, 1, true). // modal fixed width
-		AddItem(nil, 0, 1, false))             // right spacer
-
-	// vertical centering
-	centeredModal = styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(nil, 0, 1, false).          // top spacer
-		AddItem(initialModal, 15, 1, true). // form box automatic height
-		AddItem(nil, 0, 1, false))          // bottom spacer
-
-	root := styleFlex(tview.NewFlex().SetDirection(tview.FlexRow).
-		AddItem(centeredModal, 0, 1, true))
+	// synthwave logo above the centered set password box (50 wide, 15 high)
+	root := newLoginLayout(formWithMessage, 50, 15)
 
 	root.SetInputCapture(func(event *tcell.EventKey) *tcell.EventKey {
 		if event.Key() == tcell.KeyEsc {
