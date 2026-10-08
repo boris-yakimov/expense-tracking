@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -12,6 +13,9 @@ import (
 var incomeSearch string
 var expenseSearch string
 var investmentSearch string
+
+// one-shot message shown in the header of the next rendered transactions page (e.g. the result of an undo)
+var statusMessage string
 
 // creates a TUI window to show list of available months with transactions
 func showMonthSelector() error {
@@ -204,7 +208,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 	header := tview.NewTextView().
 		SetDynamicColors(true).
 		SetTextAlign(tview.AlignCenter).
-		SetText(renderMonthHeader(displayMonth, displayYear))
+		SetText(renderMonthHeader(displayMonth, displayYear) + statusMessage)
+	statusMessage = "" // only shown once
 	header.SetBackgroundColor(theme.BackgroundColor)
 
 	summary := styleTextView(tview.NewTextView().
@@ -239,7 +244,8 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 
 	// keep a list of tables for focus switching in the TUI
 	tables := []*tview.Table{incomeTable, expenseTable, investmentTable}
-	currentTable := 0 // index of which table is currently in focus
+	tableTypes := []string{"income", "expense", "investment"} // transaction type of each table, same order
+	currentTable := 0                                         // index of which table is currently in focus
 	switch focusTableType {
 	case "income":
 		currentTable = 0
@@ -287,6 +293,16 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 		case tcell.KeyBacktab, tcell.KeyLeft: // Shift + Tab
 			currentTable = (currentTable - 1 + len(tables)) % len(tables) // add +len(tables to prevent out of bounds when on first index and trying pressing to go back, if we don't do this we get index -1, when we do this we get 0-1+len(tables) which takes us to the last elemet of the table list instead of to -1
 			tui.SetFocus(tables[currentTable])
+			return nil
+		}
+
+		// undo / redo the last change and jump to the month and table where it happened
+		switch event.Key() {
+		case tcell.KeyCtrlZ:
+			applyHistory("undo", undoLastChange, displayMonth, displayYear, tableTypes[currentTable], grid)
+			return nil
+		case tcell.KeyCtrlY, tcell.KeyCtrlR:
+			applyHistory("redo", redoLastChange, displayMonth, displayYear, tableTypes[currentTable], grid)
 			return nil
 		}
 
@@ -514,4 +530,28 @@ func renderIncomeSplitBar(income, expenses, investments float64) string {
 		investmentColor + strings.Repeat("█", investmentCells) +
 		positiveColor + strings.Repeat("█", leftCells) + Reset +
 		mutedColor + strings.Repeat("░", emptyCells) + Reset
+}
+
+// runs an undo or redo step and re-renders the transactions page where the change happened, noting what was reverted
+// with an empty history the current page (month, year, focused table) is re-rendered with a note instead
+func applyHistory(action string, step func() (historyResult, error), month, year, tableType string, focus tview.Primitive) {
+	res, err := step()
+	switch {
+	case errors.Is(err, ErrNothingToUndo), errors.Is(err, ErrNothingToRedo):
+		statusMessage = fmt.Sprintf("%s   %s%s", mutedColor, capitalize(err.Error()), Reset)
+		res = historyResult{month: month, year: year, txType: tableType}
+	case err != nil:
+		showErrorModal(fmt.Sprintf("%s failed:\n\n%s", action, err), focus)
+		return
+	default:
+		icon := "↶"
+		if action == "redo" {
+			icon = "↷"
+		}
+		statusMessage = fmt.Sprintf("%s   %s %s: %s%s", mutedColor, icon, capitalize(action), tview.Escape(res.label), Reset)
+	}
+
+	if _, err := gridVisualizeTransactions(res.month, res.year, res.txType, true); err != nil {
+		showErrorModal(fmt.Sprintf("error showing transactions:\n\n%s", err), focus)
+	}
 }

@@ -180,6 +180,8 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 
 	// years
 	var transactionFound bool
+	var updated Transaction
+	var foundMonth, foundYear string
 	for year, months := range transactions {
 
 		// months
@@ -193,6 +195,7 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 
 					transactions[year][month][txType][i] = tx
 					transactionFound = true
+					updated, foundMonth, foundYear = tx, month, year
 				}
 			}
 		}
@@ -202,7 +205,8 @@ func handleUpdateTransaction(req UpdateTransactionRequest) error {
 		return fmt.Errorf("transaction with id %s not found", req.Id)
 	}
 
-	if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
+	label := "update " + describeTransaction(txType, updated)
+	if saveTransactionErr := saveTransactionsWithHistory(label, foundMonth, foundYear, txType, transactions); saveTransactionErr != nil {
 		return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 	}
 

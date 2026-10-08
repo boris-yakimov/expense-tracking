@@ -21,6 +21,10 @@ func setupTestStorage(t *testing.T, storageType StorageType) {
 	// Save original config
 	originalConfig = globalConfig
 
+	// undo/redo history is global, every test starts without any
+	clearHistory()
+	t.Cleanup(clearHistory)
+
 	switch storageType {
 	case StorageSQLite:
 		setupTestDb(t)

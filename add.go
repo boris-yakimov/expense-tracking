@@ -318,7 +318,8 @@ func handleAddTransaction(req AddTransactionRequest) error {
 	}
 
 	transactions[req.Year][req.Month][txType] = append(transactions[req.Year][req.Month][txType], newTransaction)
-	if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
+	label := "add " + describeTransaction(txType, newTransaction)
+	if saveTransactionErr := saveTransactionsWithHistory(label, req.Month, req.Year, txType, transactions); saveTransactionErr != nil {
 		return fmt.Errorf("Error saving transaction: %w", saveTransactionErr)
 	}
 

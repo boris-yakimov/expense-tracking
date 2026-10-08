@@ -25,8 +25,10 @@ func generateWindowNavigationFooter() string {
 func generateTransactionCrudFooter() string {
 	return Green + "a" + Reset + ": add  " +
 		Red + "d" + Reset + ": delete  " +
-		Yellow + "e/u" + Reset + ": update " +
-		Blue + "/" + Reset + ": search"
+		Yellow + "e/u" + Reset + ": update  " +
+		Blue + "/" + Reset + ": search  " +
+		Blue + "ctrl+z" + Reset + ": undo  " +
+		Blue + "ctrl+y" + Reset + ": redo"
 }
 
 func generateTransactionNavigationFooter() string {

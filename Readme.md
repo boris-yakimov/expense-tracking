@@ -1,4 +1,4 @@
-# expense tracking CLI tool
+# expense tracking CLI tool (TUI)
 Track your expenses in the terminal
 
 List of Transactions Page

@@ -92,7 +92,8 @@ func handleDeleteTransaction(transactionType, transactionId string) error {
 				if t.Id == transactionId {
 					transactions[year][month][txType] = removeTransactionAtIndex(txList, i)
 
-					if saveTransactionErr := SaveTransactions(transactions); saveTransactionErr != nil {
+					label := "delete " + describeTransaction(txType, t)
+					if saveTransactionErr := saveTransactionsWithHistory(label, month, year, txType, transactions); saveTransactionErr != nil {
 						return fmt.Errorf("error saving transaction: %w", saveTransactionErr)
 					}
 
