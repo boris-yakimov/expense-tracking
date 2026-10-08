@@ -254,7 +254,16 @@ func SaveTransactions(transactions TransactionHistory) error {
 	// previously also supported JSON but was deprecated, leaving the current approach in case I want to extend with other storage options in the future
 	switch globalConfig.StorageType {
 	case StorageSQLite:
-		return saveTransactionsToDb(transactions)
+		if err := saveTransactionsToDb(transactions); err != nil {
+			return err
+		}
+		// the db only lives in memory, so every change is encrypted to disk right away
+		if userPassword != "" && globalConfig.EncryptedDBFile != "" {
+			if err := persistDb(); err != nil {
+				return fmt.Errorf("failed to save encrypted transactions: %w", err)
+			}
+		}
+		return nil
 	default:
 		return fmt.Errorf("unsupported storage type: %s", globalConfig.StorageType)
 	}

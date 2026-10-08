@@ -109,21 +109,17 @@ func deriveEncryptionKey(password string) ([]byte, error) {
 	return key, nil
 }
 
-// encrypts the SQLite database file
-func encryptDatabase(dbPath string) error {
+// encrypts the serialized SQLite database and writes it to the encrypted db file
+func encryptDatabase(dbData []byte) error {
 	if userPassword == "" {
 		return fmt.Errorf("user password not set")
-	}
-
-	dbData, err := os.ReadFile(dbPath)
-	if err != nil {
-		return fmt.Errorf("failed to read database file: %w", err)
 	}
 
 	key, err := deriveEncryptionKey(userPassword)
 	if err != nil {
 		return fmt.Errorf("failed to derive encryption key: %w", err)
 	}
+	defer clear(key)
 
 	encryptedData, err := encryptTransactions(key, dbData)
 	if err != nil {
@@ -137,57 +133,75 @@ func encryptDatabase(dbPath string) error {
 	}
 
 	// write the encrypted file
-	if err := os.WriteFile(globalConfig.EncryptedDBFile, encryptedData, 0600); err != nil {
+	if err := writeFileAtomic(globalConfig.EncryptedDBFile, encryptedData); err != nil {
 		return fmt.Errorf("failed to write encrypted database: %w", err)
 	}
 
 	return nil
 }
 
+// writes data to a temp file (0600) next to path and renames it over path,
+// so a crash mid-write never leaves a half written (and undecryptable) encrypted db behind
+func writeFileAtomic(path string, data []byte) error {
+	tmp, err := os.CreateTemp(filepath.Dir(path), filepath.Base(path)+".tmp-*") // created with 0600
+	if err != nil {
+		return err
+	}
+	tmpPath := tmp.Name()
+	defer os.Remove(tmpPath) // no-op after a successful rename
+
+	if _, err := tmp.Write(data); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Sync(); err != nil {
+		tmp.Close()
+		return err
+	}
+	if err := tmp.Close(); err != nil {
+		return err
+	}
+	return os.Rename(tmpPath, path)
+}
+
 var ErrWrongPassword = errors.New("wrong password")
 
-// decrypts the SQLite database file
-func decryptDatabase(dbPath string) error {
+// decrypts the encrypted db file and returns the SQLite database bytes, they are only kept in memory
+// returns nil data (and no error) when there is no encrypted file yet
+func decryptDatabase() ([]byte, error) {
 	if userPassword == "" {
-		return fmt.Errorf("user password not set")
-	}
-
-	// check if encrypted file exists
-	if _, err := os.Stat(globalConfig.EncryptedDBFile); os.IsNotExist(err) {
-		return nil // nothing to decrypt
+		return nil, fmt.Errorf("user password not set")
 	}
 
 	encryptedData, err := os.ReadFile(globalConfig.EncryptedDBFile)
 	if err != nil {
-		return fmt.Errorf("failed to read encrypted database: %w", err)
+		if os.IsNotExist(err) {
+			return nil, nil // nothing to decrypt
+		}
+		return nil, fmt.Errorf("failed to read encrypted database: %w", err)
+	}
+
+	// an encrypted file can only be decrypted with the salt it was created with, never generate a new one here
+	if _, err := os.Stat(globalConfig.SaltFile); os.IsNotExist(err) {
+		return nil, fmt.Errorf("salt file %s is missing, copy it together with %s", globalConfig.SaltFile, globalConfig.EncryptedDBFile)
 	}
 
 	key, err := deriveEncryptionKey(userPassword)
 	if err != nil {
-		return fmt.Errorf("failed to derive encryption key: %w", err)
+		return nil, fmt.Errorf("failed to derive encryption key: %w", err)
 	}
+	defer clear(key)
 
 	decryptedData, err := decryptTransactions(key, encryptedData)
 	if err != nil {
 		// when decryption fails due to wrong password, return ErrWrongPassword
 		if errors.Is(err, ErrWrongPassword) {
-			return ErrWrongPassword
+			return nil, ErrWrongPassword
 		}
-		return fmt.Errorf("failed to decrypt database: %w", err)
+		return nil, fmt.Errorf("failed to decrypt database: %w", err)
 	}
 
-	// make sure dir exists
-	dir := filepath.Dir(dbPath)
-	if err := os.MkdirAll(dir, 0700); err != nil {
-		return fmt.Errorf("failed to create database directory: %w", err)
-	}
-
-	// write decrypted data to database file
-	if err := os.WriteFile(dbPath, decryptedData, 0600); err != nil {
-		return fmt.Errorf("failed to write decrypted database: %w", err)
-	}
-
-	return nil
+	return decryptedData, nil
 }
 
 // encrypts transaction data using AES-GCM

@@ -1,3 +1,15 @@
-# data.json
 bin/
 .kiro/
+/expense-tracking
+
+# never commit real transaction data, logs or binaries built in the repo root
+# (test_data/ only contains dummy data and is excluded from these rules)
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.enc
+*.salt
+*.json
+*.log
+!test_data/**
