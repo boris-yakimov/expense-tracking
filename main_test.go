@@ -11,29 +11,10 @@ import (
 )
 
 func TestSetupGracefulShutdown(t *testing.T) {
-	// Create a test config
-	testConfig := &Config{
-		StorageType:       StorageSQLite,
-		UnencryptedDbFile: "test.db",
-	}
-
 	// Test that setupGracefulShutdown doesn't panic
-	setupGracefulShutdown(testConfig)
-
-	// Test that signal handler is set up by sending a signal
-	// Note: This is a basic test - in a real scenario, we'd need to test
-	// the actual signal handling behavior more thoroughly
-}
-
-func TestSetupGracefulShutdownWithNilConfig(t *testing.T) {
-	// Test that setupGracefulShutdown handles nil config gracefully
-	defer func() {
-		if r := recover(); r != nil {
-			t.Errorf("setupGracefulShutdown panicked with nil config: %v", r)
-		}
-	}()
-
-	setupGracefulShutdown(nil)
+	setupGracefulShutdown()
+	// stop delivering signals to the handler again, otherwise a ctrl+c during the test run would exit the test binary
+	signal.Reset(os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
 }
 
 func TestSignalHandling(t *testing.T) {

@@ -239,7 +239,7 @@ func TestDatabaseFileProtection(t *testing.T) {
 
 		// Test database operations with test storage
 		TestInitDb(t)
-		TestInitDbWithExistingFile(t)
+		TestInitDbWithExistingData(t)
 		TestCloseDb(t)
 		TestLoadTransactionsFromDb(t)
 		TestSaveTransactionsToDb(t)

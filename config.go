@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 	"os"
 	"path/filepath"
 )
@@ -27,7 +28,8 @@ const (
 )
 
 type Config struct {
-	StorageType       StorageType
+	StorageType StorageType
+	// plaintext db of older versions, never written anymore; only imported on first run if present and then deleted
 	UnencryptedDbFile string
 	LogFilePath       string
 	EncryptedDBFile   string
@@ -47,13 +49,18 @@ func DefaultConfig() (*Config, error) {
 	}
 
 	expenseToolDir := filepath.Join(homeDir, defaultExpenseToolDir)
-	if _, err := os.Stat(expenseToolDir); err != nil {
-		if os.IsNotExist(err) { // directory doesn't exist, create it
-			if err := os.Mkdir(expenseToolDir, 0755); err != nil {
+	if info, err := os.Stat(expenseToolDir); err != nil {
+		if os.IsNotExist(err) { // directory doesn't exist, create it, only accessible by the current user
+			if err := os.Mkdir(expenseToolDir, 0700); err != nil {
 				return nil, fmt.Errorf("failed to create %s dir, err: %w", expenseToolDir, err)
 			}
 		} else { // other errors, like permission denied, etc
 			return nil, fmt.Errorf("failed to check if %s dir exists, err: %w", expenseToolDir, err)
+		}
+	} else if info.IsDir() && info.Mode().Perm()&0077 != 0 {
+		// created by an older version (0755) or by hand, don't let other users on the machine list or read it
+		if err := os.Chmod(expenseToolDir, 0700); err != nil {
+			return nil, fmt.Errorf("failed to restrict permissions of %s dir, err: %w", expenseToolDir, err)
 		}
 	}
 
@@ -100,9 +107,30 @@ func loadConfigFromEnvVars() (*Config, error) {
 }
 
 func createLogFileIfNotPresent(logFilePath string) (logFile *os.File, err error) {
-	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	logFile, err = os.OpenFile(logFilePath, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
 	if err != nil {
 		return nil, fmt.Errorf("unable to open log file for writing %s, err: %w", logFilePath, err)
 	}
 	return logFile, nil
+}
+
+// makes the encrypted db, salt and log files readable only by the current user
+// they are often copied in by hand (backups, other machines) and keep whatever permissions the copy gave them
+// the db is encrypted, but a readable .enc + .salt still allows other local users to brute force the password offline
+func restrictDataFilePermissions(config *Config) {
+	if config == nil {
+		return
+	}
+	for _, path := range []string{config.EncryptedDBFile, config.SaltFile, config.LogFilePath, config.UnencryptedDbFile} {
+		if path == "" {
+			continue
+		}
+		info, err := os.Stat(path)
+		if err != nil || !info.Mode().IsRegular() || info.Mode().Perm()&0077 == 0 {
+			continue
+		}
+		if err := os.Chmod(path, 0600); err != nil {
+			log.Printf("warning: failed to restrict permissions of %s: %s\n", path, err)
+		}
+	}
 }

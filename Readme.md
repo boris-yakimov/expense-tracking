@@ -136,7 +136,9 @@ Expand-Archive -Path "expense-tracking-windows-amd64.zip" -DestinationPath "." -
 ## Authentication & Encryption Overview
 
 This project uses **password-based encryption** to protect the SQLite database that stores expense tracking data.  
-The system is designed so that the database on disk is stored **encrypted**. It is only decrypted into plaintext form at runtime after the user successfully authenticates and than re-encrypted back after exit(re-encryption also happens if the program is crashed).
+The system is designed so that the database on disk is only ever stored **encrypted**. After the user successfully authenticates it is decrypted straight into an in-memory SQLite database, the plaintext is never written to disk. Every change is encrypted back to disk as soon as it is saved, so a crash, kill or closed terminal neither loses changes nor leaves readable data behind.
+
+The data directory (`~/.expense-tracking`) is restricted to `0700` and the encrypted db, salt and log files to `0600` on every start, which also fixes the permissions of files copied in by hand.
 
 ---
 
@@ -170,7 +172,7 @@ The expense tracking tool now supports configurable storage backends. Primary st
 
 ### Environment Variables (optional)
 
-- `EXPENSE_UNENCRYPTED_DB_PATH`: Path to unencrypted SQLite database file (default: `"~/.expense-tracking/transactions.db"`)
+- `EXPENSE_UNENCRYPTED_DB_PATH`: Legacy plaintext SQLite database file used by older versions (default: `"~/.expense-tracking/transactions.db"`). It is no longer written; if it exists it is imported on first run (when there is no encrypted db yet) and then deleted.
 - `EXPENSE_ENCRYPTED_DB_PATH`: Path to encrypted database file (default: `"~/.expense-tracking/transactions.enc"`)
 - `EXPENSE_LOG_PATH`: Path to log file (default: `"~/.expense-tracking/expense-tracking.log"`)
 - `EXPENSE_SALT_PATH`: Path to salt file (default: `"~/.expense-tracking/transactions.salt"`)
@@ -182,9 +184,9 @@ The expense tracking tool now supports configurable storage backends. Primary st
 ./expense-tracker
 ```
 
-**Use custom SQLite path:**
+**Use a custom encrypted database location:**
 ```bash
-EXPENSE_UNENCRYPTED_DB_PATH=/path/to/my/database.db ./expense-tracker
+EXPENSE_ENCRYPTED_DB_PATH=/path/to/transactions.enc EXPENSE_SALT_PATH=/path/to/transactions.salt ./expense-tracker
 ```
 
 

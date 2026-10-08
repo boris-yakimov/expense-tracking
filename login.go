@@ -36,32 +36,20 @@ func loginForm() error {
 			// store password in memory to derive an encryption key from it
 			setUserPassword(entered)
 
-			// if encrypted file exists, decrypt with provided password
-			if _, err := os.Stat(globalConfig.EncryptedDBFile); err == nil {
-
-				if err := decryptDatabase(globalConfig.UnencryptedDbFile); err != nil {
-
-					if errors.Is(err, ErrWrongPassword) {
-						// wrong password, stay on login prompt
-						message.SetText("Wrong password. Try again.")
-						passwordInputField.SetText("")
-						clearUserPassword() // remove pass from memory on error
-						return
-					}
-
-					// some other unexpected error occured - corrupted file, permision issues, etc
-					showErrorModal(fmt.Sprintf("decryption failed: %s", err), passwordInputField)
-					log.Printf("decryption failed: %s", err)
-					clearUserPassword()
+			// decrypt straight into an in-memory db, plaintext is never written to disk
+			if err := openTransactions(); err != nil {
+				if errors.Is(err, ErrWrongPassword) {
+					// wrong password, stay on login prompt
+					message.SetText("Wrong password. Try again.")
+					passwordInputField.SetText("")
+					clearUserPassword() // remove pass from memory on error
 					return
 				}
-			}
 
-			// initialize DB connection now that the DB is decrypted or already plaintext
-			if err := initDb(globalConfig.UnencryptedDbFile); err != nil {
-				showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), passwordInputField)
-				log.Printf("failed to initialize DB: %s\n", err)
-				clearUserPassword() // remove pass from memory on error
+				// some other unexpected error occured - corrupted file, missing salt, permision issues, etc
+				showErrorModal(fmt.Sprintf("failed to open transactions: %s", err), passwordInputField)
+				log.Printf("failed to open transactions: %s", err)
+				clearUserPassword()
 				return
 			}
 
@@ -138,8 +126,8 @@ func setNewPasswordForm() {
 					return // interrupt here
 				}
 
-				// proceed directly to app using the newly set in-memory password
-				if err := initDb(globalConfig.UnencryptedDbFile); err != nil {
+				// first run: create an empty in-memory db and encrypt it with the new password right away
+				if err := openTransactions(); err != nil {
 					showErrorModal(fmt.Sprintf("failed to initialize DB: %s\n", err), passwordInputField)
 					log.Printf("failed to initialize DB: %s\n", err)
 					clearUserPassword() // remove pass from memory on error

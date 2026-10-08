@@ -6,7 +6,9 @@ import (
 	"log"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
+	"time"
 
 	"github.com/gdamore/tcell/v2"
 	"github.com/rivo/tview"
@@ -34,8 +36,11 @@ func main() {
 	log.SetOutput(io.MultiWriter(logFile))
 	log.SetFlags(log.LstdFlags | log.Lshortfile) // timestamps + file:line info
 
-	// set up graceful shutdown handler to make sure database re-encryption happens even if the tui gets killed
-	setupGracefulShutdown(config)
+	// files copied in manually (backups, another machine) keep their original, often world readable, permissions
+	restrictDataFilePermissions(config)
+
+	// make sure the tui is stopped (and the cleanup below runs) if the process gets killed or the terminal closed
+	setupGracefulShutdown()
 
 	tui = tview.NewApplication()
 	tui.SetBeforeDrawFunc(func(screen tcell.Screen) bool {
@@ -58,59 +63,46 @@ func main() {
 
 	if err := tui.Run(); err != nil {
 		log.Printf("tui failed to start: %s\n", err)
+		shutdown()
 		os.Exit(1)
 	}
 
-	// on normal shutdown, close and re-encrypt DB if user was authenticated
-	if config.StorageType == StorageSQLite {
-		closeDb()
-		if userPassword != "" {
-			if err := encryptDatabase(config.UnencryptedDbFile); err != nil {
-				log.Printf("failed to encrypt database on shutdown: %s\n", err)
-			} else {
-				// remove unencrypted database file after successful encryption
-				if err := os.Remove(config.UnencryptedDbFile); err != nil {
-					log.Printf("warning: failed to remove plaintext database: %s\n", err)
-				}
-			}
-		}
-	}
-
+	shutdown()
 	log.Printf("Exit Expense Tracking Tool")
 }
 
-// sets up signal handling to ensure database encryption on exit
-func setupGracefulShutdown(config *Config) {
-	c := make(chan os.Signal, 1)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM) // Interrupt = ctrl+c ; SIGTERM when process is killed
-
-	// since this runs inside the goroutine, the shutdown logic happens asynchronously when triggered.
-	go func() {
-		<-c // blocks until a signal is received
-
-		// close db and re-encrypt database before exiting
-		if config.StorageType == StorageSQLite {
-			closeDb()
-			if userPassword != "" {
-				if err := encryptDatabase(config.UnencryptedDbFile); err != nil {
-					log.Printf("failed to encrypt database on shutdown: %s\n", err)
-				} else {
-					// remove unencrypted database file after successful encryption
-					if err := os.Remove(config.UnencryptedDbFile); err != nil {
-						log.Printf("warning: failed to remove plaintext database: %s\n", err)
-					}
-				}
+// every change is already encrypted to disk when it is saved, this is only a last safety net before the in-memory db is dropped
+// runs once, both a normal exit and the signal handler can call it
+func shutdown() {
+	shutdownOnce.Do(func() {
+		if db != nil && userPassword != "" {
+			if err := persistDb(); err != nil {
+				log.Printf("failed to encrypt database on shutdown: %s\n", err)
 			}
 		}
+		closeDb()
 		clearUserPassword() // clear password from memory
-		if logFile != nil {
-			if err := logFile.Sync(); err != nil {
-				log.Printf("failed to sync log file: %s\n", err)
-			}
-			if err := logFile.Close(); err != nil {
-				log.Printf("failed to close log file: %s\n", err)
-			}
+	})
+}
+
+var shutdownOnce sync.Once
+
+// stops the tui on ctrl+c, kill (SIGTERM) or a closed terminal (SIGHUP), so main() can restore the terminal and run shutdown()
+// the decrypted data only lives in memory, so even a hard kill (SIGKILL, power loss) leaves nothing readable on disk
+func setupGracefulShutdown() {
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP)
+
+	go func() {
+		sig := <-c // blocks until a signal is received
+		log.Printf("received %s, shutting down\n", sig)
+
+		if tui != nil {
+			go tui.Stop()
+			// tui.Stop may never return if the terminal is already gone (SIGHUP), don't wait for it forever
+			time.Sleep(3 * time.Second)
 		}
-		// os.Exit(0)
+		shutdown()
+		os.Exit(1)
 	}()
 }
