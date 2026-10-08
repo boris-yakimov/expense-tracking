@@ -18,6 +18,7 @@ func generateWindowNavigationFooter() string {
 		Yellow + "q" + Reset + ": back  " +
 		Yellow + "m" + Reset + ": select month  " +
 		Yellow + "y" + Reset + ": select year  " +
+		Yellow + "b" + Reset + ": breakdown  " +
 		Yellow + "TAB" + Reset + ": next table"
 }
 

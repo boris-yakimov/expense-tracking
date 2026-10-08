@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"sort"
 )
 
 type PnLResult struct {
@@ -121,4 +122,74 @@ func calculateYearMonthlyPnL(year string) (map[string]PnLResult, error) {
 	}
 
 	return monthlyPnL, nil
+}
+
+// total spent on a single expense category and its share of all expenses in the period
+type CategoryTotal struct {
+	category string
+	total    float64
+	percent  float64 // % of total expenses for the period
+}
+
+// expense breakdown per category for a period (month or year)
+type CategoryBreakdown struct {
+	expenseTotal float64
+	categories   []CategoryTotal // sorted by total, highest first
+}
+
+// builds a per-category expense breakdown for the given months of a year
+// pure function over TransactionHistory so it can be reused for both month and year views
+func buildExpenseCategoryBreakdown(transactions TransactionHistory, year string, months []string) CategoryBreakdown {
+	var breakdown CategoryBreakdown
+	totals := make(map[string]float64)
+
+	for _, month := range months {
+		for _, tx := range transactions[year][month]["expense"] {
+			totals[tx.Category] += tx.Amount
+			breakdown.expenseTotal += tx.Amount
+		}
+	}
+
+	for category, total := range totals {
+		ct := CategoryTotal{category: category, total: total}
+		if breakdown.expenseTotal != 0 { // avoid division by zero
+			ct.percent = (total / breakdown.expenseTotal) * 100
+		}
+		breakdown.categories = append(breakdown.categories, ct)
+	}
+
+	// highest spend first, alphabetical on ties so the order is stable between renders
+	sort.Slice(breakdown.categories, func(i, j int) bool {
+		if breakdown.categories[i].total != breakdown.categories[j].total {
+			return breakdown.categories[i].total > breakdown.categories[j].total
+		}
+		return breakdown.categories[i].category < breakdown.categories[j].category
+	})
+
+	return breakdown
+}
+
+// calculates how much was spent on each expense category in a specific month
+func calculateMonthCategoryBreakdown(month, year string) (CategoryBreakdown, error) {
+	transactions, err := LoadTransactions()
+	if err != nil {
+		return CategoryBreakdown{}, fmt.Errorf("unable to load transactions file: %w", err)
+	}
+
+	return buildExpenseCategoryBreakdown(transactions, year, []string{month}), nil
+}
+
+// calculates how much was spent on each expense category across a whole year
+func calculateYearCategoryBreakdown(year string) (CategoryBreakdown, error) {
+	transactions, err := LoadTransactions()
+	if err != nil {
+		return CategoryBreakdown{}, fmt.Errorf("unable to load transactions file: %w", err)
+	}
+
+	months := make([]string, 0, len(transactions[year]))
+	for month := range transactions[year] {
+		months = append(months, month)
+	}
+
+	return buildExpenseCategoryBreakdown(transactions, year, months), nil
 }

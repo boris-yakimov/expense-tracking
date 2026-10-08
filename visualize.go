@@ -362,6 +362,18 @@ func gridVisualizeTransactions(selectedMonth, selectedYear, focusTableType strin
 			}
 		}
 
+		// show expenses grouped by category for this month and its year
+		if event.Key() == tcell.KeyRune && event.Rune() == 'b' {
+			if displayMonth == "" || displayYear == "" {
+				return nil
+			}
+			if err := showSpendingBreakdown(displayMonth, displayYear); err != nil {
+				showErrorModal(fmt.Sprintf("error showing spending breakdown:\n\n%s", err), grid)
+				return nil
+			}
+			return nil // key event consumed
+		}
+
 		if event.Key() == tcell.KeyRune && event.Rune() == 'y' {
 			if err := showYearSelector(); err != nil {
 				showErrorModal(fmt.Sprintf("error showing year selector:\n\n%s", err), grid)

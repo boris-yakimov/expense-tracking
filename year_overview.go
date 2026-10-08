@@ -143,10 +143,23 @@ func showYearResults(year string) error {
 	pieChart := generatePieChart(yearPnL, pieWidth, pieHeight)
 	rightText.SetText(pieChart)
 
-	// split view
+	// category panel: pie chart of expenses by category with the per-category list as legend
+	yearCategories, err := calculateYearCategoryBreakdown(year)
+	if err != nil {
+		return fmt.Errorf("unable to calculate year category breakdown: %w", err)
+	}
+
+	categoryText := styleTextView(tview.NewTextView().
+		SetDynamicColors(true).
+		SetWordWrap(false))
+	categoryText.SetBorder(true).SetTitle("Spending Breakdown")
+	categoryText.SetText(renderSpendingBreakdown(yearCategories))
+
+	// split view - category panel gets more room since its legend lines are the widest
 	flex := styleFlex(tview.NewFlex().
 		AddItem(leftText, 0, 1, false).
-		AddItem(rightText, 0, 1, false))
+		AddItem(rightText, 0, 1, false).
+		AddItem(categoryText, 0, 2, false))
 
 	// frame with navigation
 	frame := tview.NewFrame(flex).
